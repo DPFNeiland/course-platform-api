@@ -14,7 +14,7 @@ import jakarta.persistence.Table;
  * gerar a tabela automaticamente no H2, mesmo sem Repository.
  */
 @Entity
-@Table(name = "usuarios")
+@Table(name = "usuario")
 public class Usuario {
 
     @Id
