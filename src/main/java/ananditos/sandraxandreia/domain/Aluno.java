@@ -20,6 +20,13 @@ public class Aluno {
 
     @Column(nullable = false, length = 100)
     private String respFinanceiro;
+    
+    public Aluno(Long id, int RA, String planoAss, String respFinanceiro) {
+        this.id = id;
+        this.RA = RA;
+        this.planoAss = planoAss;
+        this.respFinanceiro = respFinanceiro;
+    }
 
     String escreverTopico(String mensagem) {
         return ("Mensagem: " + mensagem);
