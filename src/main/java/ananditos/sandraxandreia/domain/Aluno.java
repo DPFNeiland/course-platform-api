@@ -28,6 +28,10 @@ public class Aluno {
         this.respFinanceiro = respFinanceiro;
     }
 
+    public Aluno() {
+        
+    }
+
     String escreverTopico(String mensagem) {
         return ("Mensagem: " + mensagem);
     }
