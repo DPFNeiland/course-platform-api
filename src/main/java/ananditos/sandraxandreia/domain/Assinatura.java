@@ -1,13 +1,12 @@
 package ananditos.sandraxandreia.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 import java.util.List;
 import java.util.Objects;
 
+@Entity
+@Table(name="assinatura")
 public class Assinatura {
 
     @Id
