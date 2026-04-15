@@ -1,7 +1,6 @@
 package ananditos.sandraxandreia.service;
 
 import ananditos.sandraxandreia.domain.Curso;
-import ananditos.sandraxandreia.domain.Usuario;
 import ananditos.sandraxandreia.repository.CursoRepository;
 import org.springframework.stereotype.Service;
 
@@ -9,7 +8,7 @@ import java.util.List;
 
 @Service
 public class CursoService {
-    private final CursoService repository;
+    private final CursoRepository repository;
 
 
     public CursoService(CursoRepository repository) {
@@ -19,13 +18,14 @@ public class CursoService {
 
     public Curso criar(Curso curso) {
 
-        return repository.criar(curso);
+        return repository.save(curso);
     }
 
     public List<Curso> listarTodos() {
 
         return repository.findAll();
     }
+
 
     public Curso buscarPorId(Long id) {
         return repository.findById(id).orElseThrow(() -> new IllegalArgumentException("Curso nao encontrado para o id: " + id));
@@ -38,7 +38,7 @@ public class CursoService {
     }
 
     public void deletar(Long id) {
-        Usuario cursoExistente = buscarPorId(id);
+        Curso cursoExistente = buscarPorId(id);
         repository.delete(cursoExistente);
     }
 }
