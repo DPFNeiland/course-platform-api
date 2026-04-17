@@ -1,6 +1,5 @@
 package ananditos.sandraxandreia.controller;
 
-
 import ananditos.sandraxandreia.domain.Curso;
 import ananditos.sandraxandreia.service.CursoService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,9 +9,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-
-@RequestMapping("/curso")
-@Tag(name = "curso", description = "API REST de curso")
+@RestController
+@RequestMapping("/cursos")
+@Tag(name = "Curso", description = "API REST de curso")
 public class CursoController {
 
         private final CursoService service;
