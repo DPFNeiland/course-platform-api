@@ -18,11 +18,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/usuarios")
 @Tag(name = "Usuario", description = "Endpoints didaticos para a entidade Usuario")
-public class UsuarioRestController {
+public class UsuarioController {
 
     private final UsuarioService service;
 
-    public UsuarioRestController(UsuarioService service) {
+    public UsuarioController(UsuarioService service) {
         this.service = service;
     }
 
