@@ -1,6 +1,7 @@
 package ananditos.sandraxandreia.controller;
 
 
+import ananditos.sandraxandreia.domain.Curso;
 import ananditos.sandraxandreia.service.CursoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -10,45 +11,44 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 
+@RequestMapping("/curso")
+@Tag(name = "curso", description = "API REST de curso")
 public class CursoController {
-    @RequestMapping("/usuarios")
-    @Tag(name = "Usuario", description = "Endpoints didaticos para a entidade Usuario")
-    public class UsuarioController {
 
         private final CursoService service;
 
-        public UsuarioController(Curso service) {
+        public CursoController(CursoService service) {
             this.service = service;
         }
 
         @PostMapping
         @ResponseStatus(HttpStatus.CREATED)
-        @Operation(summary = "Cadastra um novo usuario")
-        public Usuario criar(@RequestBody Usuario usuario) {
-            return service.criar(usuario);
+        @Operation(summary = "Cadastra um novo curso")
+        public Curso criar(@RequestBody Curso curso) {
+            return service.criar(curso);
         }
 
         @GetMapping
-        @Operation(summary = "Lista todos os usuarios")
-        public List<Usuario> listarTodos() {
+        @Operation(summary = "Lista todos os cursos")
+        public List<Curso> listarTodos() {
             return service.listarTodos();
         }
 
         @GetMapping("/{id}")
-        @Operation(summary = "Busca um usuario pelo id")
-        public Usuario buscarPorId(@PathVariable Long id) {
+        @Operation(summary = "Busca um curso pelo id")
+        public Curso buscarPorId(@PathVariable Long id) {
             return service.buscarPorId(id);
         }
 
         @PutMapping("/{id}")
-        @Operation(summary = "Atualiza um usuario existente")
-        public Usuario atualizar(@PathVariable Long id, @RequestBody Usuario usuario) {
-            return service.atualizar(id, usuario);
+        @Operation(summary = "Atualiza um curso existente")
+        public Curso atualizar(@PathVariable Long id, @RequestBody Curso curso) {
+            return service.atualizar(id, curso);
         }
 
         @DeleteMapping("/{id}")
         @ResponseStatus(HttpStatus.NO_CONTENT)
-        @Operation(summary = "Remove um usuario pelo id")
+        @Operation(summary = "Remove um curso pelo id")
         public void deletar(@PathVariable Long id) {
             service.deletar(id);
         }
