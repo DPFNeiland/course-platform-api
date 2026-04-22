@@ -1,13 +1,13 @@
 package ananditos.sandraxandreia.domain;
 
+import ananditos.sandraxandreia.domain.vo.SenhaCriptografada;
 import jakarta.persistence.*;
 
 import java.util.Objects;
 
 /**
  * Classe de dominio anotada como Entity.
- *
- * Nesta primeira versao, ela ja e suficiente para o Hibernate/JPA
+ * Nesta primeira versao, ela já e suficiente para o Hibernate/JPA
  * gerar a tabela automaticamente no H2, mesmo sem Repository.
  */
 @Entity
@@ -25,38 +25,50 @@ public class Usuario {
     @Column(nullable = false, unique = true, length = 120)
     private String email;
 
+    @Embedded
+    private SenhaCriptografada senha;
+
     public Usuario() {
         // Construtor padrao exigido pela JPA.
     }
 
-    public Usuario(String nome, String email) {
+    public Usuario(Long id, String nome, String email, String senhaCriptografada) {
+        this.id = id;
         this.nome = nome;
         this.email = email;
+        this.senha = new SenhaCriptografada(senhaCriptografada);
     }
 
     public Long getId() {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public String getNome() {
         return nome;
-    }
-
-    public void setNome(String nome) {
-        this.nome = nome;
     }
 
     public String getEmail() {
         return email;
     }
 
+    public String getSenha() {
+        return senha.getValor();
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
     public void setEmail(String email) {
         this.email = email;
     }
+
+    public void setSenha(SenhaCriptografada senha) {
+        this.senha = senha;
+    }
+
+
 
     @Override
     public boolean equals(Object o) {

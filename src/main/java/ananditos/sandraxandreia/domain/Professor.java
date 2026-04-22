@@ -1,5 +1,6 @@
 package ananditos.sandraxandreia.domain;
 
+import ananditos.sandraxandreia.domain.vo.SenhaCriptografada;
 import jakarta.persistence.*;
 
 import java.util.Objects;
@@ -17,43 +18,27 @@ public class Professor extends Usuario{
     @Column(nullable = false, length = 100)
     private String tipoEnsino;
 
-
     public Professor() {
     }
 
-
-    public Professor(String nome, String email, String areaFormacao, double horaAula, String tipoEnsino) {
-        super(nome, email);
+    public Professor(Long id, String nome, String email, String senhaCriptografada, String areaFormacao, double horaAula, String tipoEnsino) {
+        super(id, nome, email, senhaCriptografada);
         this.areaFormacao = areaFormacao;
         this.horaAula = horaAula;
         this.tipoEnsino = tipoEnsino;
     }
 
-
     public String getAreaFormacao() {
         return areaFormacao;
-    }
-
-    public void setAreaFormacao(String areaFormacao) {
-        areaFormacao = areaFormacao;
     }
 
     public double getHoraAula() {
         return horaAula;
     }
 
-    public void setHoraAula(double horaAula) {
-        horaAula = horaAula;
-    }
-
     public String getTipoEnsino() {
         return tipoEnsino;
     }
-
-    public void setTipoEnsino(String tipoEnsino) {
-        tipoEnsino = tipoEnsino;
-    }
-
 
     @Override
     public boolean equals(Object o) {
@@ -71,9 +56,9 @@ public class Professor extends Usuario{
     @Override
     public String toString() {
         return "Professor{" +
-                "AreaFormacao='" + areaFormacao + '\'' +
-                ", HoraAula=" + horaAula +
-                ", TipoEnsino='" + tipoEnsino + '\'' +
+                "areaFormacao='" + areaFormacao + '\'' +
+                ", horaAula=" + horaAula +
+                ", tipoEnsino='" + tipoEnsino + '\'' +
                 '}';
     }
 }

@@ -1,6 +1,9 @@
 package ananditos.sandraxandreia.service;
 
 import ananditos.sandraxandreia.domain.Usuario;
+import ananditos.sandraxandreia.domain.vo.SenhaCriptografada;
+import ananditos.sandraxandreia.dto.UsuarioRequestDTO;
+import ananditos.sandraxandreia.dto.UsuarioResponseDTO;
 import ananditos.sandraxandreia.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
 
@@ -20,28 +23,50 @@ public class UsuarioService {
         this.repository = repository;
     }
 
-    public Usuario criar(Usuario usuario) {
-        return repository.save(usuario);
+    private UsuarioResponseDTO toResponse(Usuario usuario) {
+        return new UsuarioResponseDTO(
+                usuario.getId(),
+                usuario.getNome(),
+                usuario.getEmail()
+        );
     }
 
-    public List<Usuario> listarTodos() {
-        return repository.findAll();
+
+    public UsuarioResponseDTO criar(UsuarioRequestDTO request) {
+        var usuario = new Usuario(
+                null,
+                request.getNome(),
+                request.getEmail(),
+                request.getSenha()
+        );
+        Usuario salvo = repository.save(usuario);
+        return toResponse(salvo);
+
     }
 
-    public Usuario buscarPorId(Long id) {
-        return repository.findById(id)
+    public List<UsuarioResponseDTO> listarTodos() {
+        return repository.findAll().stream().map(this::toResponse).toList();
+    }
+
+    public UsuarioResponseDTO buscarPorId(Long id) {
+        Usuario usuario = repository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario nao encontrado para o id: " + id));
+        return toResponse(usuario);
     }
 
-    public Usuario atualizar(Long id, Usuario usuarioAtualizado) {
-        Usuario usuarioExistente = buscarPorId(id);
-        usuarioExistente.setNome(usuarioAtualizado.getNome());
-        usuarioExistente.setEmail(usuarioAtualizado.getEmail());
-        return repository.save(usuarioExistente);
+        public UsuarioResponseDTO atualizar(Long id, UsuarioRequestDTO request) {
+            Usuario usuario = repository.findById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Usuario nao encontrado para o id: " + id));
+            usuario.setNome(request.getNome());
+            usuario.setEmail(request.getEmail());
+            usuario.setSenha(new SenhaCriptografada(request.getSenha()));
+            Usuario salvo = repository.save(usuario);
+            return toResponse(salvo);
     }
 
     public void deletar(Long id) {
-        Usuario usuarioExistente = buscarPorId(id);
-        repository.delete(usuarioExistente);
+        Usuario usuario = repository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario nao encontrado para o id: " + id));
+        repository.delete(usuario);
     }
 }

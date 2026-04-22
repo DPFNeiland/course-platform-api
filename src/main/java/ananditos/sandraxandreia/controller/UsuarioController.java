@@ -1,6 +1,8 @@
 package ananditos.sandraxandreia.controller;
 
 import ananditos.sandraxandreia.domain.Usuario;
+import ananditos.sandraxandreia.dto.UsuarioRequestDTO;
+import ananditos.sandraxandreia.dto.UsuarioResponseDTO;
 import ananditos.sandraxandreia.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,25 +31,25 @@ public class UsuarioController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Cadastra um novo usuario")
-    public Usuario criar(@RequestBody Usuario usuario) {
+    public UsuarioResponseDTO criar(@RequestBody UsuarioRequestDTO usuario) {
         return service.criar(usuario);
     }
 
     @GetMapping
     @Operation(summary = "Lista todos os usuarios")
-    public List<Usuario> listarTodos() {
+    public List<UsuarioResponseDTO> listarTodos() {
         return service.listarTodos();
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Busca um usuario pelo id")
-    public Usuario buscarPorId(@PathVariable Long id) {
+    public UsuarioResponseDTO buscarPorId(@PathVariable Long id) {
         return service.buscarPorId(id);
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Atualiza um usuario existente")
-    public Usuario atualizar(@PathVariable Long id, @RequestBody Usuario usuario) {
+    public UsuarioResponseDTO atualizar(@PathVariable Long id, @RequestBody UsuarioRequestDTO usuario) {
         return service.atualizar(id, usuario);
     }
 

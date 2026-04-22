@@ -21,7 +21,6 @@ public class ProfessorService {
     }
 
     public List<Professor> listarTodos() {
-
         return professorRepository.findAll();
     }
 
