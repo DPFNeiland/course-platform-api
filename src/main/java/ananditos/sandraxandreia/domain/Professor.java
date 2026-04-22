@@ -6,84 +6,75 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "professor")
-public class Professor {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Professor extends Usuario{
 
     @Column(nullable = false, length = 100)
-    private String AreaFormacao;
+    private String areaFormacao;
 
     @Column(nullable = false, length = 100)
-    private double HoraAula;
+    private double horaAula;
 
     @Column(nullable = false, length = 100)
-    private String TipoEnsino;
+    private String tipoEnsino;
+
 
     public Professor() {
-        // Construtor padrao exigido pela JPA.
     }
 
-    public Professor(String AreaFormacao, double HoraAula, String TipoEnsino) {
-        this.AreaFormacao = AreaFormacao;
-        this.HoraAula = HoraAula;
-        this.TipoEnsino = TipoEnsino;
+
+    public Professor(String nome, String email, String areaFormacao, double horaAula, String tipoEnsino) {
+        super(nome, email);
+        this.areaFormacao = areaFormacao;
+        this.horaAula = horaAula;
+        this.tipoEnsino = tipoEnsino;
     }
 
-    // Getters e Setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public String getAreaFormacao() {
-        return AreaFormacao;
+        return areaFormacao;
     }
 
     public void setAreaFormacao(String areaFormacao) {
-        AreaFormacao = areaFormacao;
+        areaFormacao = areaFormacao;
     }
 
     public double getHoraAula() {
-        return HoraAula;
+        return horaAula;
     }
 
     public void setHoraAula(double horaAula) {
-        HoraAula = horaAula;
+        horaAula = horaAula;
     }
 
     public String getTipoEnsino() {
-        return TipoEnsino;
+        return tipoEnsino;
     }
 
     public void setTipoEnsino(String tipoEnsino) {
-        TipoEnsino = tipoEnsino;
+        tipoEnsino = tipoEnsino;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        Professor professor = (Professor) o;
+        return Double.compare(horaAula, professor.horaAula) == 0 && Objects.equals(areaFormacao, professor.areaFormacao) && Objects.equals(tipoEnsino, professor.tipoEnsino);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), areaFormacao, horaAula, tipoEnsino);
     }
 
     @Override
     public String toString() {
         return "Professor{" +
-                "id=" + id +
-                ", AreaFormacao='" + AreaFormacao + '\'' +
-                ", HoraAula=" + HoraAula +
-                ", TipoEnsino='" + TipoEnsino + '\'' +
+                "AreaFormacao='" + areaFormacao + '\'' +
+                ", HoraAula=" + horaAula +
+                ", TipoEnsino='" + tipoEnsino + '\'' +
                 '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        Professor professor = (Professor) o;
-        return Double.compare(HoraAula, professor.HoraAula) == 0 && Objects.equals(id, professor.id) && Objects.equals(AreaFormacao, professor.AreaFormacao) && Objects.equals(TipoEnsino, professor.TipoEnsino);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, AreaFormacao, HoraAula, TipoEnsino);
     }
 }
 
