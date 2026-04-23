@@ -1,6 +1,7 @@
 package ananditos.sandraxandreia.domain;
 
 import ananditos.sandraxandreia.domain.vo.UsuarioCpf;
+import ananditos.sandraxandreia.domain.vo.UsuarioEmail;
 import ananditos.sandraxandreia.domain.vo.UsuarioSenhaCriptografada;
 import jakarta.persistence.*;
 
@@ -23,8 +24,8 @@ public class Usuario {
     @Column(nullable = false, length = 100)
     private String nome;
 
-    @Column(nullable = false, unique = true, length = 120)
-    private String email;
+    @Embedded
+    private UsuarioEmail email;
 
     @Embedded
     private UsuarioCpf cpf;
@@ -44,7 +45,7 @@ public class Usuario {
     public Usuario(Long id, String nome, String email, String senhaCriptografada, String cpf, GeneroUsuario genero) {
         this.id = id;
         this.nome = nome;
-        this.email = email;
+        this.email = new UsuarioEmail(email);
         this.senha = new UsuarioSenhaCriptografada(senhaCriptografada);
         this.cpf = new UsuarioCpf(cpf);
         this.genero = genero;
@@ -55,20 +56,41 @@ public class Usuario {
         return id;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getNome() {
         return nome;
     }
 
-    public String getEmail() {
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public UsuarioEmail getEmail() {
         return email;
     }
 
-    public String getSenha() {
-        return senha.getValor();
+    public void setEmail(UsuarioEmail email) {
+        this.email = email;
     }
 
-    public String getCpf() { return cpf.getValor();}
+    public UsuarioCpf getCpf() {
+        return cpf;
+    }
+
+    public void setCpf(UsuarioCpf cpf) {
+        this.cpf = cpf;
+    }
+
+    public UsuarioSenhaCriptografada getSenha() {
+        return senha;
+    }
+
+    public void setSenha(UsuarioSenhaCriptografada senha) {
+        this.senha = senha;
+    }
 
     public GeneroUsuario getGenero() {
         return genero;
@@ -76,22 +98,6 @@ public class Usuario {
 
     public void setGenero(GeneroUsuario genero) {
         this.genero = genero;
-    }
-
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public void setSenha(UsuarioSenhaCriptografada senha) {
-        this.senha = senha;
-    }
-
-    public void setCpf(UsuarioCpf cpf) {
-        this.cpf = cpf;
     }
 
     @Override

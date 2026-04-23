@@ -1,5 +1,6 @@
 package ananditos.sandraxandreia.domain;
 
+import ananditos.sandraxandreia.domain.vo.UsuarioEmail;
 import jakarta.persistence.*;
 
 import java.util.Objects;
@@ -11,7 +12,7 @@ public class Professor extends Usuario{
     @Column(nullable = false, length = 100)
     private String areaFormacao;
 
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false)
     private double horaAula;
 
     @Column(nullable = false, length = 100)
