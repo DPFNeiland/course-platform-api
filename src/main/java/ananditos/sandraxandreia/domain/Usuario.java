@@ -1,6 +1,7 @@
 package ananditos.sandraxandreia.domain;
 
-import ananditos.sandraxandreia.domain.vo.SenhaCriptografada;
+import ananditos.sandraxandreia.domain.vo.UsuarioCpf;
+import ananditos.sandraxandreia.domain.vo.UsuarioSenhaCriptografada;
 import jakarta.persistence.*;
 
 import java.util.Objects;
@@ -26,17 +27,28 @@ public class Usuario {
     private String email;
 
     @Embedded
-    private SenhaCriptografada senha;
+    private UsuarioCpf cpf;
+
+    @Embedded
+    private UsuarioSenhaCriptografada senha;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private GeneroUsuario genero;
+
 
     public Usuario() {
         // Construtor padrao exigido pela JPA.
     }
 
-    public Usuario(Long id, String nome, String email, String senhaCriptografada) {
+    public Usuario(Long id, String nome, String email, String senhaCriptografada, String cpf, GeneroUsuario genero) {
         this.id = id;
         this.nome = nome;
         this.email = email;
-        this.senha = new SenhaCriptografada(senhaCriptografada);
+        this.senha = new UsuarioSenhaCriptografada(senhaCriptografada);
+        this.cpf = new UsuarioCpf(cpf);
+        this.genero = genero;
+
     }
 
     public Long getId() {
@@ -56,6 +68,16 @@ public class Usuario {
         return senha.getValor();
     }
 
+    public String getCpf() { return cpf.getValor();}
+
+    public GeneroUsuario getGenero() {
+        return genero;
+    }
+
+    public void setGenero(GeneroUsuario genero) {
+        this.genero = genero;
+    }
+
     public void setNome(String nome) {
         this.nome = nome;
     }
@@ -64,11 +86,13 @@ public class Usuario {
         this.email = email;
     }
 
-    public void setSenha(SenhaCriptografada senha) {
+    public void setSenha(UsuarioSenhaCriptografada senha) {
         this.senha = senha;
     }
 
-
+    public void setCpf(UsuarioCpf cpf) {
+        this.cpf = cpf;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -88,6 +112,7 @@ public class Usuario {
                 "id=" + id +
                 ", nome='" + nome + '\'' +
                 ", email='" + email + '\'' +
+                ", cpf=" + cpf +
                 '}';
     }
 }
