@@ -1,7 +1,7 @@
 package ananditos.sandraxandreia.service;
 
 import ananditos.sandraxandreia.domain.Usuario;
-import ananditos.sandraxandreia.domain.vo.SenhaCriptografada;
+import ananditos.sandraxandreia.domain.vo.UsuarioSenhaCriptografada;
 import ananditos.sandraxandreia.dto.UsuarioRequestDTO;
 import ananditos.sandraxandreia.dto.UsuarioResponseDTO;
 import ananditos.sandraxandreia.repository.UsuarioRepository;
@@ -27,17 +27,33 @@ public class UsuarioService {
         return new UsuarioResponseDTO(
                 usuario.getId(),
                 usuario.getNome(),
-                usuario.getEmail()
+                usuario.getEmail(),
+                usuario.getCpf(),
+                usuario.getGenero()
         );
     }
 
 
     public UsuarioResponseDTO criar(UsuarioRequestDTO request) {
+
+        String emailNormalizado = request.getEmail() == null ? null : request.getEmail().trim().toLowerCase();
+        String cpf = request.getCpf() == null ? null : request.getCpf().trim().toLowerCase();
+
+        if (repository.existsByEmailValor(emailNormalizado)) {
+            throw new RuntimeException("E-mail ja cadastrado");
+        }
+
+        if (repository.existsByCpfValor(cpf)) {
+            throw new RuntimeException("CPF ja cadastrado");
+        }
+
         var usuario = new Usuario(
                 null,
                 request.getNome(),
                 request.getEmail(),
-                request.getSenha()
+                request.getSenha(),
+                request.getCpf(),
+                request.getGenero()
         );
         Usuario salvo = repository.save(usuario);
         return toResponse(salvo);
@@ -59,7 +75,7 @@ public class UsuarioService {
                     .orElseThrow(() -> new IllegalArgumentException("Usuario nao encontrado para o id: " + id));
             usuario.setNome(request.getNome());
             usuario.setEmail(request.getEmail());
-            usuario.setSenha(new SenhaCriptografada(request.getSenha()));
+            usuario.setSenha(new UsuarioSenhaCriptografada(request.getSenha()));
             Usuario salvo = repository.save(usuario);
             return toResponse(salvo);
     }

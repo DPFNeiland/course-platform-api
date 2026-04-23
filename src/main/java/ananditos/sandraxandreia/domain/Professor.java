@@ -1,6 +1,5 @@
 package ananditos.sandraxandreia.domain;
 
-import ananditos.sandraxandreia.domain.vo.SenhaCriptografada;
 import jakarta.persistence.*;
 
 import java.util.Objects;
@@ -21,8 +20,8 @@ public class Professor extends Usuario{
     public Professor() {
     }
 
-    public Professor(Long id, String nome, String email, String senhaCriptografada, String areaFormacao, double horaAula, String tipoEnsino) {
-        super(id, nome, email, senhaCriptografada);
+    public Professor(Long id, String nome, String email, String senhaCriptografada, String cpf, String areaFormacao, GeneroUsuario genero, double horaAula, String tipoEnsino) {
+        super(id, nome, email, senhaCriptografada, cpf, genero);
         this.areaFormacao = areaFormacao;
         this.horaAula = horaAula;
         this.tipoEnsino = tipoEnsino;
