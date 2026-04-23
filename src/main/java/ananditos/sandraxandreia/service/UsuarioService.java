@@ -7,22 +7,27 @@ import ananditos.sandraxandreia.domain.vo.UsuarioSenhaCriptografada;
 import ananditos.sandraxandreia.dto.UsuarioRequestDTO;
 import ananditos.sandraxandreia.dto.UsuarioResponseDTO;
 import ananditos.sandraxandreia.repository.UsuarioRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+
+import javax.swing.text.PasswordView;
+import java.security.KeyStore;
 import java.util.List;
 
 @Service
 public class UsuarioService {
 
     private final UsuarioRepository repository;
-
+    private final PasswordEncoder passwordEncoder;
     /**
      * Injeção de dependência por construtor.
      *
      * O Spring localiza o bean UsuarioRepository e injeta automaticamente aqui.
      */
-    public UsuarioService(UsuarioRepository repository) {
+    public UsuarioService(UsuarioRepository repository, PasswordEncoder passwordEncoder) {
         this.repository = repository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     private UsuarioResponseDTO toResponse(Usuario usuario) {
@@ -53,7 +58,7 @@ public class UsuarioService {
                 null,
                 request.getNome(),
                 request.getEmail(),
-                request.getSenha(),
+                passwordEncoder.encode(request.getSenha()) ,
                 request.getCpf(),
                 request.getGenero()
         );
