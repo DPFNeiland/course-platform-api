@@ -1,6 +1,8 @@
 package ananditos.sandraxandreia.service;
 
 import ananditos.sandraxandreia.domain.Usuario;
+import ananditos.sandraxandreia.domain.vo.UsuarioCpf;
+import ananditos.sandraxandreia.domain.vo.UsuarioEmail;
 import ananditos.sandraxandreia.domain.vo.UsuarioSenhaCriptografada;
 import ananditos.sandraxandreia.dto.UsuarioRequestDTO;
 import ananditos.sandraxandreia.dto.UsuarioResponseDTO;
@@ -27,8 +29,8 @@ public class UsuarioService {
         return new UsuarioResponseDTO(
                 usuario.getId(),
                 usuario.getNome(),
-                usuario.getEmail(),
-                usuario.getCpf(),
+                usuario.getEmail().getValor(),
+                usuario.getCpf().getValor(),
                 usuario.getGenero()
         );
     }
@@ -74,8 +76,10 @@ public class UsuarioService {
             Usuario usuario = repository.findById(id)
                     .orElseThrow(() -> new IllegalArgumentException("Usuario nao encontrado para o id: " + id));
             usuario.setNome(request.getNome());
-            usuario.setEmail(request.getEmail());
+            usuario.setEmail(new UsuarioEmail(request.getEmail()));
+            usuario.setCpf(new UsuarioCpf(request.getCpf()));
             usuario.setSenha(new UsuarioSenhaCriptografada(request.getSenha()));
+            usuario.setGenero(request.getGenero());
             Usuario salvo = repository.save(usuario);
             return toResponse(salvo);
     }
