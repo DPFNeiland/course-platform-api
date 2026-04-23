@@ -57,6 +57,7 @@ public class UsuarioController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Remove um usuario pelo id")
     public void deletar(@PathVariable Long id) {
+
         service.deletar(id);
     }
 }
