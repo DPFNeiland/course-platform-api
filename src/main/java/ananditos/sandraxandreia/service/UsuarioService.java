@@ -11,12 +11,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 
-import javax.swing.text.PasswordView;
-import java.security.KeyStore;
 import java.util.List;
 
 @Service
-public class UsuarioService {
+public class x'UsuarioService {
 
     private final UsuarioRepository repository;
     private final PasswordEncoder passwordEncoder;

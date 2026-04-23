@@ -15,16 +15,29 @@ public class Professor extends Usuario{
     @Column(nullable = false)
     private double horaAula;
 
-    @Column(nullable = false, length = 100)
-    private String tipoEnsino;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TipoEnsinoProfessor tipoEnsino;
 
     public Professor() {
     }
 
-    public Professor(Long id, String nome, String email, String senhaCriptografada, String cpf, String areaFormacao, GeneroUsuario genero, double horaAula, String tipoEnsino) {
+    public Professor(Long id, String nome, String email, String senhaCriptografada, String cpf, String areaFormacao, GeneroUsuario genero, double horaAula, TipoEnsinoProfessor tipoEnsino) {
         super(id, nome, email, senhaCriptografada, cpf, genero);
         this.areaFormacao = areaFormacao;
         this.horaAula = horaAula;
+        this.tipoEnsino = tipoEnsino;
+    }
+
+    public void setAreaFormacao(String areaFormacao) {
+        this.areaFormacao = areaFormacao;
+    }
+
+    public void setHoraAula(double horaAula) {
+        this.horaAula = horaAula;
+    }
+
+    public void setTipoEnsino(TipoEnsinoProfessor tipoEnsino) {
         this.tipoEnsino = tipoEnsino;
     }
 
@@ -36,7 +49,7 @@ public class Professor extends Usuario{
         return horaAula;
     }
 
-    public String getTipoEnsino() {
+    public TipoEnsinoProfessor getTipoEnsino() {
         return tipoEnsino;
     }
 
