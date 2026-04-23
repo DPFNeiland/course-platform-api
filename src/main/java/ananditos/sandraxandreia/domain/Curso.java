@@ -18,10 +18,15 @@ public class Curso {
     @Column(nullable = false, length = 100)
     private String tipoAssinatura;
 
-    public Curso(Long id, String nome, String tipoAssinatura) {
+    @Column(nullable = false, length = 100)
+    private TipoCurso tipoCurso;
+
+
+    public Curso(Long id, String nome, String tipoAssinatura, TipoCurso tipoCurso) {
         this.id = id;
         this.nome = nome;
         this.tipoAssinatura = tipoAssinatura;
+        this.tipoCurso = tipoCurso;
     }
 
     public Curso() {
@@ -35,7 +40,6 @@ public class Curso {
     String acessarCurso(Curso curso){
         return "Curso acessado";
     }
-
 
     public Long getId() {
         return id;
@@ -61,11 +65,19 @@ public class Curso {
         this.tipoAssinatura = tipoAssinatura;
     }
 
+    public TipoCurso getTipoCurso() {
+        return tipoCurso;
+    }
+
+    public void setTipoCurso(TipoCurso tipoCurso) {
+        this.tipoCurso = tipoCurso;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Curso curso = (Curso) o;
-        return Objects.equals(id, curso.id) && Objects.equals(nome, curso.nome) && Objects.equals(tipoAssinatura, curso.tipoAssinatura);
+        return Objects.equals(id, curso.id) && Objects.equals(nome, curso.nome) && Objects.equals(tipoAssinatura, curso.tipoAssinatura) && tipoCurso == curso.tipoCurso;
     }
 
     @Override
@@ -79,6 +91,7 @@ public class Curso {
                 "id=" + id +
                 ", nome='" + nome + '\'' +
                 ", tipoAssinatura='" + tipoAssinatura + '\'' +
+                ", tipoCurso=" + tipoCurso +
                 '}';
     }
 }
