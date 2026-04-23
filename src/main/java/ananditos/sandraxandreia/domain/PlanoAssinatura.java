@@ -4,3 +4,4 @@ public enum PlanoAssinatura {
     COMUM,
     PREMIUM
 }
+
