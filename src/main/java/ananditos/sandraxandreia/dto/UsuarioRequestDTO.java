@@ -3,6 +3,7 @@ package ananditos.sandraxandreia.dto;
 import ananditos.sandraxandreia.domain.GeneroUsuario;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 
 public class UsuarioRequestDTO {
     @NotBlank(message = "Nome e obrigatorio")
@@ -13,6 +14,7 @@ public class UsuarioRequestDTO {
     private String email;
 
     @NotBlank(message = "Cpf eh obrigaatorio")
+    @Pattern(regexp = "\\d{11}|\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}", message = "CPF deve ter 11 digitos ou estar no formato 000.000.000-00")
     private String cpf;
 
     @NotBlank(message = "Senha e obrigatoria")
