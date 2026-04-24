@@ -1,82 +1,64 @@
 package ananditos.sandraxandreia.domain;
 
+import ananditos.sandraxandreia.domain.vo.AlunoRA;
 import jakarta.persistence.*;
 
 import java.util.Objects;
 
 @Entity
 @Table(name="aluno")
-public class Aluno {
+public class Aluno extends Usuario{
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Embedded
+    private AlunoRA ra;
 
-    @Column(nullable = false, length = 100)
-    private int RA;
-
-    @Column(nullable = false, length = 100)
-    private String planoAss;
-
-    @Column(nullable = false, length = 100)
-    private String respFinanceiro;
-    
-    public Aluno(Long id, int RA, String planoAss, String respFinanceiro) {
-        this.id = id;
-        this.RA = RA;
-        this.planoAss = planoAss;
-        this.respFinanceiro = respFinanceiro;
-    }
+    @Enumerated(EnumType.STRING)
+    private StatusAluno status;
 
     public Aluno() {
-        
+        // Pro JPA
     }
 
-    String escreverTopico(String mensagem) {
-        return ("Mensagem: " + mensagem);
+    public Aluno(Long id, String nome, String email, String senhaCriptografada, String cpf, GeneroUsuario genero, String ra, StatusAluno status) {
+        super(id, nome, email, senhaCriptografada, cpf, genero);
+        this.ra = new AlunoRA(ra);
+        this.status = status;
     }
 
-    public Long getId() {
-        return id;
+    public AlunoRA getRa() {
+        return ra;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setRa(AlunoRA ra) {
+        this.ra = ra;
     }
 
-    public int getRA() {
-        return RA;
+    public StatusAluno getStatus() {
+        return status;
     }
 
-    public void setRA(int RA) {
-        this.RA = RA;
-    }
-
-    public String getPlanoAss() {
-        return planoAss;
-    }
-
-    public void setPlanoAss(String planoAss) {
-        this.planoAss = planoAss;
-    }
-
-    public String getRespFinanceiro() {
-        return respFinanceiro;
-    }
-
-    public void setRespFinanceiro(String respFinanceiro) {
-        this.respFinanceiro = respFinanceiro;
+    public void setStatus(StatusAluno status) {
+        this.status = status;
     }
 
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
         Aluno aluno = (Aluno) o;
-        return RA == aluno.RA && Objects.equals(id, aluno.id) && Objects.equals(planoAss, aluno.planoAss) && Objects.equals(respFinanceiro, aluno.respFinanceiro);
+        return Objects.equals(ra, aluno.ra) && status == aluno.status;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, RA, planoAss, respFinanceiro);
+        return Objects.hash(super.hashCode(), ra, status);
+    }
+
+    @Override
+    public String toString() {
+        return "Aluno{" +
+                "RA=" + ra +
+                ", Status=" + status +
+                '}';
     }
 }
