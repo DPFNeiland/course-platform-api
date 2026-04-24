@@ -6,84 +6,72 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "professor")
-public class Professor {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Professor extends Usuario{
 
     @Column(nullable = false, length = 100)
-    private String AreaFormacao;
+    private String areaFormacao;
 
-    @Column(nullable = false, length = 100)
-    private double HoraAula;
+    @Column(nullable = false)
+    private double horaAula;
 
-    @Column(nullable = false, length = 100)
-    private String TipoEnsino;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TipoEnsinoProfessor tipoEnsino;
 
     public Professor() {
-        // Construtor padrao exigido pela JPA.
     }
 
-    public Professor(String AreaFormacao, double HoraAula, String TipoEnsino) {
-        this.AreaFormacao = AreaFormacao;
-        this.HoraAula = HoraAula;
-        this.TipoEnsino = TipoEnsino;
-    }
-
-    // Getters e Setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getAreaFormacao() {
-        return AreaFormacao;
+    public Professor(Long id, String nome, String email, String senhaCriptografada, String cpf, String areaFormacao, GeneroUsuario genero, double horaAula, TipoEnsinoProfessor tipoEnsino) {
+        super(id, nome, email, senhaCriptografada, cpf, genero);
+        this.areaFormacao = areaFormacao;
+        this.horaAula = horaAula;
+        this.tipoEnsino = tipoEnsino;
     }
 
     public void setAreaFormacao(String areaFormacao) {
-        AreaFormacao = areaFormacao;
-    }
-
-    public double getHoraAula() {
-        return HoraAula;
+        this.areaFormacao = areaFormacao;
     }
 
     public void setHoraAula(double horaAula) {
-        HoraAula = horaAula;
+        this.horaAula = horaAula;
     }
 
-    public String getTipoEnsino() {
-        return TipoEnsino;
+    public void setTipoEnsino(TipoEnsinoProfessor tipoEnsino) {
+        this.tipoEnsino = tipoEnsino;
     }
 
-    public void setTipoEnsino(String tipoEnsino) {
-        TipoEnsino = tipoEnsino;
+    public String getAreaFormacao() {
+        return areaFormacao;
     }
 
-    @Override
-    public String toString() {
-        return "Professor{" +
-                "id=" + id +
-                ", AreaFormacao='" + AreaFormacao + '\'' +
-                ", HoraAula=" + HoraAula +
-                ", TipoEnsino='" + TipoEnsino + '\'' +
-                '}';
+    public double getHoraAula() {
+        return horaAula;
+    }
+
+    public TipoEnsinoProfessor getTipoEnsino() {
+        return tipoEnsino;
     }
 
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
         Professor professor = (Professor) o;
-        return Double.compare(HoraAula, professor.HoraAula) == 0 && Objects.equals(id, professor.id) && Objects.equals(AreaFormacao, professor.AreaFormacao) && Objects.equals(TipoEnsino, professor.TipoEnsino);
+        return Double.compare(horaAula, professor.horaAula) == 0 && Objects.equals(areaFormacao, professor.areaFormacao) && Objects.equals(tipoEnsino, professor.tipoEnsino);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, AreaFormacao, HoraAula, TipoEnsino);
+        return Objects.hash(super.hashCode(), areaFormacao, horaAula, tipoEnsino);
+    }
+
+    @Override
+    public String toString() {
+        return "Professor{" +
+                "areaFormacao='" + areaFormacao + '\'' +
+                ", horaAula=" + horaAula +
+                ", tipoEnsino='" + tipoEnsino + '\'' +
+                '}';
     }
 }
 
