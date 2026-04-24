@@ -4,7 +4,6 @@ import ananditos.sandraxandreia.domain.vo.UsuarioCpf;
 import ananditos.sandraxandreia.domain.vo.UsuarioEmail;
 import ananditos.sandraxandreia.domain.vo.UsuarioSenhaCriptografada;
 import jakarta.persistence.*;
-
 import java.util.Objects;
 
 /**

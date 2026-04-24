@@ -1,6 +1,5 @@
 package ananditos.sandraxandreia.controller;
 
-import ananditos.sandraxandreia.domain.Usuario;
 import ananditos.sandraxandreia.dto.UsuarioRequestDTO;
 import ananditos.sandraxandreia.dto.UsuarioResponseDTO;
 import ananditos.sandraxandreia.service.UsuarioService;

@@ -1,6 +1,5 @@
 package ananditos.sandraxandreia.domain;
 
-import ananditos.sandraxandreia.domain.vo.UsuarioEmail;
 import jakarta.persistence.*;
 
 import java.util.Objects;

@@ -1,7 +1,6 @@
 package ananditos.sandraxandreia.domain;
 
 import jakarta.persistence.*;
-
 import java.util.Objects;
 
 @Entity
