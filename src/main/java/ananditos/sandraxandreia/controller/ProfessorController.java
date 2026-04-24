@@ -1,12 +1,9 @@
 package ananditos.sandraxandreia.controller;
 
-import ananditos.sandraxandreia.domain.Professor;
-import ananditos.sandraxandreia.domain.Usuario;
 import ananditos.sandraxandreia.dto.ProfessorRequestDTO;
 import ananditos.sandraxandreia.dto.ProfessorResponseDTO;
 import ananditos.sandraxandreia.dto.UsuarioResponseDTO;
 import ananditos.sandraxandreia.service.ProfessorService;
-import ananditos.sandraxandreia.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
@@ -42,14 +39,14 @@ public class ProfessorController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Busca um professor pelo id")
-    public UsuarioResponseDTO buscarPorId(@PathVariable Long id) {
+    public ProfessorResponseDTO buscarPorId(@PathVariable Long id) {
 
         return service.buscarPorId(id);
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Atualiza um professor existente")
-    public UsuarioResponseDTO atualizar(@PathVariable Long id, @RequestBody ProfessorRequestDTO professor) {
+    public ProfessorResponseDTO atualizar(@PathVariable Long id, @RequestBody ProfessorRequestDTO professor) {
         return service.atualizar(id, professor);
     }
 
