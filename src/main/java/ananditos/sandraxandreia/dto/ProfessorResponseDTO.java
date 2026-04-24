@@ -1,7 +1,6 @@
 package ananditos.sandraxandreia.dto;
 
 import ananditos.sandraxandreia.domain.GeneroUsuario;
-import ananditos.sandraxandreia.domain.Professor;
 import ananditos.sandraxandreia.domain.TipoEnsinoProfessor;
 
 public class ProfessorResponseDTO extends UsuarioResponseDTO {
@@ -10,6 +9,8 @@ public class ProfessorResponseDTO extends UsuarioResponseDTO {
     private double horaAula;
     private TipoEnsinoProfessor tipoEnsino;
 
+    public ProfessorResponseDTO() {
+    }
 
     public ProfessorResponseDTO(Long id, String nome, String email, String cpf, GeneroUsuario genero, String areaFormacao, double horaAula, TipoEnsinoProfessor tipoEnsino) {
         super(id, nome, email, cpf, genero);
