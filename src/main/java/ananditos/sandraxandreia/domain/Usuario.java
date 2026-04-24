@@ -1,6 +1,5 @@
 package ananditos.sandraxandreia.domain;
 
-<<<<<<< Updated upstream
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -8,7 +7,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
-=======
 import ananditos.sandraxandreia.domain.vo.UsuarioCpf;
 import ananditos.sandraxandreia.domain.vo.UsuarioDataNascimento;
 import ananditos.sandraxandreia.domain.vo.UsuarioEmail;
@@ -16,17 +14,21 @@ import ananditos.sandraxandreia.domain.vo.UsuarioSenhaCriptografada;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
->>>>>>> Stashed changes
+
+import ananditos.sandraxandreia.domain.vo.UsuarioCpf;
+import ananditos.sandraxandreia.domain.vo.UsuarioEmail;
+import ananditos.sandraxandreia.domain.vo.UsuarioSenhaCriptografada;
+import jakarta.persistence.*;
 import java.util.Objects;
 
 /**
  * Classe de dominio anotada como Entity.
- *
- * Nesta primeira versao, ela ja e suficiente para o Hibernate/JPA
+ * Nesta primeira versao, ela já e suficiente para o Hibernate/JPA
  * gerar a tabela automaticamente no H2, mesmo sem Repository.
  */
 @Entity
 @Table(name = "usuario")
+@Inheritance(strategy = InheritanceType.JOINED)
 public class Usuario {
 
     @Id
@@ -36,10 +38,6 @@ public class Usuario {
     @Column(nullable = false, length = 100)
     private String nome;
 
-<<<<<<< Updated upstream
-    @Column(nullable = false, unique = true, length = 120)
-    private String email;
-=======
     @Embedded
     private UsuarioEmail email;
 
@@ -56,26 +54,22 @@ public class Usuario {
     @Column(nullable = false)
     private GeneroUsuario genero;
 
->>>>>>> Stashed changes
-
     public Usuario() {
         // Construtor padrao exigido pela JPA.
     }
 
-<<<<<<< Updated upstream
     public Usuario(String nome, String email) {
         this.nome = nome;
         this.email = email;
-=======
-    public Usuario(Long id, String nome, UsuarioEmail email, UsuarioCpf cpf, UsuarioSenhaCriptografada senha, UsuarioDataNascimento dataNascimento, GeneroUsuario genero) {
+
+    public Usuario(Long id, String nome, String email, String senhaCriptografada, String cpf, GeneroUsuario genero) {
         this.id = id;
         this.nome = nome;
-        this.email = email;
-        this.cpf = cpf;
-        this.senha = senha;
-        this.dataNascimento = dataNascimento;
+        this.email = new UsuarioEmail(email);
+        this.senha = new UsuarioSenhaCriptografada(senhaCriptografada);
+        this.cpf = new UsuarioCpf(cpf);
         this.genero = genero;
->>>>>>> Stashed changes
+
     }
 
     public Long getId() {
@@ -94,16 +88,14 @@ public class Usuario {
         this.nome = nome;
     }
 
-    public String getEmail() {
+    public UsuarioEmail getEmail() {
         return email;
     }
 
-    public void setEmail(String email) {
+    public void setEmail(UsuarioEmail email) {
         this.email = email;
     }
 
-<<<<<<< Updated upstream
-=======
     public UsuarioCpf getCpf() {
         return cpf;
     }
@@ -136,7 +128,6 @@ public class Usuario {
         this.genero = genero;
     }
 
->>>>>>> Stashed changes
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
@@ -154,15 +145,8 @@ public class Usuario {
         return "Usuario{" +
                 "id=" + id +
                 ", nome='" + nome + '\'' +
-<<<<<<< Updated upstream
                 ", email='" + email + '\'' +
-=======
-                ", email=" + email +
                 ", cpf=" + cpf +
-                ", senha=" + senha +
-                ", dataNascimento=" + dataNascimento +
-                ", genero=" + genero +
->>>>>>> Stashed changes
                 '}';
     }
 }

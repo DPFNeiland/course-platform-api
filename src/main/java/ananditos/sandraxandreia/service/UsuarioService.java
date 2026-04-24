@@ -1,8 +1,15 @@
 package ananditos.sandraxandreia.service;
 
 import ananditos.sandraxandreia.domain.Usuario;
+import ananditos.sandraxandreia.domain.vo.UsuarioCpf;
+import ananditos.sandraxandreia.domain.vo.UsuarioEmail;
+import ananditos.sandraxandreia.domain.vo.UsuarioSenhaCriptografada;
+import ananditos.sandraxandreia.dto.UsuarioRequestDTO;
+import ananditos.sandraxandreia.dto.UsuarioResponseDTO;
 import ananditos.sandraxandreia.repository.UsuarioRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 
 import java.util.List;
 
@@ -10,24 +17,17 @@ import java.util.List;
 public class UsuarioService {
 
     private final UsuarioRepository repository;
-
+    private final PasswordEncoder passwordEncoder;
     /**
      * Injeção de dependência por construtor.
      *
      * O Spring localiza o bean UsuarioRepository e injeta automaticamente aqui.
      */
-    public UsuarioService(UsuarioRepository repository) {
+    public UsuarioService(UsuarioRepository repository, PasswordEncoder passwordEncoder) {
         this.repository = repository;
+        this.passwordEncoder = passwordEncoder;
     }
 
-<<<<<<< Updated upstream
-    public Usuario criar(Usuario usuario) {
-        return repository.save(usuario);
-    }
-
-    public List<Usuario> listarTodos() {
-        return repository.findAll();
-=======
     private UsuarioResponseDTO toResponse(Usuario usuario) {
         return new UsuarioResponseDTO(
                 usuario.getId(),
@@ -36,6 +36,17 @@ public class UsuarioService {
                 usuario.getCpf().getValor(),
                 usuario.getGenero(),
                 usuario.getDataNascimento().getData()
+        );
+    }
+
+
+    private UsuarioResponseDTO toResponse(Usuario usuario) {
+        return new UsuarioResponseDTO(
+                usuario.getId(),
+                usuario.getNome(),
+                usuario.getEmail().getValor(),
+                usuario.getCpf().getValor(),
+                usuario.getGenero()
         );
     }
 
@@ -60,28 +71,40 @@ public class UsuarioService {
                 request.getCpf(),
                 passwordEncoder.encode(request.getSenha()),
                 request.getDataNascimento(),
+                passwordEncoder.encode(request.getSenha()) ,
+                request.getCpf(),
                 request.getGenero()
         );
         Usuario salvo = repository.save(usuario);
         return toResponse(salvo);
 
->>>>>>> Stashed changes
     }
 
-    public Usuario buscarPorId(Long id) {
-        return repository.findById(id)
+    public List<UsuarioResponseDTO> listarTodos() {
+        return repository.findAll().stream().map(this::toResponse).toList();
+    }
+
+    public UsuarioResponseDTO buscarPorId(Long id) {
+        Usuario usuario = repository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario nao encontrado para o id: " + id));
+        return toResponse(usuario);
     }
 
-    public Usuario atualizar(Long id, Usuario usuarioAtualizado) {
-        Usuario usuarioExistente = buscarPorId(id);
-        usuarioExistente.setNome(usuarioAtualizado.getNome());
-        usuarioExistente.setEmail(usuarioAtualizado.getEmail());
-        return repository.save(usuarioExistente);
+        public UsuarioResponseDTO atualizar(Long id, UsuarioRequestDTO request) {
+            Usuario usuario = repository.findById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Usuario nao encontrado para o id: " + id));
+            usuario.setNome(request.getNome());
+            usuario.setEmail(new UsuarioEmail(request.getEmail()));
+            usuario.setCpf(new UsuarioCpf(request.getCpf()));
+            usuario.setSenha(new UsuarioSenhaCriptografada(request.getSenha()));
+            usuario.setGenero(request.getGenero());
+            Usuario salvo = repository.save(usuario);
+            return toResponse(salvo);
     }
 
     public void deletar(Long id) {
-        Usuario usuarioExistente = buscarPorId(id);
-        repository.delete(usuarioExistente);
+        Usuario usuario = repository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario nao encontrado para o id: " + id));
+        repository.delete(usuario);
     }
 }
