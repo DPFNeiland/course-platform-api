@@ -2,7 +2,6 @@ package ananditos.sandraxandreia.dto;
 
 
 import ananditos.sandraxandreia.domain.StatusAluno;
-import ananditos.sandraxandreia.domain.vo.AlunoRA;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;

@@ -1,10 +1,7 @@
 package ananditos.sandraxandreia.service;
 
 import ananditos.sandraxandreia.domain.Aluno;
-import ananditos.sandraxandreia.domain.vo.AlunoRA;
-import ananditos.sandraxandreia.domain.vo.UsuarioCpf;
-import ananditos.sandraxandreia.domain.vo.UsuarioEmail;
-import ananditos.sandraxandreia.domain.vo.UsuarioSenhaCriptografada;
+import ananditos.sandraxandreia.domain.vo.*;
 import ananditos.sandraxandreia.dto.AlunoRequestDTO;
 import ananditos.sandraxandreia.dto.AlunoResponseDTO;
 import ananditos.sandraxandreia.repository.AlunoRepository;
@@ -30,6 +27,7 @@ public class AlunoService {
                 aluno.getEmail().getValor(),
                 aluno.getCpf().getValor(),
                 aluno.getGenero(),
+                aluno.getDataNascimento().getData(),
                 aluno.getRa().getValor(),
                 aluno.getStatus()
 
@@ -55,6 +53,7 @@ public class AlunoService {
                 passwordEncoder.encode(request.getSenha()),
                 request.getCpf(),
                 request.getGenero(),
+                request.getDataNascimento(),
                 request.getRa(),
                 request.getStatus()
         );
@@ -84,6 +83,7 @@ public class AlunoService {
         aluno.setCpf(new UsuarioCpf(request.getCpf()));
         aluno.setSenha(new UsuarioSenhaCriptografada(request.getSenha()));
         aluno.setGenero(request.getGenero());
+        aluno.setDataNascimento(new UsuarioDataNascimento(request.getDataNascimento()));
         aluno.setRa(new AlunoRA(request.getRa()));
         aluno.setStatus(request.getStatus());
 
