@@ -26,7 +26,7 @@ public class UsuarioRequestDTO {
     private GeneroUsuario genero;
 
     @NotBlank(message = "Data de nascimento é obrigatória")
-    private LocalDate dataNascimento;
+    private String dataNascimento;
 
     public UsuarioRequestDTO() {
     }
@@ -36,6 +36,6 @@ public class UsuarioRequestDTO {
     public String getSenha() { return senha; }
     public String getCpf() { return cpf; }
     public GeneroUsuario getGenero() { return genero; }
-    public LocalDate getDataNascimento() {return dataNascimento; }
+    public String getDataNascimento() {return dataNascimento; }
 
 }

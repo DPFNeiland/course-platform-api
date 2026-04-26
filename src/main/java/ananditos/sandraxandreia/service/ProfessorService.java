@@ -1,7 +1,9 @@
 package ananditos.sandraxandreia.service;
 
+import ananditos.sandraxandreia.domain.GeneroUsuario;
 import ananditos.sandraxandreia.domain.Professor;
 import ananditos.sandraxandreia.domain.vo.UsuarioCpf;
+import ananditos.sandraxandreia.domain.vo.UsuarioDataNascimento;
 import ananditos.sandraxandreia.domain.vo.UsuarioEmail;
 import ananditos.sandraxandreia.domain.vo.UsuarioSenhaCriptografada;
 import ananditos.sandraxandreia.dto.ProfessorRequestDTO;
@@ -21,7 +23,6 @@ public class ProfessorService {
         this.passwordEncoder = passwordEncoder;
         this.professorRepository = professorRepository;
     }
-
     private ProfessorResponseDTO toResponse(Professor professor) {
         return new ProfessorResponseDTO(
                 professor.getId(),
@@ -29,6 +30,7 @@ public class ProfessorService {
                 professor.getEmail().getValor(),
                 professor.getCpf().getValor(),
                 professor.getGenero(),
+                professor.getDataNascimento().getData(),
                 professor.getAreaFormacao(),
                 professor.getHoraAula(),
                 professor.getTipoEnsino()
@@ -47,15 +49,15 @@ public class ProfessorService {
         if (professorRepository.existsByCpfValor(cpf)) {
             throw new RuntimeException("CPF ja cadastrado");
         }
-
         var professor = new Professor(
                 null,
                 request.getNome(),
                 request.getEmail(),
                 passwordEncoder.encode(request.getSenha()),
                 request.getCpf(),
-                request.getAreaFormacao(),
                 request.getGenero(),
+                request.getDataNascimento(),
+                request.getAreaFormacao(),
                 request.getHoraAula(),
                 request.getTipoEnsino()
         );
@@ -85,6 +87,7 @@ public class ProfessorService {
         professor.setCpf(new UsuarioCpf(request.getCpf()));
         professor.setSenha(new UsuarioSenhaCriptografada(request.getSenha()));
         professor.setGenero(request.getGenero());
+        professor.setDataNascimento(new UsuarioDataNascimento(request.getDataNascimento()));
         professor.setAreaFormacao(request.getAreaFormacao());
         professor.setHoraAula(request.getHoraAula());
         professor.setTipoEnsino(request.getTipoEnsino());
