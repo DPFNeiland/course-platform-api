@@ -2,6 +2,7 @@ package ananditos.sandraxandreia.service;
 
 import ananditos.sandraxandreia.domain.Usuario;
 import ananditos.sandraxandreia.domain.vo.UsuarioCpf;
+import ananditos.sandraxandreia.domain.vo.UsuarioDataNascimento;
 import ananditos.sandraxandreia.domain.vo.UsuarioEmail;
 import ananditos.sandraxandreia.domain.vo.UsuarioSenhaCriptografada;
 import ananditos.sandraxandreia.dto.UsuarioRequestDTO;
@@ -34,9 +35,11 @@ public class UsuarioService {
                 usuario.getNome(),
                 usuario.getEmail().getValor(),
                 usuario.getCpf().getValor(),
-                usuario.getGenero()
+                usuario.getGenero(),
+                usuario.getDataNascimento().getData()
         );
     }
+
 
 
     public UsuarioResponseDTO criar(UsuarioRequestDTO request) {
@@ -51,14 +54,15 @@ public class UsuarioService {
         if (repository.existsByCpfValor(cpf)) {
             throw new RuntimeException("CPF ja cadastrado");
         }
-
         var usuario = new Usuario(
                 null,
                 request.getNome(),
                 request.getEmail(),
-                passwordEncoder.encode(request.getSenha()) ,
+                passwordEncoder.encode(request.getSenha()),
                 request.getCpf(),
-                request.getGenero()
+                request.getGenero(),
+                request.getDataNascimento()
+
         );
         Usuario salvo = repository.save(usuario);
         return toResponse(salvo);
@@ -83,6 +87,7 @@ public class UsuarioService {
             usuario.setCpf(new UsuarioCpf(request.getCpf()));
             usuario.setSenha(new UsuarioSenhaCriptografada(request.getSenha()));
             usuario.setGenero(request.getGenero());
+            usuario.setDataNascimento(new UsuarioDataNascimento(request.getDataNascimento()));
             Usuario salvo = repository.save(usuario);
             return toResponse(salvo);
     }
