@@ -21,8 +21,8 @@ public class Professor extends Usuario{
     public Professor() {
     }
 
-    public Professor(Long id, String nome, String email, String senhaCriptografada, String cpf, String areaFormacao, GeneroUsuario genero, double horaAula, TipoEnsinoProfessor tipoEnsino) {
-        super(id, nome, email, senhaCriptografada, cpf, genero);
+    public Professor(Long id, String nome, String email, String senhaCriptografada, String cpf, GeneroUsuario genero, String dataNascimento, String areaFormacao, double horaAula, TipoEnsinoProfessor tipoEnsino) {
+        super(id, nome, email, senhaCriptografada, cpf, genero, dataNascimento);
         this.areaFormacao = areaFormacao;
         this.horaAula = horaAula;
         this.tipoEnsino = tipoEnsino;

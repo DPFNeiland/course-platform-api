@@ -26,7 +26,7 @@ public class UsuarioDataNascimento {
         }
         this.valor = normalizado;
 
-        DateTimeFormatter formatador = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        DateTimeFormatter formatador = DateTimeFormatter.ofPattern("d/M/yyyy");
 
         if (!isDataValida(valor, formatador)) {
             throw new IllegalArgumentException("Data de nascimento com formato inválido");
@@ -36,10 +36,11 @@ public class UsuarioDataNascimento {
         LocalDate dataMinima = LocalDate.parse("01/01/1900", formatador);
         LocalDate dataAtual = LocalDate.now();
 
-        if (data.isBefore(dataMinima) && data.isAfter(dataAtual)) {
+        if (data.isBefore(dataMinima) ||     data.isAfter(dataAtual)) {
             throw new IllegalArgumentException("Data de nascimento inválida");
         }
     }
+
 
     public boolean isDataValida(String data, DateTimeFormatter formato) {
         try {
@@ -50,13 +51,6 @@ public class UsuarioDataNascimento {
         }
     }
 
-    public String getValor() {
-        return valor;
-    }
-
-    public void setValor(String valor) {
-        this.valor = valor;
-    }
 
     public LocalDate getData() {
         return data;

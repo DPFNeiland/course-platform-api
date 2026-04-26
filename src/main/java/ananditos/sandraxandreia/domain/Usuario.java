@@ -19,6 +19,8 @@ import ananditos.sandraxandreia.domain.vo.UsuarioCpf;
 import ananditos.sandraxandreia.domain.vo.UsuarioEmail;
 import ananditos.sandraxandreia.domain.vo.UsuarioSenhaCriptografada;
 import jakarta.persistence.*;
+import org.jspecify.annotations.Nullable;
+
 import java.util.Objects;
 
 /**
@@ -58,17 +60,14 @@ public class Usuario {
         // Construtor padrao exigido pela JPA.
     }
 
-    public Usuario(String nome, String email) {
-        this.nome = nome;
-        this.email = email;
-
-    public Usuario(Long id, String nome, String email, String senhaCriptografada, String cpf, GeneroUsuario genero) {
+    public Usuario(Long id, String nome, String email, String senhaCriptografada, String cpf, GeneroUsuario genero, String dataNascimento) {
         this.id = id;
         this.nome = nome;
         this.email = new UsuarioEmail(email);
         this.senha = new UsuarioSenhaCriptografada(senhaCriptografada);
         this.cpf = new UsuarioCpf(cpf);
         this.genero = genero;
+        this.dataNascimento = new UsuarioDataNascimento(dataNascimento);
 
     }
 
@@ -128,6 +127,8 @@ public class Usuario {
         this.genero = genero;
     }
 
+
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
@@ -145,8 +146,11 @@ public class Usuario {
         return "Usuario{" +
                 "id=" + id +
                 ", nome='" + nome + '\'' +
-                ", email='" + email + '\'' +
+                ", email=" + email +
                 ", cpf=" + cpf +
+                ", senha=" + senha +
+                ", dataNascimento=" + dataNascimento +
+                ", genero=" + genero +
                 '}';
     }
 }
