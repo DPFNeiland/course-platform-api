@@ -27,10 +27,8 @@ public class Professor extends Usuario{
         super(id, nome, email, senhaCriptografada, cpf, genero, dataNascimento);
         this.areaFormacao = new ProfessorAreaFormacao(areaFormacao);
         this.horaAula = horaAula;
-        this.tipoEnsino = tipoEnsino;  
-      
-
-
+        this.tipoEnsino = tipoEnsino;
+    }
     public ProfessorAreaFormacao getAreaFormacao() {
         return areaFormacao;
     }
