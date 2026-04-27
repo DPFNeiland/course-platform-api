@@ -1,4 +1,4 @@
-package ananditos.sandraxandreia.dto;
+package ananditos.sandraxandreia.dto.response;
 
 import ananditos.sandraxandreia.domain.GeneroUsuario;
 import ananditos.sandraxandreia.domain.TipoEnsinoProfessor;

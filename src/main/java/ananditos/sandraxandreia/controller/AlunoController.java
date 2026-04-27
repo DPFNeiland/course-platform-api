@@ -1,8 +1,8 @@
 package ananditos.sandraxandreia.controller;
 
-import ananditos.sandraxandreia.dto.*;
+import ananditos.sandraxandreia.dto.request.AlunoRequestDTO;
+import ananditos.sandraxandreia.dto.response.AlunoResponseDTO;
 import ananditos.sandraxandreia.service.AlunoService;
-import ananditos.sandraxandreia.service.ProfessorService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
