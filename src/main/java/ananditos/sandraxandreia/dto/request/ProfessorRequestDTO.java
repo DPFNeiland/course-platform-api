@@ -1,6 +1,6 @@
 package ananditos.sandraxandreia.dto.request;
 
-import ananditos.sandraxandreia.domain.TipoEnsinoProfessor;
+import ananditos.sandraxandreia.domain.professor.TipoEnsinoProfessor;
 import jakarta.validation.constraints.NotNull;
 
 public class ProfessorRequestDTO extends UsuarioRequestDTO {

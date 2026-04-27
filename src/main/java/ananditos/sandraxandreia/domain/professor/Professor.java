@@ -1,14 +1,15 @@
-package ananditos.sandraxandreia.domain;
+package ananditos.sandraxandreia.domain.professor;
 
-import ananditos.sandraxandreia.domain.vo.ProfessorAreaFormacao;
+import ananditos.sandraxandreia.domain.usuario.GeneroUsuario;
+import ananditos.sandraxandreia.domain.usuario.Usuario;
+import ananditos.sandraxandreia.domain.professor.vo.ProfessorAreaFormacao;
 import jakarta.persistence.*;
-import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 
 @Entity
 @Table(name = "professor")
-public class Professor extends Usuario{
+public class Professor extends Usuario {
 
     @Column(nullable = false, length = 100)
     private ProfessorAreaFormacao areaFormacao;

@@ -1,4 +1,4 @@
-package ananditos.sandraxandreia.domain.vo;
+package ananditos.sandraxandreia.domain.usuario.vo;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;

@@ -1,4 +1,4 @@
-package ananditos.sandraxandreia.domain;
+package ananditos.sandraxandreia.domain.curso;
 
 import jakarta.persistence.*;
 import java.util.Objects;

@@ -1,6 +1,6 @@
 package ananditos.sandraxandreia.service;
 
-import ananditos.sandraxandreia.domain.Curso;
+import ananditos.sandraxandreia.domain.curso.Curso;
 import ananditos.sandraxandreia.repository.CursoRepository;
 import org.springframework.stereotype.Service;
 

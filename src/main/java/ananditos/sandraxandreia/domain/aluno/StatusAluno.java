@@ -1,4 +1,4 @@
-package ananditos.sandraxandreia.domain;
+package ananditos.sandraxandreia.domain.aluno;
 
 public enum StatusAluno {
     A_CURSAR,

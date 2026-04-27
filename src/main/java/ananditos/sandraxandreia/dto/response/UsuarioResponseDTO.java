@@ -1,6 +1,6 @@
 package ananditos.sandraxandreia.dto.response;
 
-import ananditos.sandraxandreia.domain.GeneroUsuario;
+import ananditos.sandraxandreia.domain.usuario.GeneroUsuario;
 
 import java.time.LocalDate;
 

@@ -1,11 +1,11 @@
 package ananditos.sandraxandreia.service;
 
-import ananditos.sandraxandreia.domain.Professor;
-import ananditos.sandraxandreia.domain.vo.ProfessorAreaFormacao;
-import ananditos.sandraxandreia.domain.vo.UsuarioCpf;
-import ananditos.sandraxandreia.domain.vo.UsuarioDataNascimento;
-import ananditos.sandraxandreia.domain.vo.UsuarioEmail;
-import ananditos.sandraxandreia.domain.vo.UsuarioSenhaCriptografada;
+import ananditos.sandraxandreia.domain.professor.Professor;
+import ananditos.sandraxandreia.domain.professor.vo.ProfessorAreaFormacao;
+import ananditos.sandraxandreia.domain.usuario.vo.UsuarioCpf;
+import ananditos.sandraxandreia.domain.usuario.vo.UsuarioDataNascimento;
+import ananditos.sandraxandreia.domain.usuario.vo.UsuarioEmail;
+import ananditos.sandraxandreia.domain.usuario.vo.UsuarioSenhaCriptografada;
 import ananditos.sandraxandreia.dto.request.ProfessorRequestDTO;
 import ananditos.sandraxandreia.dto.response.ProfessorResponseDTO;
 import ananditos.sandraxandreia.repository.ProfessorRepository;

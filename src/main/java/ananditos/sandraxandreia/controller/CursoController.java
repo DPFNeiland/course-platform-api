@@ -1,6 +1,6 @@
 package ananditos.sandraxandreia.controller;
 
-import ananditos.sandraxandreia.domain.Curso;
+import ananditos.sandraxandreia.domain.curso.Curso;
 import ananditos.sandraxandreia.service.CursoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

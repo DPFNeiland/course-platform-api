@@ -1,6 +1,6 @@
 package ananditos.sandraxandreia.dto.request;
 
-import ananditos.sandraxandreia.domain.GeneroUsuario;
+import ananditos.sandraxandreia.domain.usuario.GeneroUsuario;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;

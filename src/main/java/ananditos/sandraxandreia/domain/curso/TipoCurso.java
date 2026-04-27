@@ -1,4 +1,4 @@
-package ananditos.sandraxandreia.domain;
+package ananditos.sandraxandreia.domain.curso;
 
 public enum TipoCurso {
     SINCRONO,

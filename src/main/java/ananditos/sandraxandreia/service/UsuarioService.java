@@ -1,10 +1,10 @@
 package ananditos.sandraxandreia.service;
 
-import ananditos.sandraxandreia.domain.Usuario;
-import ananditos.sandraxandreia.domain.vo.UsuarioCpf;
-import ananditos.sandraxandreia.domain.vo.UsuarioDataNascimento;
-import ananditos.sandraxandreia.domain.vo.UsuarioEmail;
-import ananditos.sandraxandreia.domain.vo.UsuarioSenhaCriptografada;
+import ananditos.sandraxandreia.domain.usuario.Usuario;
+import ananditos.sandraxandreia.domain.usuario.vo.UsuarioCpf;
+import ananditos.sandraxandreia.domain.usuario.vo.UsuarioDataNascimento;
+import ananditos.sandraxandreia.domain.usuario.vo.UsuarioEmail;
+import ananditos.sandraxandreia.domain.usuario.vo.UsuarioSenhaCriptografada;
 import ananditos.sandraxandreia.dto.request.UsuarioRequestDTO;
 import ananditos.sandraxandreia.dto.response.UsuarioResponseDTO;
 import ananditos.sandraxandreia.repository.UsuarioRepository;
