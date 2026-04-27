@@ -1,7 +1,7 @@
 package ananditos.sandraxandreia.controller;
 
-import ananditos.sandraxandreia.dto.UsuarioRequestDTO;
-import ananditos.sandraxandreia.dto.UsuarioResponseDTO;
+import ananditos.sandraxandreia.dto.request.UsuarioRequestDTO;
+import ananditos.sandraxandreia.dto.response.UsuarioResponseDTO;
 import ananditos.sandraxandreia.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

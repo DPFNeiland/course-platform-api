@@ -2,8 +2,8 @@ package ananditos.sandraxandreia.service;
 
 import ananditos.sandraxandreia.domain.Aluno;
 import ananditos.sandraxandreia.domain.vo.*;
-import ananditos.sandraxandreia.dto.AlunoRequestDTO;
-import ananditos.sandraxandreia.dto.AlunoResponseDTO;
+import ananditos.sandraxandreia.dto.request.AlunoRequestDTO;
+import ananditos.sandraxandreia.dto.response.AlunoResponseDTO;
 import ananditos.sandraxandreia.repository.AlunoRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

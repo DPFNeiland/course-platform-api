@@ -1,14 +1,13 @@
 package ananditos.sandraxandreia.service;
 
-import ananditos.sandraxandreia.domain.GeneroUsuario;
 import ananditos.sandraxandreia.domain.Professor;
 import ananditos.sandraxandreia.domain.vo.ProfessorAreaFormacao;
 import ananditos.sandraxandreia.domain.vo.UsuarioCpf;
 import ananditos.sandraxandreia.domain.vo.UsuarioDataNascimento;
 import ananditos.sandraxandreia.domain.vo.UsuarioEmail;
 import ananditos.sandraxandreia.domain.vo.UsuarioSenhaCriptografada;
-import ananditos.sandraxandreia.dto.ProfessorRequestDTO;
-import ananditos.sandraxandreia.dto.ProfessorResponseDTO;
+import ananditos.sandraxandreia.dto.request.ProfessorRequestDTO;
+import ananditos.sandraxandreia.dto.response.ProfessorResponseDTO;
 import ananditos.sandraxandreia.repository.ProfessorRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
