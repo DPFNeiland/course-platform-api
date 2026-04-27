@@ -1,7 +1,7 @@
 package ananditos.sandraxandreia.dto.response;
 
-import ananditos.sandraxandreia.domain.GeneroUsuario;
-import ananditos.sandraxandreia.domain.StatusAluno;
+import ananditos.sandraxandreia.domain.usuario.GeneroUsuario;
+import ananditos.sandraxandreia.domain.aluno.StatusAluno;
 
 import java.time.LocalDate;
 

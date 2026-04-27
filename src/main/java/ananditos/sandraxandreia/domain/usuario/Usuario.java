@@ -1,4 +1,4 @@
-package ananditos.sandraxandreia.domain;
+package ananditos.sandraxandreia.domain.usuario;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -7,19 +7,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
-import ananditos.sandraxandreia.domain.vo.UsuarioCpf;
-import ananditos.sandraxandreia.domain.vo.UsuarioDataNascimento;
-import ananditos.sandraxandreia.domain.vo.UsuarioEmail;
-import ananditos.sandraxandreia.domain.vo.UsuarioSenhaCriptografada;
+import ananditos.sandraxandreia.domain.usuario.vo.UsuarioCpf;
+import ananditos.sandraxandreia.domain.usuario.vo.UsuarioDataNascimento;
+import ananditos.sandraxandreia.domain.usuario.vo.UsuarioEmail;
+import ananditos.sandraxandreia.domain.usuario.vo.UsuarioSenhaCriptografada;
 import jakarta.persistence.*;
-
-import java.time.LocalDate;
-
-import ananditos.sandraxandreia.domain.vo.UsuarioCpf;
-import ananditos.sandraxandreia.domain.vo.UsuarioEmail;
-import ananditos.sandraxandreia.domain.vo.UsuarioSenhaCriptografada;
-import jakarta.persistence.*;
-import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 

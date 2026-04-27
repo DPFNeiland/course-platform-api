@@ -1,7 +1,7 @@
 package ananditos.sandraxandreia.dto.request;
 
 
-import ananditos.sandraxandreia.domain.StatusAluno;
+import ananditos.sandraxandreia.domain.aluno.StatusAluno;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;

@@ -1,4 +1,4 @@
-package ananditos.sandraxandreia.domain.vo;
+package ananditos.sandraxandreia.domain.professor.vo;
 
 
 import jakarta.persistence.Column;

@@ -1,6 +1,6 @@
-package ananditos.sandraxandreia.domain.vo;
+package ananditos.sandraxandreia.domain.assinatura.vo;
 
-import ananditos.sandraxandreia.domain.PlanoAssinatura;
+import ananditos.sandraxandreia.domain.assinatura.PlanoAssinatura;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 

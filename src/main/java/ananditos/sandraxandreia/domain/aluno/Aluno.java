@@ -1,13 +1,15 @@
-package ananditos.sandraxandreia.domain;
+package ananditos.sandraxandreia.domain.aluno;
 
-import ananditos.sandraxandreia.domain.vo.AlunoRA;
+import ananditos.sandraxandreia.domain.usuario.GeneroUsuario;
+import ananditos.sandraxandreia.domain.usuario.Usuario;
+import ananditos.sandraxandreia.domain.aluno.vo.AlunoRA;
 import jakarta.persistence.*;
 
 import java.util.Objects;
 
 @Entity
 @Table(name="aluno")
-public class Aluno extends Usuario{
+public class Aluno extends Usuario {
 
     @Embedded
     private AlunoRA ra;

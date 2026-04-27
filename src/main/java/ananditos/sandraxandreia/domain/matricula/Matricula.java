@@ -1,5 +1,6 @@
-package ananditos.sandraxandreia.domain;
+package ananditos.sandraxandreia.domain.matricula;
 
+import ananditos.sandraxandreia.domain.aluno.Aluno;
 import jakarta.persistence.*;
 import java.util.Objects;
 
