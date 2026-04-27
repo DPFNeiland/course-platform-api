@@ -31,9 +31,8 @@ public class ProfessorService {
                 professor.getEmail().getValor(),
                 professor.getCpf().getValor(),
                 professor.getGenero(),
-                professor.getAreaFormacao().getValor(),
                 professor.getDataNascimento().getData(),
-                professor.getAreaFormacao(),
+                professor.getAreaFormacao().getValor(),
                 professor.getHoraAula(),
                 professor.getTipoEnsino()
 
@@ -91,7 +90,7 @@ public class ProfessorService {
         professor.setGenero(request.getGenero());
         professor.setAreaFormacao(new ProfessorAreaFormacao(request.getAreaFormacao()));
         professor.setDataNascimento(new UsuarioDataNascimento(request.getDataNascimento()));
-        professor.setAreaFormacao(request.getAreaFormacao());
+        professor.setAreaFormacao(new ProfessorAreaFormacao(request.getAreaFormacao()));
         professor.setHoraAula(request.getHoraAula());
         professor.setTipoEnsino(request.getTipoEnsino());
 
