@@ -19,8 +19,8 @@ public class Aluno extends Usuario{
         // Pro JPA
     }
 
-    public Aluno(Long id, String nome, String email, String senhaCriptografada, String cpf, GeneroUsuario genero, String ra, StatusAluno status) {
-        super(id, nome, email, senhaCriptografada, cpf, genero);
+    public Aluno(Long id, String nome, String email, String senhaCriptografada, String cpf, GeneroUsuario genero, String dataNascimento, String ra, StatusAluno status) {
+        super(id, nome, email, senhaCriptografada, cpf, genero, dataNascimento);
         this.ra = new AlunoRA(ra);
         this.status = status;
     }

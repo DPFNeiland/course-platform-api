@@ -3,6 +3,8 @@ package ananditos.sandraxandreia.dto;
 import ananditos.sandraxandreia.domain.GeneroUsuario;
 import ananditos.sandraxandreia.domain.TipoEnsinoProfessor;
 
+import java.time.LocalDate;
+
 public class ProfessorResponseDTO extends UsuarioResponseDTO {
 
     private String areaFormacao;
@@ -12,8 +14,8 @@ public class ProfessorResponseDTO extends UsuarioResponseDTO {
     public ProfessorResponseDTO() {
     }
 
-    public ProfessorResponseDTO(Long id, String nome, String email, String cpf, GeneroUsuario genero, String areaFormacao, double horaAula, TipoEnsinoProfessor tipoEnsino) {
-        super(id, nome, email, cpf, genero);
+    public ProfessorResponseDTO(Long id, String nome, String email, String cpf, GeneroUsuario genero, LocalDate dataNascimento, String areaFormacao, double horaAula, TipoEnsinoProfessor tipoEnsino) {
+        super(id, nome, email, cpf, genero, dataNascimento);
         this.areaFormacao = areaFormacao;
         this.horaAula = horaAula;
         this.tipoEnsino = tipoEnsino;
