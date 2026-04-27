@@ -2,7 +2,8 @@ package ananditos.sandraxandreia.dto;
 
 import ananditos.sandraxandreia.domain.GeneroUsuario;
 import ananditos.sandraxandreia.domain.StatusAluno;
-import ananditos.sandraxandreia.domain.vo.AlunoRA;
+
+import java.time.LocalDate;
 
 public class AlunoResponseDTO extends UsuarioResponseDTO {
 
@@ -12,12 +13,11 @@ public class AlunoResponseDTO extends UsuarioResponseDTO {
     public AlunoResponseDTO() {
     }
 
-    public AlunoResponseDTO(Long id, String nome, String email, String cpf, GeneroUsuario genero, String ra, StatusAluno status) {
-        super(id, nome, email, cpf, genero);
+    public AlunoResponseDTO(Long id, String nome, String email, String cpf, GeneroUsuario genero, LocalDate dataNascimento, String ra, StatusAluno status) {
+        super(id, nome, email, cpf, genero, dataNascimento);
         this.ra = ra;
         this.status = status;
     }
-
 
     public String getRa() {
         return ra;
