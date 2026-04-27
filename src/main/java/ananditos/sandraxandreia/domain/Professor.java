@@ -1,6 +1,8 @@
 package ananditos.sandraxandreia.domain;
 
+import ananditos.sandraxandreia.domain.vo.ProfessorAreaFormacao;
 import jakarta.persistence.*;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -9,7 +11,7 @@ import java.util.Objects;
 public class Professor extends Usuario{
 
     @Column(nullable = false, length = 100)
-    private String areaFormacao;
+    private ProfessorAreaFormacao areaFormacao;
 
     @Column(nullable = false)
     private double horaAula;
@@ -23,33 +25,34 @@ public class Professor extends Usuario{
 
     public Professor(Long id, String nome, String email, String senhaCriptografada, String cpf, String areaFormacao, GeneroUsuario genero, double horaAula, TipoEnsinoProfessor tipoEnsino) {
         super(id, nome, email, senhaCriptografada, cpf, genero);
-        this.areaFormacao = areaFormacao;
+        this.areaFormacao = new ProfessorAreaFormacao(areaFormacao);
         this.horaAula = horaAula;
         this.tipoEnsino = tipoEnsino;
     }
 
-    public void setAreaFormacao(String areaFormacao) {
-        this.areaFormacao = areaFormacao;
-    }
 
-    public void setHoraAula(double horaAula) {
-        this.horaAula = horaAula;
-    }
-
-    public void setTipoEnsino(TipoEnsinoProfessor tipoEnsino) {
-        this.tipoEnsino = tipoEnsino;
-    }
-
-    public String getAreaFormacao() {
+    public ProfessorAreaFormacao getAreaFormacao() {
         return areaFormacao;
+    }
+
+    public void setAreaFormacao(ProfessorAreaFormacao areaFormacao) {
+        this.areaFormacao = areaFormacao;
     }
 
     public double getHoraAula() {
         return horaAula;
     }
 
+    public void setHoraAula(double horaAula) {
+        this.horaAula = horaAula;
+    }
+
     public TipoEnsinoProfessor getTipoEnsino() {
         return tipoEnsino;
+    }
+
+    public void setTipoEnsino(TipoEnsinoProfessor tipoEnsino) {
+        this.tipoEnsino = tipoEnsino;
     }
 
     @Override
@@ -57,7 +60,7 @@ public class Professor extends Usuario{
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         Professor professor = (Professor) o;
-        return Double.compare(horaAula, professor.horaAula) == 0 && Objects.equals(areaFormacao, professor.areaFormacao) && Objects.equals(tipoEnsino, professor.tipoEnsino);
+        return Double.compare(horaAula, professor.horaAula) == 0 && Objects.equals(areaFormacao, professor.areaFormacao) && tipoEnsino == professor.tipoEnsino;
     }
 
     @Override
@@ -68,9 +71,9 @@ public class Professor extends Usuario{
     @Override
     public String toString() {
         return "Professor{" +
-                "areaFormacao='" + areaFormacao + '\'' +
+                "areaFormacao=" + areaFormacao +
                 ", horaAula=" + horaAula +
-                ", tipoEnsino='" + tipoEnsino + '\'' +
+                ", tipoEnsino=" + tipoEnsino +
                 '}';
     }
 }

@@ -1,4 +1,4 @@
-package ananditos.sandraxandreia.controller;
+package ananditos.sandraxandreia.domain.vo;
 
 
 import jakarta.persistence.Column;

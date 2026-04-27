@@ -1,6 +1,7 @@
 package ananditos.sandraxandreia.service;
 
 import ananditos.sandraxandreia.domain.Professor;
+import ananditos.sandraxandreia.domain.vo.ProfessorAreaFormacao;
 import ananditos.sandraxandreia.domain.vo.UsuarioCpf;
 import ananditos.sandraxandreia.domain.vo.UsuarioEmail;
 import ananditos.sandraxandreia.domain.vo.UsuarioSenhaCriptografada;
@@ -29,7 +30,7 @@ public class ProfessorService {
                 professor.getEmail().getValor(),
                 professor.getCpf().getValor(),
                 professor.getGenero(),
-                professor.getAreaFormacao(),
+                professor.getAreaFormacao().getValor(),
                 professor.getHoraAula(),
                 professor.getTipoEnsino()
 
@@ -85,7 +86,7 @@ public class ProfessorService {
         professor.setCpf(new UsuarioCpf(request.getCpf()));
         professor.setSenha(new UsuarioSenhaCriptografada(request.getSenha()));
         professor.setGenero(request.getGenero());
-        professor.setAreaFormacao(request.getAreaFormacao());
+        professor.setAreaFormacao(new ProfessorAreaFormacao(request.getAreaFormacao()));
         professor.setHoraAula(request.getHoraAula());
         professor.setTipoEnsino(request.getTipoEnsino());
 
