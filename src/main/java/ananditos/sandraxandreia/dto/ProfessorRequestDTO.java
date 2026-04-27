@@ -1,12 +1,11 @@
 package ananditos.sandraxandreia.dto;
 
 import ananditos.sandraxandreia.domain.TipoEnsinoProfessor;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public class ProfessorRequestDTO extends UsuarioRequestDTO {
 
-    @NotBlank(message = "Area de formacao em branco")
+    @NotNull(message = "Area de formacao em branco")
     private String areaFormacao;
 
     @NotNull(message = "Hora aula e obrigatoria")
