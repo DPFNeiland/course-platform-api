@@ -91,7 +91,6 @@ src/
 ---
 ## Referencias
 
-- Spring Boot Documentation
 - Spring Data JPA Documentation
 - springdoc OpenAPI
 - H2 Database Engine
