@@ -51,7 +51,6 @@ public class UsuarioDataNascimento {
         }
     }
 
-
     public LocalDate getData() {
         return data;
     }
