@@ -10,6 +10,7 @@ public class Matricula {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private String dataMatricula;
 
     @Column(nullable = false, length = 100)
     private StatusMatricula status;
@@ -22,9 +23,10 @@ public class Matricula {
         System.out.println(" Pessoa matriculada");
     };
 
-    public Matricula(Long id, StatusMatricula status) {
+    public Matricula(Long id, StatusMatricula status, String dataMatricula) {
         this.id = id;
         this.status = status;
+        this.dataMatricula = dataMatricula;
     }
 
     public Matricula() {
@@ -39,6 +41,14 @@ public class Matricula {
         this.id = id;
     }
 
+    public String getDataMatricula() {
+        return dataMatricula;
+    }
+
+    public void setDataMatricula(String dataMatricula) {
+        this.dataMatricula = dataMatricula;
+    }
+
     public StatusMatricula getStatus() {
         return status;
     }
@@ -51,18 +61,19 @@ public class Matricula {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Matricula matricula = (Matricula) o;
-        return Objects.equals(id, matricula.id) && status == matricula.status;
+        return Objects.equals(id, matricula.id) && Objects.equals(dataMatricula, matricula.dataMatricula) && status == matricula.status;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, status);
+        return Objects.hash(id, dataMatricula, status);
     }
 
     @Override
     public String toString() {
         return "Matricula{" +
                 "id=" + id +
+                ", dataMatricula='" + dataMatricula + '\'' +
                 ", status=" + status +
                 '}';
     }
