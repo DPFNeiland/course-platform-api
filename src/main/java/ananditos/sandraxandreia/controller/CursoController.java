@@ -1,6 +1,11 @@
 package ananditos.sandraxandreia.controller;
 
 import ananditos.sandraxandreia.domain.curso.Curso;
+import ananditos.sandraxandreia.dto.request.AlunoRequestDTO;
+import ananditos.sandraxandreia.dto.request.CursoRequestDTO;
+import ananditos.sandraxandreia.dto.response.AlunoResponseDTO;
+import ananditos.sandraxandreia.dto.response.CursoResponseDTO;
+import ananditos.sandraxandreia.service.AlunoService;
 import ananditos.sandraxandreia.service.CursoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -10,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/cursos")
+@RequestMapping("/curso")
 @Tag(name = "Curso", description = "API REST de curso")
 public class CursoController {
 
@@ -23,25 +28,25 @@ public class CursoController {
         @PostMapping
         @ResponseStatus(HttpStatus.CREATED)
         @Operation(summary = "Cadastra um novo curso")
-        public Curso criar(@RequestBody Curso curso) {
+        public CursoResponseDTO criar(@RequestBody CursoRequestDTO curso) {
             return service.criar(curso);
         }
 
         @GetMapping
         @Operation(summary = "Lista todos os cursos")
-        public List<Curso> listarTodos() {
+        public List<CursoResponseDTO> listarTodos() {
             return service.listarTodos();
         }
 
         @GetMapping("/{id}")
         @Operation(summary = "Busca um curso pelo id")
-        public Curso buscarPorId(@PathVariable Long id) {
+        public CursoResponseDTO buscarPorId(@PathVariable Long id) {
             return service.buscarPorId(id);
         }
 
         @PutMapping("/{id}")
         @Operation(summary = "Atualiza um curso existente")
-        public Curso atualizar(@PathVariable Long id, @RequestBody Curso curso) {
+        public CursoResponseDTO atualizar(@PathVariable Long id, @RequestBody CursoRequestDTO curso) {
             return service.atualizar(id, curso);
         }
 
