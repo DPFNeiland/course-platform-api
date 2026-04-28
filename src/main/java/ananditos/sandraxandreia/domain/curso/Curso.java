@@ -33,7 +33,7 @@ public class Curso {
     }
 
     String registrarCurso(Curso curso){
-         return "Curso em registramento";
+         return "Curso em registro";
     }
 
     String acessarCurso(Curso curso){
