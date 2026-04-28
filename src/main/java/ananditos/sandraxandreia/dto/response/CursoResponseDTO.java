@@ -10,10 +10,13 @@ public class CursoResponseDTO {
 
     private TipoCurso tipoCurso;
 
-    public CursoResponseDTO(String nome, CursoAssinatura tipoAssinatura, TipoCurso tipoCurso) {
+    private Long professorId;
+
+    public CursoResponseDTO(String nome, CursoAssinatura tipoAssinatura, TipoCurso tipoCurso,  Long professorId) {
         this.nome = nome;
         this.tipoAssinatura = tipoAssinatura;
         this.tipoCurso = tipoCurso;
+        this.professorId = professorId;
     }
 
     public CursoResponseDTO() {
@@ -29,5 +32,9 @@ public class CursoResponseDTO {
 
     public TipoCurso getTipoCurso() {
         return tipoCurso;
+    }
+
+    public Long getProfessorId() {
+        return professorId;
     }
 }

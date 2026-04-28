@@ -1,5 +1,6 @@
 package ananditos.sandraxandreia.domain.curso;
 
+import ananditos.sandraxandreia.domain.professor.Professor;
 import jakarta.persistence.*;
 import java.util.Objects;
 
@@ -20,11 +21,16 @@ public class Curso {
     @Column(nullable = false, length = 100)
     private TipoCurso tipoCurso;
 
+    @ManyToOne
+    @JoinColumn(name="professor_id", nullable=false)
+    private Professor professor;
+
     public Curso(Long id, String nome, CursoAssinatura tipoAssinatura, TipoCurso tipoCurso) {
         this.id = id;
         this.nome = nome;
         this.tipoAssinatura = tipoAssinatura;
         this.tipoCurso = tipoCurso;
+
     }
 
     public Curso() {
@@ -61,6 +67,14 @@ public class Curso {
 
     public void setTipoCurso(TipoCurso tipoCurso) {
         this.tipoCurso = tipoCurso;
+    }
+
+    public Professor getProfessor() {
+        return professor;
+    }
+
+    public void setProfessor(Professor professor) {
+        this.professor = professor;
     }
 
     @Override

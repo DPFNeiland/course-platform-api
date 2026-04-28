@@ -1,10 +1,13 @@
 package ananditos.sandraxandreia.service;
 
 import ananditos.sandraxandreia.domain.curso.Curso;
+import ananditos.sandraxandreia.domain.professor.Professor;
 import ananditos.sandraxandreia.dto.request.CursoRequestDTO;
 import ananditos.sandraxandreia.dto.response.CursoResponseDTO;
 
+import ananditos.sandraxandreia.dto.response.ProfessorResponseDTO;
 import ananditos.sandraxandreia.repository.CursoRepository;
+import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,21 +15,27 @@ import java.util.List;
 @Service
 public class CursoService {
     private final CursoRepository cursoRepository;
+    private final ProfessorService professorService;
 
-    public CursoService(CursoRepository cursoRepository) {
+    public CursoService(CursoRepository cursoRepository, ProfessorService professorRepository) {
         this.cursoRepository = cursoRepository;
+        this.professorService = professorRepository;
     }
 
     private CursoResponseDTO toResponse(Curso curso) {
         return new CursoResponseDTO(
                 curso.getNome(),
                 curso.getTipoAssinatura(),
-                curso.getTipoCurso()
+                curso.getTipoCurso(),
+                curso.getProfessor().getId()
 
         );
     }
 
     public CursoResponseDTO criar(CursoRequestDTO request) {
+
+        Professor professor = professorService.buscarEntidadePorId(request.getProfessorIid());
+
 
         var curso = new Curso(
                 null,
@@ -34,6 +43,8 @@ public class CursoService {
                 request.getTipoAssinatura(),
                 request.getTipoCurso()
         );
+        curso.setProfessor(professor);
+
         Curso salvo = cursoRepository.save(curso);
         return toResponse(salvo);
     }

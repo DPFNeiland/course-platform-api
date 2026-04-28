@@ -16,6 +16,9 @@ public class CursoRequestDTO {
     @NotNull(message = "Tipo de curso invahlido")
     private TipoCurso tipoCurso;
 
+    @NotNull(message = "Professor obrigatohrio")
+    private Long professorIid;
+
     public CursoRequestDTO() {
     }
 
@@ -29,5 +32,9 @@ public class CursoRequestDTO {
 
     public TipoCurso getTipoCurso() {
         return tipoCurso;
+    }
+
+    public Long getProfessorIid() {
+        return professorIid;
     }
 }
