@@ -5,9 +5,8 @@ import ananditos.sandraxandreia.domain.professor.Professor;
 import ananditos.sandraxandreia.dto.request.CursoRequestDTO;
 import ananditos.sandraxandreia.dto.response.CursoResponseDTO;
 
-import ananditos.sandraxandreia.dto.response.ProfessorResponseDTO;
 import ananditos.sandraxandreia.repository.CursoRepository;
-import org.springframework.data.web.config.EnableSpringDataWebSupport;
+import ananditos.sandraxandreia.repository.ProfessorRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,11 +14,11 @@ import java.util.List;
 @Service
 public class CursoService {
     private final CursoRepository cursoRepository;
-    private final ProfessorService professorService;
+    private final ProfessorRepository professorRepository;
 
-    public CursoService(CursoRepository cursoRepository, ProfessorService professorRepository) {
+    public CursoService(CursoRepository cursoRepository, ProfessorRepository professorRepository) {
         this.cursoRepository = cursoRepository;
-        this.professorService = professorRepository;
+        this.professorRepository = professorRepository;
     }
 
     private CursoResponseDTO toResponse(Curso curso) {
@@ -34,7 +33,8 @@ public class CursoService {
 
     public CursoResponseDTO criar(CursoRequestDTO request) {
 
-        Professor professor = professorService.buscarEntidadePorId(request.getProfessorIid());
+        Professor professor = professorRepository.findById(request.getProfessorIid()).
+                orElseThrow(() -> new RuntimeException("Professor não encontrado"));
 
 
         var curso = new Curso(
