@@ -1,10 +1,13 @@
 package ananditos.sandraxandreia.domain.professor;
 
+import ananditos.sandraxandreia.domain.curso.Curso;
 import ananditos.sandraxandreia.domain.usuario.GeneroUsuario;
 import ananditos.sandraxandreia.domain.usuario.Usuario;
 import ananditos.sandraxandreia.domain.professor.vo.ProfessorAreaFormacao;
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -20,6 +23,13 @@ public class Professor extends Usuario {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TipoEnsinoProfessor tipoEnsino;
+
+    @OneToMany(
+            mappedBy = "professor",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<Curso> cursos = new ArrayList<>();
 
     public Professor() {
     }
@@ -52,6 +62,14 @@ public class Professor extends Usuario {
 
     public void setTipoEnsino(TipoEnsinoProfessor tipoEnsino) {
         this.tipoEnsino = tipoEnsino;
+    }
+
+    public List<Curso> getCursos() {
+        return cursos;
+    }
+
+    public void setCursos(List<Curso> cursos) {
+        this.cursos = cursos;
     }
 
     @Override
