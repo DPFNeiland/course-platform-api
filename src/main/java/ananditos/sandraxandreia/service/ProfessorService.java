@@ -78,11 +78,6 @@ public class ProfessorService {
 
     }
 
-    public Professor buscarEntidadePorId(Long id) {
-        return professorRepository.findById(id)
-                .orElseThrow(() ->
-                        new IllegalArgumentException("Professor nao encontrado para o id: " + id));
-    }
 
     public ProfessorResponseDTO atualizar(Long id, ProfessorRequestDTO request) {
         Professor professor = professorRepository.findById(id).
