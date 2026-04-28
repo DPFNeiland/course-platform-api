@@ -11,17 +11,16 @@ public class Curso {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false, unique = true, length = 100)
     private String nome;
 
     @Column(nullable = false, length = 100)
-    private String tipoAssinatura;
+    private CursoAssinatura tipoAssinatura;
 
     @Column(nullable = false, length = 100)
     private TipoCurso tipoCurso;
 
-
-    public Curso(Long id, String nome, String tipoAssinatura, TipoCurso tipoCurso) {
+    public Curso(Long id, String nome, CursoAssinatura tipoAssinatura, TipoCurso tipoCurso) {
         this.id = id;
         this.nome = nome;
         this.tipoAssinatura = tipoAssinatura;
@@ -29,16 +28,8 @@ public class Curso {
     }
 
     public Curso() {
-
     }
 
-    String registrarCurso(Curso curso){
-         return "Curso em registro";
-    }
-
-    String acessarCurso(Curso curso){
-        return "Curso acessado";
-    }
 
     public Long getId() {
         return id;
@@ -56,11 +47,11 @@ public class Curso {
         this.nome = nome;
     }
 
-    public String getTipoAssinatura() {
+    public CursoAssinatura getTipoAssinatura() {
         return tipoAssinatura;
     }
 
-    public void setTipoAssinatura(String tipoAssinatura) {
+    public void setTipoAssinatura(CursoAssinatura tipoAssinatura) {
         this.tipoAssinatura = tipoAssinatura;
     }
 
@@ -76,12 +67,12 @@ public class Curso {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Curso curso = (Curso) o;
-        return Objects.equals(id, curso.id) && Objects.equals(nome, curso.nome) && Objects.equals(tipoAssinatura, curso.tipoAssinatura) && tipoCurso == curso.tipoCurso;
+        return Objects.equals(id, curso.id) && Objects.equals(nome, curso.nome) && tipoAssinatura == curso.tipoAssinatura && tipoCurso == curso.tipoCurso;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, nome, tipoAssinatura);
+        return Objects.hash(id, nome, tipoAssinatura, tipoCurso);
     }
 
     @Override
@@ -89,7 +80,7 @@ public class Curso {
         return "Curso{" +
                 "id=" + id +
                 ", nome='" + nome + '\'' +
-                ", tipoAssinatura='" + tipoAssinatura + '\'' +
+                ", tipoAssinatura=" + tipoAssinatura +
                 ", tipoCurso=" + tipoCurso +
                 '}';
     }

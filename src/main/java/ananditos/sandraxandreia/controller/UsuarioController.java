@@ -17,7 +17,7 @@ import java.util.List;
  * e devolve respostas em JSON.
  */
 @RestController
-@RequestMapping("/usuarios")
+@RequestMapping("/usuario")
 @Tag(name = "Usuario", description = "Endpoints didaticos para a entidade Usuario")
 public class UsuarioController {
 
