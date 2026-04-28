@@ -1,7 +1,12 @@
 package ananditos.sandraxandreia.domain.curso;
 
+import ananditos.sandraxandreia.domain.aluno.Aluno;
+import ananditos.sandraxandreia.domain.matricula.Matricula;
 import ananditos.sandraxandreia.domain.professor.Professor;
 import jakarta.persistence.*;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -25,6 +30,9 @@ public class Curso {
     @JoinColumn(name="professor_id", nullable=false)
     private Professor professor;
 
+    @OneToMany(mappedBy = "curso", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Matricula> alunos = new ArrayList<>();
+
     public Curso(Long id, String nome, CursoAssinatura tipoAssinatura, TipoCurso tipoCurso) {
         this.id = id;
         this.nome = nome;
@@ -36,6 +44,13 @@ public class Curso {
     public Curso() {
     }
 
+    public List<Matricula> getAlunos() {
+        return alunos;
+    }
+
+    public void setAlunos(List<Matricula> alunos) {
+        this.alunos = alunos;
+    }
 
     public Long getId() {
         return id;
@@ -76,6 +91,7 @@ public class Curso {
     public void setProfessor(Professor professor) {
         this.professor = professor;
     }
+
 
     @Override
     public boolean equals(Object o) {
