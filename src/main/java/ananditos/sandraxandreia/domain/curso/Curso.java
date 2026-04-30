@@ -20,9 +20,11 @@ public class Curso {
     @Column(nullable = false, unique = true, length = 100)
     private String nome;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 100)
     private CursoAssinatura tipoAssinatura;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 100)
     private TipoCurso tipoCurso;
 
