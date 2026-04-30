@@ -19,11 +19,11 @@ public class Matricula {
     @Column(nullable = false, length = 100)
     private StatusMatricula status;
 
-    @ManyToOne
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "aluno_id")
     private Aluno aluno;
 
-    @ManyToOne
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "curso_id")
     private Curso curso;
 
