@@ -28,6 +28,10 @@ public class Curso {
     @Column(nullable = false, length = 100)
     private TipoCurso tipoCurso;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 100)
+    private StatusCurso status;
+
     @ManyToOne
     @JoinColumn(name="professor_id", nullable=false)
     private Professor professor;
@@ -40,6 +44,7 @@ public class Curso {
         this.nome = nome;
         this.tipoAssinatura = tipoAssinatura;
         this.tipoCurso = tipoCurso;
+        this.status = StatusCurso.EM_AVALIACAO;
 
     }
 
@@ -84,6 +89,14 @@ public class Curso {
 
     public void setTipoCurso(TipoCurso tipoCurso) {
         this.tipoCurso = tipoCurso;
+    }
+
+    public StatusCurso getStatus() {
+        return status;
+    }
+
+    public void setStatus(StatusCurso status) {
+        this.status = status;
     }
 
     public Professor getProfessor() {
