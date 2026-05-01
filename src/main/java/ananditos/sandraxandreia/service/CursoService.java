@@ -1,12 +1,14 @@
 package ananditos.sandraxandreia.service;
 
 import ananditos.sandraxandreia.domain.curso.Curso;
+import ananditos.sandraxandreia.domain.curso.StatusCurso;
 import ananditos.sandraxandreia.domain.professor.Professor;
 import ananditos.sandraxandreia.dto.request.CursoRequestDTO;
 import ananditos.sandraxandreia.dto.response.CursoResponseDTO;
 
 import ananditos.sandraxandreia.repository.CursoRepository;
 import ananditos.sandraxandreia.repository.ProfessorRepository;
+import jdk.jshell.Snippet;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,6 +28,7 @@ public class CursoService {
                 curso.getNome(),
                 curso.getTipoAssinatura(),
                 curso.getTipoCurso(),
+                curso.getStatus(),
                 curso.getProfessor().getId()
 
         );
@@ -70,6 +73,18 @@ public class CursoService {
         curso.setTipoAssinatura(request.getTipoAssinatura());
         curso.setTipoCurso(request.getTipoCurso());
 
+
+        Curso salvo = cursoRepository.save(curso);
+
+        return toResponse(salvo);
+
+    }
+
+    public CursoResponseDTO atualizar_status(Long id, StatusCurso novoStatus) {
+        Curso curso = cursoRepository.findById(id).
+                orElseThrow(() -> new IllegalArgumentException("`Curso` nao encontrado para o id: " + id));
+
+        curso.setStatus(novoStatus);
 
         Curso salvo = cursoRepository.save(curso);
 
