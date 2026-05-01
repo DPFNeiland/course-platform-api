@@ -1,11 +1,8 @@
 package ananditos.sandraxandreia.controller;
 
-import ananditos.sandraxandreia.domain.curso.Curso;
-import ananditos.sandraxandreia.dto.request.AlunoRequestDTO;
+import ananditos.sandraxandreia.domain.curso.StatusCurso;
 import ananditos.sandraxandreia.dto.request.CursoRequestDTO;
-import ananditos.sandraxandreia.dto.response.AlunoResponseDTO;
 import ananditos.sandraxandreia.dto.response.CursoResponseDTO;
-import ananditos.sandraxandreia.service.AlunoService;
 import ananditos.sandraxandreia.service.CursoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -48,6 +45,12 @@ public class CursoController {
         @Operation(summary = "Atualiza um curso existente")
         public CursoResponseDTO atualizar(@PathVariable Long id, @RequestBody CursoRequestDTO curso) {
             return service.atualizar(id, curso);
+        }
+
+        @PutMapping("/{id}/status")
+        @Operation(summary = "Atualiza o status do curso")
+        public CursoResponseDTO atualizar_status(@PathVariable Long id, @RequestParam StatusCurso novoStatus) {
+                return service.atualizar_status(id, novoStatus);
         }
 
         @DeleteMapping("/{id}")
