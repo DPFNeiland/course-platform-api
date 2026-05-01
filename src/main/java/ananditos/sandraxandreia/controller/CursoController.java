@@ -41,6 +41,16 @@ public class CursoController {
             return service.buscarPorId(id);
         }
 
+        @GetMapping("EmAndamento")
+        @Operation(summary = "Busca todos os cursos em Analise")
+        public List<CursoResponseDTO> listarTodosEmAndamento(@RequestParam(required = false) StatusCurso status) {
+                if (status != null) {
+                        return service.listarPorStatus(status);
+                }
+
+                return service.listarTodos();
+        }
+
         @PutMapping("/{id}")
         @Operation(summary = "Atualiza um curso existente")
         public CursoResponseDTO atualizar(@PathVariable Long id, @RequestBody CursoRequestDTO curso) {
