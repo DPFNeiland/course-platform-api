@@ -65,6 +65,14 @@ public class CursoService {
 
     }
 
+    public List<CursoResponseDTO> listarPorStatus(StatusCurso status) {
+        List<Curso> cursos = cursoRepository.findByStatus(status);
+
+        return cursos.stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
     public CursoResponseDTO atualizar(Long id, CursoRequestDTO request) {
         Curso curso = cursoRepository.findById(id).
                 orElseThrow(() -> new IllegalArgumentException("`Curso` nao encontrado para o id: " + id));
