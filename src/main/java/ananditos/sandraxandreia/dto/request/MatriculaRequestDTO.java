@@ -1,7 +1,6 @@
 package ananditos.sandraxandreia.dto.request;
 
 import ananditos.sandraxandreia.domain.matricula.StatusMatricula;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public class MatriculaRequestDTO {

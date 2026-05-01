@@ -3,15 +3,11 @@ package ananditos.sandraxandreia.service;
 import ananditos.sandraxandreia.domain.aluno.Aluno;
 import ananditos.sandraxandreia.domain.curso.Curso;
 import ananditos.sandraxandreia.domain.matricula.Matricula;
-import ananditos.sandraxandreia.domain.professor.Professor;
-import ananditos.sandraxandreia.dto.request.CursoRequestDTO;
 import ananditos.sandraxandreia.dto.request.MatriculaRequestDTO;
-import ananditos.sandraxandreia.dto.response.CursoResponseDTO;
 import ananditos.sandraxandreia.dto.response.MatriculaResponseDTO;
 import ananditos.sandraxandreia.repository.AlunoRepository;
 import ananditos.sandraxandreia.repository.CursoRepository;
 import ananditos.sandraxandreia.repository.MatriculaRepository;
-import ananditos.sandraxandreia.repository.ProfessorRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
