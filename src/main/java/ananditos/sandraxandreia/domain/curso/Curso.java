@@ -1,6 +1,5 @@
 package ananditos.sandraxandreia.domain.curso;
 
-import ananditos.sandraxandreia.domain.aluno.Aluno;
 import ananditos.sandraxandreia.domain.matricula.Matricula;
 import ananditos.sandraxandreia.domain.professor.Professor;
 import jakarta.persistence.*;
