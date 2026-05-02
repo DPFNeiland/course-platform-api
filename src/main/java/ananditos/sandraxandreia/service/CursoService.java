@@ -8,7 +8,6 @@ import ananditos.sandraxandreia.dto.response.CursoResponseDTO;
 
 import ananditos.sandraxandreia.repository.CursoRepository;
 import ananditos.sandraxandreia.repository.ProfessorRepository;
-import jdk.jshell.Snippet;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

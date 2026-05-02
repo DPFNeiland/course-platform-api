@@ -1,14 +1,10 @@
 package ananditos.sandraxandreia.domain.matricula.vo;
 
 
-import ananditos.sandraxandreia.domain.usuario.vo.UsuarioDataNascimento;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import org.springframework.cglib.core.Local;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 
 
 @Embeddable

@@ -1,7 +1,6 @@
 package ananditos.sandraxandreia.dto.response;
 
 import ananditos.sandraxandreia.domain.matricula.StatusMatricula;
-import org.springframework.cglib.core.Local;
 
 import java.time.LocalDate;
 
