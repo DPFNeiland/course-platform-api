@@ -8,5 +8,5 @@ import java.util.List;
 
 public interface CursoRepository extends JpaRepository<Curso, Long> {
     List<Curso> findByStatus(StatusCurso status);
-
+    boolean existsByNome(String email);
 }
