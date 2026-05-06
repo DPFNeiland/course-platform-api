@@ -35,6 +35,10 @@ public class CursoService {
 
     public CursoResponseDTO criar(CursoRequestDTO request) {
 
+        if (cursoRepository.existsByNome(request.getNome())) {
+            throw new RuntimeException("Esse nome de curso já existe");
+        }
+
         Professor professor = professorRepository.findById(request.getProfessorIid()).
                 orElseThrow(() -> new RuntimeException("Professor não encontrado"));
 
