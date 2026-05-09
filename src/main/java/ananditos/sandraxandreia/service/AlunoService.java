@@ -61,7 +61,8 @@ public class AlunoService {
             throw new RuntimeException("CPF ja cadastrado");
         }
 
-        // se não deu erro:
+        // se não deu erro, extrai dados que foram escritos pelo usuário e
+        // validados pelo AlunoRequestDTO
         var aluno = new Aluno(
                 null,
                 request.getNome(),
@@ -73,7 +74,11 @@ public class AlunoService {
                 request.getRa(),
                 request.getStatus()
         );
+
+        // salva entidade aluno no banco e retorna com ID novo
         Aluno salvo = alunoRepository.save(aluno);
+        // pega a entidade e extrai infos que o usuário pode ver
+        //(tira senhas, limpa formatos e retorna DTO para a camada Controller)
         return toResponse(salvo);
     }
 
@@ -91,9 +96,11 @@ public class AlunoService {
     }
 
     public AlunoResponseDTO atualizar(Long id, AlunoRequestDTO request) {
+        //1° Busca aluno por ID (se nao achar dá erro)
         Aluno aluno = alunoRepository.findById(id).
                 orElseThrow(() -> new IllegalArgumentException("`Professor` nao encontrado para o id: " + id));
 
+        // 2° Substitui os antigos pelos novos que vieram do request
         aluno.setNome(request.getNome());
         aluno.setEmail(new UsuarioEmail(request.getEmail()));
         aluno.setCpf(new UsuarioCpf(request.getCpf()));
@@ -103,8 +110,10 @@ public class AlunoService {
         aluno.setRa(new AlunoRA(request.getRa()));
         aluno.setStatus(request.getStatus());
 
+        // 3° Salva no banco de dados
         Aluno salvo = alunoRepository.save(aluno);
 
+        // 4° Traduz e retorna resposta
         return toResponse(salvo);
 
     }
