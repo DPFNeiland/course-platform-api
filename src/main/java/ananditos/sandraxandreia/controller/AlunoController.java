@@ -1,3 +1,5 @@
+// código documentado por Betina Volpi com o intuito de revisar a matéria,
+// além de explicar como funciona para possíveis leitores que possam utilizá-lo
 package ananditos.sandraxandreia.controller;
 
 import ananditos.sandraxandreia.dto.request.AlunoRequestDTO;
@@ -10,8 +12,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController
-@RequestMapping("/aluno")
+@RestController // formata em JSON
+@RequestMapping("/aluno") // endereço base da API
 @Tag(name = "Aluno", description = "API REST de aluno")
 public class AlunoController {
         private final AlunoService service;
@@ -21,36 +23,41 @@ public class AlunoController {
 
         }
 
-        @PostMapping
+        @PostMapping //criar
         @ResponseStatus(HttpStatus.CREATED)
         @Operation(summary = "Cadastra um novo aluno")
-        public AlunoResponseDTO criar(@RequestBody AlunoRequestDTO aluno)
+
+        public AlunoResponseDTO criar(
+                // para o JSON enviado ser transformado em um AlunoRequestDTO
+                // e, assim, validar as regras
+                // @RequestBody -> usado no POST e PUT
+                @RequestBody AlunoRequestDTO aluno)
         {
             return service.criar(aluno);
         }
 
-        @GetMapping
+        @GetMapping //busca todos
         @Operation(summary = "Lista todos os alunos")
         public List<AlunoResponseDTO> listarTodos() {
 
             return service.listarTodos();
         }
 
-        @GetMapping("/{id}")
+        @GetMapping("/{id}") //busca pelo id
         @Operation(summary = "Busca um aluno pelo id")
         public AlunoResponseDTO buscarPorId(@PathVariable Long id) {
 
             return service.buscarPorId(id);
         }
 
-        @PutMapping("/{id}")
-        @Operation(summary = "Atualiza um alunon existente")
+        @PutMapping("/{id}") //atualiza pelo id
+        @Operation(summary = "Atualiza um aluno existente")
         public AlunoResponseDTO atualizar(@PathVariable Long id, @RequestBody AlunoRequestDTO aluno) {
             return service.atualizar(id, aluno);
         }
 
-        @DeleteMapping("/{id}")
-        @ResponseStatus(HttpStatus.NO_CONTENT)
+        @DeleteMapping("/{id}") //deleta pelo id
+        @ResponseStatus(HttpStatus.NO_CONTENT) //não recebe nenhum JSON como resposta (deletou)
         @Operation(summary = "Remove um aluno pelo id")
         public void deletar(@PathVariable Long id) {
             service.deletar(id);
