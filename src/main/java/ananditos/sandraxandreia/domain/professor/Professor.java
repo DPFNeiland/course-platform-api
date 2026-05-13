@@ -4,6 +4,8 @@ import ananditos.sandraxandreia.domain.curso.Curso;
 import ananditos.sandraxandreia.domain.usuario.GeneroUsuario;
 import ananditos.sandraxandreia.domain.usuario.Usuario;
 import ananditos.sandraxandreia.domain.professor.vo.ProfessorAreaFormacao;
+import ananditos.sandraxandreia.domain.usuario.UsuarioCargo;
+import ananditos.sandraxandreia.domain.usuario.vo.UsuarioSenhaCriptografada;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -34,12 +36,14 @@ public class Professor extends Usuario {
     public Professor() {
     }
 
-    public Professor(Long id, String nome, String email, String senhaCriptografada, String cpf, GeneroUsuario genero, String dataNascimento, String areaFormacao, double horaAula, TipoEnsinoProfessor tipoEnsino) {
-        super(id, nome, email, senhaCriptografada, cpf, genero, dataNascimento);
-        this.areaFormacao = new ProfessorAreaFormacao(areaFormacao);
+    public Professor(Long id, String nome, String email, String cpf, String senha, String dataNascimento, GeneroUsuario genero, ProfessorAreaFormacao areaFormacao, double horaAula, TipoEnsinoProfessor tipoEnsino, List<Curso> cursos) {
+        super(id, nome, email, cpf, senha, dataNascimento, genero, UsuarioCargo.PROFESSOR);
+        this.areaFormacao = areaFormacao;
         this.horaAula = horaAula;
         this.tipoEnsino = tipoEnsino;
+        this.cursos = cursos;
     }
+
     public ProfessorAreaFormacao getAreaFormacao() {
         return areaFormacao;
     }

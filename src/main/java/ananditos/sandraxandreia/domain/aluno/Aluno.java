@@ -4,6 +4,8 @@ import ananditos.sandraxandreia.domain.matricula.Matricula;
 import ananditos.sandraxandreia.domain.usuario.GeneroUsuario;
 import ananditos.sandraxandreia.domain.usuario.Usuario;
 import ananditos.sandraxandreia.domain.aluno.vo.AlunoRA;
+import ananditos.sandraxandreia.domain.usuario.UsuarioCargo;
+import ananditos.sandraxandreia.domain.usuario.vo.UsuarioSenhaCriptografada;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -27,9 +29,9 @@ public class Aluno extends Usuario {
         // Pro JPA
     }
 
-    public Aluno(Long id, String nome, String email, String senhaCriptografada, String cpf, GeneroUsuario genero, String dataNascimento, String ra, StatusAluno status) {
-        super(id, nome, email, senhaCriptografada, cpf, genero, dataNascimento);
-        this.ra = new AlunoRA(ra);
+    public Aluno(Long id, String nome, String email, String cpf, String senha, String dataNascimento, GeneroUsuario genero, UsuarioCargo cargo, AlunoRA ra, StatusAluno status, List<Matricula> cursos) {
+        super(id, nome, email, cpf, senha, dataNascimento, genero, UsuarioCargo.ALUNO);
+        this.ra = ra;
         this.status = status;
     }
 

@@ -31,6 +31,7 @@ public class AlunoService {
                 aluno.getEmail().getValor(),
                 aluno.getCpf().getValor(),
                 aluno.getGenero(),
+                aluno.getCargo(),
                 aluno.getDataNascimento().getData(),
                 aluno.getRa().getValor(),
                 aluno.getStatus()
@@ -58,8 +59,11 @@ public class AlunoService {
                 request.getCpf(),
                 request.getGenero(),
                 request.getDataNascimento(),
+                request.getStatus(),
                 request.getRa(),
-                request.getStatus()
+                request.getStatus(),
+                request.getRa()
+
         );
         Aluno salvo = alunoRepository.save(aluno);
         return toResponse(salvo);
