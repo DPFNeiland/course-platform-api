@@ -100,6 +100,15 @@ public class AlunoService {
         Aluno aluno = alunoRepository.findById(id).
                 orElseThrow(() -> new IllegalArgumentException("`Professor` nao encontrado para o id: " + id));
 
+        if (alunoRepository.existsByEmailValor(request.getEmail())) {
+            throw new RuntimeException("E-mail ja cadastrado");
+        }
+
+        if (alunoRepository.existsByCpfValor(request.getCpf())) {
+            throw new RuntimeException("CPF ja cadastrado");
+        }
+
+
         // 2° Substitui os antigos pelos novos que vieram do request
         aluno.setNome(request.getNome());
         aluno.setEmail(new UsuarioEmail(request.getEmail()));
