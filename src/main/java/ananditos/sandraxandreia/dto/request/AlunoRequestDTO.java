@@ -9,12 +9,14 @@ import jakarta.validation.constraints.Pattern;
 public class AlunoRequestDTO extends UsuarioRequestDTO {
 
     @NotBlank(message = "RA nao preenchido")
+    //RA deve seguir um "padrão" determinado
     @Pattern(regexp = "[A-Za-z]{2}\\d{4}", message = "RA deve seguir o formato AB1234")
     private String ra;
 
     @NotNull(message = "Status do aluno não preenchido")
     private StatusAluno status;
 
+    // se não seguir as regras acima, o sistema bloqueia antes de enviar para service
     public AlunoRequestDTO() {
     }
 
