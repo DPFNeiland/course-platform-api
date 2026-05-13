@@ -59,7 +59,6 @@ public class ProfessorService {
                 request.getDataNascimento(),
                 request.getGenero(),
                 request.getAreaFormacao(),
-                request.getCargo(),
                 request.getHoraAula(),
                 request.getTipoEnsino()
         );

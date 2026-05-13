@@ -55,14 +55,12 @@ public class AlunoService {
                 null,
                 request.getNome(),
                 request.getEmail(),
-                passwordEncoder.encode(request.getSenha()),
                 request.getCpf(),
-                request.getGenero(),
+                passwordEncoder.encode(request.getSenha()),
                 request.getDataNascimento(),
-                request.getStatus(),
+                request.getGenero(),
                 request.getRa(),
-                request.getStatus(),
-                request.getRa()
+                request.getStatus()
 
         );
         Aluno salvo = alunoRepository.save(aluno);
