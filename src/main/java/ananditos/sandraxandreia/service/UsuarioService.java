@@ -1,5 +1,6 @@
 package ananditos.sandraxandreia.service;
 
+
 import ananditos.sandraxandreia.domain.usuario.Usuario;
 import ananditos.sandraxandreia.domain.usuario.vo.UsuarioCpf;
 import ananditos.sandraxandreia.domain.usuario.vo.UsuarioDataNascimento;
@@ -58,10 +59,11 @@ public class UsuarioService {
                 null,
                 request.getNome(),
                 request.getEmail(),
-                passwordEncoder.encode(request.getSenha()),
                 request.getCpf(),
+                passwordEncoder.encode(request.getSenha()),
+                request.getDataNascimento(),
                 request.getGenero(),
-                request.getDataNascimento()
+                request.getCargo()
 
         );
         Usuario salvo = repository.save(usuario);

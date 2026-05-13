@@ -1,6 +1,7 @@
 package ananditos.sandraxandreia.dto.request;
 
 import ananditos.sandraxandreia.domain.usuario.GeneroUsuario;
+import ananditos.sandraxandreia.domain.usuario.UsuarioCargo;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -26,6 +27,8 @@ public class UsuarioRequestDTO {
     @NotBlank(message = "Data de nascimento é obrigatória")
     private String dataNascimento;
 
+    private UsuarioCargo cargo;
+
     public UsuarioRequestDTO() {
     }
 
@@ -35,5 +38,7 @@ public class UsuarioRequestDTO {
     public String getCpf() { return cpf; }
     public GeneroUsuario getGenero() { return genero; }
     public String getDataNascimento() {return dataNascimento; }
-
+    public UsuarioCargo getCargo() {
+        return cargo;
+    }
 }

@@ -31,11 +31,12 @@ public class ProfessorService {
                 professor.getCpf().getValor(),
                 professor.getGenero(),
                 professor.getDataNascimento().getData(),
+                professor.getCargo(),
                 professor.getAreaFormacao().getValor(),
                 professor.getHoraAula(),
                 professor.getTipoEnsino()
 
-        );
+                );
     }
 
     public ProfessorResponseDTO criar(ProfessorRequestDTO request) {
@@ -53,11 +54,12 @@ public class ProfessorService {
                 null,
                 request.getNome(),
                 request.getEmail(),
-                passwordEncoder.encode(request.getSenha()),
                 request.getCpf(),
-                request.getGenero(),
+                passwordEncoder.encode(request.getSenha()),
                 request.getDataNascimento(),
+                request.getGenero(),
                 request.getAreaFormacao(),
+                request.getCargo(),
                 request.getHoraAula(),
                 request.getTipoEnsino()
         );
