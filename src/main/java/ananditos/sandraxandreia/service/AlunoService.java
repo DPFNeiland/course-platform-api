@@ -14,6 +14,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static ananditos.sandraxandreia.service.validation.cpfNormalizado.normalizarCPF;
+import static ananditos.sandraxandreia.service.validation.emailNormalizado.normalizarEMAIL;
+
 @Service
 public class AlunoService {
     private final AlunoRepository alunoRepository;
@@ -40,8 +43,8 @@ public class AlunoService {
     }
 
     public AlunoResponseDTO criar(AlunoRequestDTO request) {
-        String emailNormalizado = request.getEmail() == null ? null : request.getEmail().trim().toLowerCase();
-        String cpf = request.getCpf() == null ? null : request.getCpf().trim().toLowerCase();
+        String emailNormalizado = normalizarEMAIL(request.getEmail());
+        String cpf = normalizarCPF(request.getCpf());
 
         if (alunoRepository.existsByEmailValor(emailNormalizado)) {
             throw new RuntimeException("E-mail ja cadastrado");
