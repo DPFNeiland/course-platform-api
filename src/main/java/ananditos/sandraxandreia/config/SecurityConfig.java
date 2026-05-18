@@ -2,16 +2,16 @@ package ananditos.sandraxandreia.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfig {
 
     // SecurityFilterChain e a cadeia de filtros do Spring Security.
@@ -35,12 +35,12 @@ public class SecurityConfig {
                                 "/h2-console/**"
                         ).permitAll()
 
-                        // authenticated() = exige autenticacao.
-                        // Aqui estamos protegendo as rotas REST principais.
-                        .requestMatchers("/api/**").authenticated()
+                        // Cadastro inicial para que alunos e professores possam criar
+                        // credenciais e depois autenticar com HTTP Basic.
+                        .requestMatchers(HttpMethod.POST, "/aluno", "/professor").permitAll()
 
                         // anyRequest() pega o que nao foi coberto acima.
-                        .anyRequest().permitAll())
+                        .anyRequest().authenticated())
 
                 // frameOptions() foi liberado para o console H2 funcionar no navegador.
                 .headers(headers -> headers.frameOptions(frame -> frame.disable()))
@@ -51,20 +51,6 @@ public class SecurityConfig {
 
         // build() monta o objeto final da configuracao de seguranca.
         return http.build();
-    }
-
-    // UserDetailsService e o servico que fornece usuarios para autenticacao.
-    // Nesta versao, usamos um usuario em memoria, sem tabela no banco.
-    @Bean
-    public UserDetailsService users(PasswordEncoder passwordEncoder) {
-        return new InMemoryUserDetailsManager(
-                // User.withUsername(...) cria um usuario de forma fluente.
-                User.withUsername("admin")
-                        // encode(...) criptografa a senha antes de armazenar.
-                        .password(passwordEncoder.encode("123456"))
-                        .roles("ADMIN")
-                        .build()
-        );
     }
 
     // PasswordEncoder e um bean importante da aplicacao.

@@ -90,7 +90,7 @@ public class AlunoService {
         aluno.setNome(request.getNome());
         aluno.setEmail(new UsuarioEmail(request.getEmail()));
         aluno.setCpf(new UsuarioCpf(request.getCpf()));
-        aluno.setSenha(new UsuarioSenhaCriptografada(request.getSenha()));
+        aluno.setSenha(new UsuarioSenhaCriptografada(passwordEncoder.encode(request.getSenha())));
         aluno.setGenero(request.getGenero());
         aluno.setDataNascimento(new UsuarioDataNascimento(request.getDataNascimento()));
         aluno.setRa(new AlunoRA(request.getRa()));

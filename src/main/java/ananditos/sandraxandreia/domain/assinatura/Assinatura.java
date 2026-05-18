@@ -17,12 +17,15 @@ public class Assinatura {
     private String nome;
 
     @Column(nullable = false, length = 100)
+    @Enumerated(EnumType.STRING)
     private PlanoAssinatura assinatura;
 
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false)
     private double preco;
 
-    @Column(nullable = false, length = 100)
+    @ElementCollection
+    @CollectionTable(name = "assinatura_beneficio", joinColumns = @JoinColumn(name = "assinatura_id"))
+    @Column(name = "beneficio", nullable = false, length = 100)
     private List<String> beneficios;
 
     public Assinatura(Long id, String nome, PlanoAssinatura assinatura, double preco, List<String> beneficios) {

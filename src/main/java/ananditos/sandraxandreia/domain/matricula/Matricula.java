@@ -16,6 +16,7 @@ public class Matricula {
     @Embedded
     private MatriculaDataMatricula dataMatricula;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 100)
     private StatusMatricula status;
 

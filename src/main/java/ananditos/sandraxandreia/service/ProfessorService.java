@@ -91,7 +91,7 @@ public class ProfessorService {
         professor.setNome(request.getNome());
         professor.setEmail(new UsuarioEmail(request.getEmail()));
         professor.setCpf(new UsuarioCpf(request.getCpf()));
-        professor.setSenha(new UsuarioSenhaCriptografada(request.getSenha()));
+        professor.setSenha(new UsuarioSenhaCriptografada(passwordEncoder.encode(request.getSenha())));
         professor.setGenero(request.getGenero());
         professor.setAreaFormacao(new ProfessorAreaFormacao(request.getAreaFormacao()));
         professor.setDataNascimento(new UsuarioDataNascimento(request.getDataNascimento()));

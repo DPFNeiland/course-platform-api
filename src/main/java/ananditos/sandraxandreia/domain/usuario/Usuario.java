@@ -1,19 +1,20 @@
 package ananditos.sandraxandreia.domain.usuario;
 
+import ananditos.sandraxandreia.domain.usuario.vo.UsuarioCpf;
+import ananditos.sandraxandreia.domain.usuario.vo.UsuarioDataNascimento;
+import ananditos.sandraxandreia.domain.usuario.vo.UsuarioEmail;
+import ananditos.sandraxandreia.domain.usuario.vo.UsuarioSenhaCriptografada;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-
-import ananditos.sandraxandreia.domain.usuario.vo.UsuarioCpf;
-import ananditos.sandraxandreia.domain.usuario.vo.UsuarioDataNascimento;
-import ananditos.sandraxandreia.domain.usuario.vo.UsuarioEmail;
-import ananditos.sandraxandreia.domain.usuario.vo.UsuarioSenhaCriptografada;
-import jakarta.persistence.*;
-import jdk.jshell.spi.ExecutionControl;
-import org.jspecify.annotations.Nullable;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -169,29 +170,29 @@ public class Usuario  implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         if (this.cargo == UsuarioCargo.ADMIN)
             return List.of(
-                    new SimpleGrantedAuthority("ADMIN"),
-                    new SimpleGrantedAuthority("PROFESSSOR"),
-                    new SimpleGrantedAuthority("ALUNO"),
-                    new SimpleGrantedAuthority("CURADOR"));
+                    new SimpleGrantedAuthority(UsuarioCargo.ADMIN.getRole()),
+                    new SimpleGrantedAuthority(UsuarioCargo.PROFESSOR.getRole()),
+                    new SimpleGrantedAuthority(UsuarioCargo.ALUNO.getRole()),
+                    new SimpleGrantedAuthority(UsuarioCargo.CURADOR.getRole()));
 
         if (this.cargo == UsuarioCargo.PROFESSOR)
-            return List.of(new SimpleGrantedAuthority("PROFESSOR"));
+            return List.of(new SimpleGrantedAuthority(UsuarioCargo.PROFESSOR.getRole()));
 
         if (this.cargo == UsuarioCargo.ALUNO)
-            return List.of(new SimpleGrantedAuthority("ALUNO"));
+            return List.of(new SimpleGrantedAuthority(UsuarioCargo.ALUNO.getRole()));
 
         if (this.cargo == UsuarioCargo.CURADOR)
-            return List.of(new SimpleGrantedAuthority("CURADOR"));
+            return List.of(new SimpleGrantedAuthority(UsuarioCargo.CURADOR.getRole()));
 
         if (this.cargo == UsuarioCargo.ANONIMO)
-            return List.of(new SimpleGrantedAuthority("ANONIMO"));
+            return List.of(new SimpleGrantedAuthority(UsuarioCargo.ANONIMO.getRole()));
 
         return List.of();
     }
 
     @Override
-    public @Nullable String getPassword() {
-        return "";
+    public String getPassword() {
+        return senha.getValor();
     }
 
     @Override
