@@ -15,7 +15,7 @@ import java.util.Objects;
 @Table(name = "professor")
 public class Professor extends Usuario {
 
-    @Column(nullable = false, length = 100)
+    @Embedded
     private ProfessorAreaFormacao areaFormacao;
 
     @Column(nullable = false)

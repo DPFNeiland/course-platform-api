@@ -90,9 +90,10 @@ public class UsuarioService {
             usuario.setNome(request.getNome());
             usuario.setEmail(new UsuarioEmail(request.getEmail()));
             usuario.setCpf(new UsuarioCpf(request.getCpf()));
-            usuario.setSenha(new UsuarioSenhaCriptografada(request.getSenha()));
+            usuario.setSenha(new UsuarioSenhaCriptografada(passwordEncoder.encode(request.getSenha())));
             usuario.setGenero(request.getGenero());
             usuario.setDataNascimento(new UsuarioDataNascimento(request.getDataNascimento()));
+            usuario.setCargo(request.getCargo());
             Usuario salvo = repository.save(usuario);
             return toResponse(salvo);
     }

@@ -6,6 +6,7 @@ import ananditos.sandraxandreia.service.ProfessorService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,6 +24,7 @@ public class ProfessorController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("permitAll()")
     @Operation(summary = "Cadastra um novo professor")
     public ProfessorResponseDTO criar(@RequestBody ProfessorRequestDTO professor)
     {
@@ -30,6 +32,7 @@ public class ProfessorController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('PROFESSOR')")
     @Operation(summary = "Lista todos os professor")
     public List<ProfessorResponseDTO> listarTodos() {
 
@@ -37,6 +40,7 @@ public class ProfessorController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('PROFESSOR')")
     @Operation(summary = "Busca um professor pelo id")
     public ProfessorResponseDTO buscarPorId(@PathVariable Long id) {
 
@@ -44,6 +48,7 @@ public class ProfessorController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('PROFESSOR')")
     @Operation(summary = "Atualiza um professor existente")
     public ProfessorResponseDTO atualizar(@PathVariable Long id, @RequestBody ProfessorRequestDTO professor) {
         return service.atualizar(id, professor);
@@ -51,6 +56,7 @@ public class ProfessorController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('PROFESSOR')")
     @Operation(summary = "Remove um professor pelo id")
     public void deletar(@PathVariable Long id) {
         service.deletar(id);
