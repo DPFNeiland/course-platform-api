@@ -1,3 +1,5 @@
+// código documentado por Betina Volpi com o intuito de revisar a matéria,
+// além de explicar como funciona para possíveis leitores que possam utilizá-lo
 package ananditos.sandraxandreia.controller;
 
 import ananditos.sandraxandreia.dto.request.AlunoRequestDTO;
@@ -12,8 +14,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController
-@RequestMapping("/aluno")
+@RestController // formata em JSON
+@RequestMapping("/aluno") // endereço base da API
 @Tag(name = "Aluno", description = "API REST de aluno")
 public class AlunoController {
     private final AlunoService service;

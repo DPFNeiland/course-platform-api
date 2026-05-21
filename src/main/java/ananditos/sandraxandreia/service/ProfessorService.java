@@ -87,7 +87,13 @@ public class ProfessorService {
     public ProfessorResponseDTO atualizar(Long id, ProfessorRequestDTO request) {
         Professor professor = professorRepository.findById(id).
                 orElseThrow(() -> new IllegalArgumentException("`Professor` nao encontrado para o id: " + id));
+        if (professorRepository.existsByEmailValor(request.getEmail())) {
+            throw new RuntimeException("E-mail ja cadastrado");
+        }
 
+        if (professorRepository.existsByCpfValor(request.getCpf())) {
+            throw new RuntimeException("CPF ja cadastrado");
+        }
         professor.setNome(request.getNome());
         professor.setEmail(new UsuarioEmail(request.getEmail()));
         professor.setCpf(new UsuarioCpf(request.getCpf()));

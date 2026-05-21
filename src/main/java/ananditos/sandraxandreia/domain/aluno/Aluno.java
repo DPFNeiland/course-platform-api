@@ -1,3 +1,5 @@
+// código documentado por Betina Volpi com o intuito de revisar a matéria,
+// além de explicar como funciona para possíveis leitores que possam utilizá-lo
 package ananditos.sandraxandreia.domain.aluno;
 
 import ananditos.sandraxandreia.domain.matricula.Matricula;
@@ -11,21 +13,27 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+// indica que essa classe representa uma tabela do banco de dados
 @Entity
 @Table(name="aluno")
 public class Aluno extends Usuario {
 
+    // "imbutir" valor do AlunoRA na tabela Aluno (não criar uma nova)
     @Embedded
     private AlunoRA ra;
 
     @Enumerated(EnumType.STRING)
     private StatusAluno status;
 
+    // relacionamento com outras tabelas
     @OneToMany(mappedBy = "aluno", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Matricula> cursos = new ArrayList<>();
 
     public Aluno() {
-        // Pro JPA
+        // O Hibernate/JPA exige que toda entidade tenha
+        // um construtor vazio. Busca os dados no banco:
+        // 1° cria Aluno vazio
+        // 2° preenche os campos um a um.
     }
 
     public Aluno(Long id, String nome, String email, String cpf, String senha, String dataNascimento, GeneroUsuario genero, String ra, StatusAluno status) {
