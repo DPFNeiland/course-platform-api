@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sala de Aula - EdTech</title>
+  <link rel="stylesheet" href="../global.css">
+  <link rel="stylesheet" href="style/sala-aula.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header class="header">
+      <nav class="navbar">
+          <input type="checkbox" class="nav-toggle" id="nav-toggle">
+          <div class="nav-left">
+          <label for="nav-toggle" class="nav-toggle-label">
+              <span></span>
+              <span></span>
+              <span></span>
+          </label>
+          <a href="dashboard.html" class="logo">EdTech</a>
+          </div>
+          <ul class="menu">
+          <li><a href="boletim.html">Boletim</a></li>
+          <li><a href="conquistas.html">Conquistas</a></li>
+          <li><a href="forum.html">Fórum</a></li>
+          </ul>
+          <div class="nav-right">
+          <div class="avatar">JD</div>
+          </div>
+      </nav>
+    </header>
+
+  <header class="page-header">
+    <h1>Sala de Aula — <span>Desenvolvimento Web Completo</span></h1>
+  </header>
+
+  <main class="main-container">
+    <aside class="timeline-sidebar">
+      <h2>Módulos</h2>
+      <div class="timeline">
+        <div class="timeline-item completed">
+          <div class="circle"></div>
+          <h3>Módulo 1: Introdução</h3>
+        </div>
+        <div class="timeline-item current">
+          <div class="circle"></div>
+          <h3>Módulo 2: HTML/CSS</h3>
+        </div>
+        <div class="timeline-item locked">
+          <div class="circle"></div>
+          <h3>Módulo 3: JavaScript</h3>
+        </div>
+        <div class="timeline-item locked">
+          <div class="circle"></div>
+          <h3>Módulo 4: React</h3>
+        </div>
+        <div class="timeline-item locked">
+          <div class="circle"></div>
+          <h3>Módulo 5: Deploy</h3>
+        </div>
+      </div>
+    </aside>
+
+    <section class="lesson-content">
+      <div class="video-player">
+        <div class="play-overlay">
+          <button class="play-btn">
+            <svg viewBox="0 0 24 24">
+              <path fill="currentColor" d="M8 5v14l11-7z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <h2 class="lesson-title">Fundamentos de CSS</h2>
+
+      <div class="progress-bar">
+        <div class="progress-fill" style="width: 45%;"></div>
+      </div>
+      <p class="progress-text">45% concluído</p>
+
+      <div class="lesson-description">
+        <p>Aprenda os conceitos básicos de CSS, incluindo seletores, propriedades e box model.</p>
+      </div>
+
+      <button class="btn-pill btn-primary">Marcar como Concluída</button>
+
+      <section class="support-materials">
+        <h3>Materiais de Apoio</h3>
+        <div class="cards-grid">
+          <div class="card">
+            <h4>Guia PDF</h4>
+            <p>Download do guia completo.</p>
+            <a href="#" class="btn-pill btn-secondary">Baixar</a>
+          </div>
+          <div class="card">
+            <h4>Quiz Interativo</h4>
+            <p>Teste seus conhecimentos.</p>
+            <a href="#" class="btn-pill btn-secondary">Fazer Quiz</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="comments-section">
+        <h3>Comentários</h3>
+        <form class="comment-form">
+          <textarea placeholder="Deixe seu comentário..."></textarea>
+          <button type="submit" class="btn-pill btn-primary">Enviar</button>
+        </form>
+        <div class="comments-list">
+          <div class="comment-card">
+            <div class="comment-header">
+              <div class="avatar">JS</div>
+              <div>
+                <strong>João Silva</strong>
+                <span>2 dias atrás</span>
+              </div>
+            </div>
+            <p>Aula excelente! Muito clara.</p>
+          </div>
+          <div class="comment-card">
+            <div class="comment-header">
+              <div class="avatar">MS</div>
+              <div>
+                <strong>Maria Santos</strong>
+                <span>1 dia atrás</span>
+              </div>
+            </div>
+            <p>Dúvida sobre flexbox, mas o exemplo ajudou.</p>
+          </div>
+        </div>
+      </section>
+    </section>
+  </main>
+</body>
+</html>

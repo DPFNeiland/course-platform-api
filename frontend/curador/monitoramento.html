@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitoramento - Curador</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8fafc;
+        }
+        /* Navbar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            box-shadow: 0 4px 20px rgba(30, 58, 138, 0.3);
+            z-index: 1000;
+            padding: 1rem 0;
+        }
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+        }
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+        .nav-links a {
+            color: rgba(255,255,255,0.9);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: white;
+        }
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            color: white;
+            text-align: center;
+            padding: 120px 2rem 80px;
+            margin-top: 80px;
+        }
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        /* Main Content */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        /* KPIs */
+        .kpis {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+        .kpi-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        }
+        .kpi-number {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #3b82f6;
+            margin-bottom: 0.5rem;
+        }
+        .kpi-label {
+            font-size: 1.1rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+        /* Graphs Section */
+        .graphs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+        .graph-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        .graph-card h3 {
+            margin-bottom: 1.5rem;
+            color: #1e293b;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+        /* SVG Graphs */
+        svg {
+            width: 100%;
+            height: 300px;
+        }
+        /* Line Graph */
+        .line-path {
+            fill: none;
+            stroke: #3b82f6;
+            stroke-width: 3;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .line-dots {
+            fill: #3b82f6;
+        }
+        /* Bar Graph */
+        .bar {
+            fill: #8b5cf6;
+        }
+        /* Table */
+        .table-section {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 4rem;
+        }
+        .table-header {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 1.2rem 2rem;
+            text-align: left;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #475569;
+        }
+        tr:hover {
+            background: #f1f5f9;
+        }
+        /* Responsive */
+        @media (max-width: 768px) {
+            .graphs {
+                grid-template-columns: 1fr;
+            }
+            .header h1 {
+                font-size: 2rem;
+            }
+            .nav-links {
+                display: none;
+            }
+            .kpis {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">Curador</div>
+            <ul class="nav-links">
+                <li><a href="/curador/dashboard.html">Dashboard</a></li>
+                <li><a href="/curador/monitoramento.html" class="active">Monitoramento</a></li>
+                <li><a href="/curador/usuarios.html">Usuários</a></li>
+                <li><a href="/curador/cursos.html">Cursos</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <header class="header">
+        <h1>Monitoramento</h1>
+    </header>
+
+    <main class="container">
+        <!-- KPIs -->
+        <section class="kpis">
+            <div class="kpi-card">
+                <div class="kpi-number">45</div>
+                <div class="kpi-label">Cursos ativos</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-number">12</div>
+                <div class="kpi-label">Professores ativos</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-number">567</div>
+                <div class="kpi-label">Alunos ativos</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-number">2.345</div>
+                <div class="kpi-label">Aulas publicadas</div>
+            </div>
+        </section>
+
+        <!-- Graphs -->
+        <section class="graphs">
+            <div class="graph-card">
+                <h3>Atividade Semanal</h3>
+                <svg viewBox="0 0 400 200">
+                    <!-- Grid -->
+                    <g stroke="#e2e8f0" stroke-width="1">
+                        <line x1="50" y1="20" x2="50" y2="180"/>
+                        <line x1="50" y1="180" x2="350" y2="180"/>
+                        <line x1="100" y1="180" x2="100" y2="170"/>
+                        <line x1="150" y1="180" x2="150" y2="140"/>
+                        <line x1="200" y1="180" x2="200" y2="100"/>
+                        <line x1="250" y1="180" x2="250" y2="120"/>
+                        <line x1="300" y1="180" x2="300" y2="80"/>
+                        <line x1="350" y1="180" x2="350" y2="60"/>
+                    </g>
+                    <!-- Line -->
+                    <path class="line-path" d="M50 170 L100 170 L150 140 L200 100 L250 120 L300 80 L350 60"/>
+                    <!-- Dots -->
+                    <circle class="line-dots" cx="50" cy="170" r="4"/>
+                    <circle class="line-dots" cx="100" cy="170" r="4"/>
+                    <circle class="line-dots" cx="150" cy="140" r="4"/>
+                    <circle class="line-dots" cx="200" cy="100" r="4"/>
+                    <circle class="line-dots" cx="250" cy="120" r="4"/>
+                    <circle class="line-dots" cx="300" cy="80" r="4"/>
+                    <circle class="line-dots" cx="350" cy="60" r="4"/>
+                </svg>
+            </div>
+            <div class="graph-card">
+                <h3>Distribuição de Cursos por Categoria</h3>
+                <svg viewBox="0 0 400 200">
+                    <!-- Bars -->
+                    <rect class="bar" x="70" y="120" width="40" height="80" rx="4"/>
+                    <rect class="bar" x="130" y="80" width="40" height="120" rx="4"/>
+                    <rect class="bar" x="190" y="100" width="40" height="100" rx="4"/>
+                    <rect class="bar" x="250" y="60" width="40" height="140" rx="4"/>
+                    <rect class="bar" x="310" y="140" width="40" height="60" rx="4"/>
+                    <!-- Axes -->
+                    <line stroke="#e2e8f0" stroke-width="2" x1="60" y1="20" x2="60" y2="180"/>
+                    <line stroke="#e2e8f0" stroke-width="2" x1="60" y1="180" x2="360" y2="180"/>
+                </svg>
+            </div>
+        </section>
+
+        <!-- Table -->
+        <section class="table-section">
+            <div class="table-header">Atividade Recente</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Usuário</th>
+                        <th>Ação</th>
+                        <th>Curso</th>
+                        <th>Data</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>João Silva</td>
+                        <td>Publicou aula</td>
+                        <td>Matemática Básica</td>
+                        <td>2024-10-01</td>
+                    </tr>
+                    <tr>
+                        <td>Maria Santos</td>
+                        <td>Matriculou aluno</td>
+                        <td>Programação Web</td>
+                        <td>2024-10-01</td>
+                    </tr>
+                    <tr>
+                        <td>Pedro Oliveira</td>
+                        <td>Atualizou curso</td>
+                        <td>Inglês Avançado</td>
+                        <td>2024-09-30</td>
+                    </tr>
+                    <tr>
+                        <td>Ana Costa</td>
+                        <td>Concluiu aula</td>
+                        <td>Design Gráfico</td>
+                        <td>2024-09-30</td>
+                    </tr>
+                    <tr>
+                        <td>Carlos Mendes</td>
+                        <td>Adicionou material</td>
+                        <td>Marketing Digital</td>
+                        <td>2024-09-29</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+</body>
+</html>

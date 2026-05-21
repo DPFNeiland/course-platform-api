@@ -2,7 +2,9 @@ package ananditos.sandraxandreia.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -10,8 +12,14 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfig {
 
     // SecurityFilterChain e a cadeia de filtros do Spring Security.
@@ -23,6 +31,8 @@ public class SecurityConfig {
                 // Para APIs REST didaticas/testes, costuma-se desabilitar.
                 // Em producao, isso deve ser analisado com cuidado.
                 .csrf(csrf -> csrf.disable())
+
+                .cors(Customizer.withDefaults())
 
                 // authorizeHttpRequests() define quem pode acessar cada rota.
                 .authorizeHttpRequests(auth -> auth
@@ -38,6 +48,11 @@ public class SecurityConfig {
                         // authenticated() = exige autenticacao.
                         // Aqui estamos protegendo as rotas REST principais.
                         .requestMatchers("/api/**").authenticated()
+
+                        // Cadastro inicial para que alunos e professores possam criar
+                        // credenciais e depois autenticar com HTTP Basic.
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/login", "/aluno", "/professor", "/curador").permitAll()
 
                         // anyRequest() pega o que nao foi coberto acima.
                         .anyRequest().permitAll())
@@ -65,6 +80,19 @@ public class SecurityConfig {
                         .roles("ADMIN")
                         .build()
         );
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("http://localhost:5173", "http://127.0.0.1:5173"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(false);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 
     // PasswordEncoder e um bean importante da aplicacao.

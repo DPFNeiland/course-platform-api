@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boletim - Aluno | EdTech Pro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="style/boletim.css">
+    <link rel="stylesheet" href="../global.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+          <nav class="navbar">
+            <input type="checkbox" class="nav-toggle" id="nav-toggle">
+            <div class="nav-left">
+            <label for="nav-toggle" class="nav-toggle-label">
+                <span></span>
+                <span></span>
+                <span></span>
+            </label>
+            <a href="dashboard.html" class="logo">EdTech</a>
+            </div>
+            <ul class="menu">
+            <li><a href="boletim.html">Boletim</a></li>
+            <li><a href="conquistas.html">Conquistas</a></li>
+            <li><a href="forum.html">Fórum</a></li>
+            </ul>
+            <div class="nav-right">
+            <div class="avatar">JD</div>
+            </div>
+        </nav>
+    </header>
+    <main>
+        <div class="curso-selector container">
+            <label for="select-curso">Selecione o Curso</label>
+            <select id="select-curso" class="select-curso">
+                <option value="">-- Escolha um curso --</option>
+                <option value="react">React Avançado</option>
+                <option value="python">Python para Data Science</option>
+                <option value="design">Design de Interfaces</option>
+                <option value="node">Node.js e Express</option>
+            </select>
+        </div>
+        <div class="container">
+            <div class="cards-grid">
+                <div class="card midia-final">
+                    <h3>Média Final</h3>
+                    <div class="numero">8.7</div>
+                    <div class="de">/ 10.0</div>
+                    <div class="progress-container">
+                        <div class="progress-bar"></div>
+                    </div>
+                </div>
+                <div class="card status">
+                    <h3>Status da Disciplina</h3>
+                    <svg class="status-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20,6 9,17 4,12"></polyline>
+                    </svg>
+                    <p class="status-label">Aprovado</p>
+                </div>
+                <div class="card presenca">
+                    <h3>Presença / Faltas</h3>
+                    <div class="metrics">
+                        <div class="metric presenca-val">36/40</div>
+                        <div class="metric faltas-val">4 faltas</div>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar"></div>
+                    </div>
+                </div>
+            </div>
+            <section class="notas-section">
+                <h2>Notas por Módulo</h2>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Módulo</th>
+                                <th>Nota Final</th>
+                                <th>Progresso</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Módulo 1</td>
+                                <td class="nota">9.2</td>
+                                <td>
+                                    <div class="progress-container">
+                                        <div class="progress-bar" style="width: 92%;"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Módulo 2</td>
+                                <td class="nota">8.1</td>
+                                <td>
+                                    <div class="progress-container">
+                                        <div class="progress-bar" style="width: 81%;"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Módulo 3</td>
+                                <td class="nota">7.9</td>
+                                <td>
+                                    <div class="progress-container">
+                                        <div class="progress-bar" style="width: 79%; background: linear-gradient(to right, var(--warning), #f59e0b);"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Módulo 4</td>
+                                <td class="nota">9.5</td>
+                                <td>
+                                    <div class="progress-container">
+                                        <div class="progress-bar" style="width: 95%;"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+</body>
+</html>
