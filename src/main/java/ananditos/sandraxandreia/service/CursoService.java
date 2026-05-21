@@ -5,12 +5,12 @@ import ananditos.sandraxandreia.domain.curso.StatusCurso;
 import ananditos.sandraxandreia.domain.professor.Professor;
 import ananditos.sandraxandreia.dto.request.CursoRequestDTO;
 import ananditos.sandraxandreia.dto.response.CursoResponseDTO;
-
 import ananditos.sandraxandreia.repository.CursoRepository;
 import ananditos.sandraxandreia.repository.ProfessorRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class CursoService {
@@ -22,28 +22,11 @@ public class CursoService {
         this.professorRepository = professorRepository;
     }
 
-    private CursoResponseDTO toResponse(Curso curso) {
-        return new CursoResponseDTO(
-                curso.getNome(),
-                curso.getTipoAssinatura(),
-                curso.getTipoCurso(),
-                curso.getStatus(),
-                curso.getProfessor().getId()
-
-        );
-    }
-
     public CursoResponseDTO criar(CursoRequestDTO request) {
+        validarNomeDuplicado(request.getNome(), null);
+        Professor professor = buscarProfessor(request.getProfessorId());
 
-        if (cursoRepository.existsByNome(request.getNome())) {
-            throw new RuntimeException("Esse nome de curso já existe");
-        }
-
-        Professor professor = professorRepository.findById(request.getProfessorIid()).
-                orElseThrow(() -> new RuntimeException("Professor não encontrado"));
-
-
-        var curso = new Curso(
+        Curso curso = new Curso(
                 null,
                 request.getNome(),
                 request.getTipoAssinatura(),
@@ -51,62 +34,94 @@ public class CursoService {
         );
         curso.setProfessor(professor);
 
-        Curso salvo = cursoRepository.save(curso);
-        return toResponse(salvo);
+        return toResponse(cursoRepository.save(curso));
     }
 
     public List<CursoResponseDTO> listarTodos() {
-        return cursoRepository.findAll().stream().map(this::toResponse).toList();
-
+        return cursoRepository.findAll().stream()
+                .map(this::toResponse)
+                .toList();
     }
 
+    public List<CursoResponseDTO> listarDisponiveis() {
+        return cursoRepository.findByStatusOrderByNomeAsc(StatusCurso.APROVADO).stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    public List<CursoResponseDTO> listarPorProfessor(Long professorId) {
+        buscarProfessor(professorId);
+        return cursoRepository.findByProfessorId(professorId).stream()
+                .map(this::toResponse)
+                .toList();
+    }
 
     public CursoResponseDTO buscarPorId(Long id) {
-        Curso curso = cursoRepository.findById(id).
-                orElseThrow(() -> new IllegalArgumentException("`Curso` nao encontrado para o id: " + id));
-        return toResponse(curso);
-
+        return toResponse(buscarCurso(id));
     }
 
     public List<CursoResponseDTO> listarPorStatus(StatusCurso status) {
-        List<Curso> cursos = cursoRepository.findByStatus(status);
-
-        return cursos.stream()
+        return cursoRepository.findByStatusOrderByNomeAsc(status).stream()
                 .map(this::toResponse)
                 .toList();
     }
 
     public CursoResponseDTO atualizar(Long id, CursoRequestDTO request) {
-        Curso curso = cursoRepository.findById(id).
-                orElseThrow(() -> new IllegalArgumentException("`Curso` nao encontrado para o id: " + id));
+        Curso curso = buscarCurso(id);
+        validarNomeDuplicado(request.getNome(), id);
+        Professor professor = buscarProfessor(request.getProfessorId());
 
         curso.setNome(request.getNome());
         curso.setTipoAssinatura(request.getTipoAssinatura());
         curso.setTipoCurso(request.getTipoCurso());
+        curso.setProfessor(professor);
 
-
-        Curso salvo = cursoRepository.save(curso);
-
-        return toResponse(salvo);
-
+        return toResponse(cursoRepository.save(curso));
     }
 
     public CursoResponseDTO atualizar_status(Long id, StatusCurso novoStatus) {
-        Curso curso = cursoRepository.findById(id).
-                orElseThrow(() -> new IllegalArgumentException("`Curso` nao encontrado para o id: " + id));
-
+        Curso curso = buscarCurso(id);
         curso.setStatus(novoStatus);
-
-        Curso salvo = cursoRepository.save(curso);
-
-        return toResponse(salvo);
-
+        return toResponse(cursoRepository.save(curso));
     }
 
     public void deletar(Long id) {
-        Curso cursoExistente = cursoRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Curso nao encontrado para o id: " + id));
+        cursoRepository.delete(buscarCurso(id));
+    }
 
-        cursoRepository.delete(cursoExistente);
+    private Curso buscarCurso(Long id) {
+        return cursoRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Curso nao encontrado para o id: " + id));
+    }
+
+    private Professor buscarProfessor(Long id) {
+        return professorRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Professor nao encontrado"));
+    }
+
+    private CursoResponseDTO toResponse(Curso curso) {
+        return new CursoResponseDTO(
+                curso.getId(),
+                curso.getNome(),
+                curso.getTipoAssinatura(),
+                curso.getTipoCurso(),
+                curso.getStatus(),
+                curso.getProfessor().getId()
+        );
+    }
+
+    private void validarNomeDuplicado(String nome, Long idAtual) {
+        if (!cursoRepository.existsByNomeIgnoreCase(nome)) {
+            return;
+        }
+
+        if (idAtual == null) {
+            throw new RuntimeException("Esse nome de curso ja existe");
+        }
+
+        Curso cursoAtual = buscarCurso(idAtual);
+        if (!Objects.equals(cursoAtual.getNome(), nome)) {
+            throw new RuntimeException("Esse nome de curso ja existe");
+        }
     }
 }

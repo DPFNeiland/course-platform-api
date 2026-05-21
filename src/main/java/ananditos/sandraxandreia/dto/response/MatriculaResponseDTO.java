@@ -5,6 +5,8 @@ import ananditos.sandraxandreia.domain.matricula.StatusMatricula;
 import java.time.LocalDate;
 
 public class MatriculaResponseDTO {
+    private Long id;
+
     private LocalDate dataMatricula;
 
     private StatusMatricula status;
@@ -13,7 +15,8 @@ public class MatriculaResponseDTO {
 
     private Long cursoId;
 
-    public MatriculaResponseDTO(LocalDate dataMatricula, StatusMatricula status, Long alunoId, Long cursoId) {
+    public MatriculaResponseDTO(Long id, LocalDate dataMatricula, StatusMatricula status, Long alunoId, Long cursoId) {
+        this.id = id;
         this.dataMatricula = dataMatricula;
         this.status = status;
         this.alunoId = alunoId;
@@ -21,6 +24,10 @@ public class MatriculaResponseDTO {
     }
 
     public MatriculaResponseDTO() {
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public LocalDate getDataMatricula() {

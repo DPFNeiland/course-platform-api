@@ -37,7 +37,7 @@ public class SecurityConfig {
 
                         // Cadastro inicial para que alunos e professores possam criar
                         // credenciais e depois autenticar com HTTP Basic.
-                        .requestMatchers(HttpMethod.POST, "/aluno", "/professor").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/aluno", "/professor", "/curador").permitAll()
 
                         // anyRequest() pega o que nao foi coberto acima.
                         .anyRequest().authenticated())
