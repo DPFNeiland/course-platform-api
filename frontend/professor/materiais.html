@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Materiais - Professor</title>
+    <link rel="stylesheet" href="/global.css">
+    <link rel="stylesheet" href="style/materiais.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+</head>
+<body>
+    <nav class="navbar">
+        <input type="checkbox" class="nav-toggle" id="nav-toggle">
+        <div class="nav-left">
+        <label for="nav-toggle" class="nav-toggle-label">
+            <span></span>
+            <span></span>
+            <span></span>
+        </label>
+        <a href="dashboard.html" class="logo">EdTech</a>
+        </div>
+        <ul class="menu">
+            <li><a href="agenda.html">Agenda</a></li>
+            <li><a href="avaliacoes.html">Avaliações</a></li>
+            <li><a href="materiais.html">Materiais</a></li>
+            <li><a href="forum-professor.html">Fórum</a></li>
+        </ul>
+        <div class="nav-right">
+        <a href="desempenho.html"><div class="avatar">JD</div></a>
+        </div>
+    </nav>  
+
+    <header class="header">
+        <div class="header-content">
+            <h1>Materiais didáticos</h1>
+            <p>Gerencie seus materiais de aula de forma organizada e eficiente</p>
+        </div>
+    </header>
+
+    <main>
+        <section class="upload-section">
+            <div class="card">
+                <h3><i class="fas fa-cloud-upload-alt"></i> Enviar material</h3>
+                <button class="btn-pill">
+                    <i class="fas fa-plus"></i>
+                    Enviar material
+                </button>
+            </div>
+        </section>
+
+        <section class="materials-grid">
+            <h2>Meus Materiais</h2>
+            <div class="grid">
+                <div class="material-card">
+                    <div class="icon">
+                        <i class="fas fa-file-pdf"></i>
+                    </div>
+                    <h4>Introdução ao Álgebra.pdf</h4>
+                    <div class="info">
+                        <span>2.5 MB</span>
+                        <span>15/10/2024</span>
+                    </div>
+                    <div class="actions">
+                        <button title="Baixar"><i class="fas fa-download"></i></button>
+                        <button title="Compartilhar"><i class="fas fa-share-alt"></i></button>
+                        <button class="delete" title="Excluir"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+                <div class="material-card">
+                    <div class="icon">
+                        <i class="fas fa-file-video"></i>
+                    </div>
+                    <h4>Aula 1 - Equações.mp4</h4>
+                    <div class="info">
+                        <span>45 MB</span>
+                        <span>14/10/2024</span>
+                    </div>
+                    <div class="actions">
+                        <button title="Baixar"><i class="fas fa-download"></i></button>
+                        <button title="Compartilhar"><i class="fas fa-share-alt"></i></button>
+                        <button class="delete" title="Excluir"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+                <div class="material-card">
+                    <div class="icon">
+                        <i class="fas fa-file-powerpoint"></i>
+                    </div>
+                    <h4>Revisão Semanal.pptx</h4>
+                    <div class="info">
+                        <span>8.2 MB</span>
+                        <span>10/10/2024</span>
+                    </div>
+                    <div class="actions">
+                        <button title="Baixar"><i class="fas fa-download"></i></button>
+                        <button title="Compartilhar"><i class="fas fa-share-alt"></i></button>
+                        <button class="delete" title="Excluir"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+                <div class="material-card">
+                    <div class="icon">
+                        <i class="fas fa-link"></i>
+                    </div>
+                    <h4>Khan Academy - Álgebra</h4>
+                    <div class="info">
+                        <span>Link externo</span>
+                        <span>15/10/2024</span>
+                    </div>
+                    <div class="actions">
+                        <button title="Baixar"><i class="fas fa-download"></i></button>
+                        <button title="Compartilhar"><i class="fas fa-share-alt"></i></button>
+                        <button class="delete" title="Excluir"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="folders-section">
+            <h2>Pastas</h2>
+            <div class="grid">
+                <div class="folder-card">
+                    <div class="icon">
+                        <i class="fas fa-folder-open"></i>
+                    </div>
+                    <h4>Matemática 1º Ano</h4>
+                    <span>12 materiais</span>
+                </div>
+                <div class="folder-card">
+                    <div class="icon">
+                        <i class="fas fa-folder-open"></i>
+                    </div>
+                    <h4>Prova Final</h4>
+                    <span>5 materiais</span>
+                </div>
+                <div class="folder-card">
+                    <div class="icon">
+                        <i class="fas fa-folder-open"></i>
+                    </div>
+                    <h4>Exercícios</h4>
+                    <span>8 materiais</span>
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda do Professor - EdTech</title>    
+    <link rel="stylesheet" href="/global.css">
+    <link rel="stylesheet" href="style/agenda.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <input type="checkbox" class="nav-toggle" id="nav-toggle">
+        <div class="nav-left">
+        <label for="nav-toggle" class="nav-toggle-label">
+            <span></span>
+            <span></span>
+            <span></span>
+        </label>
+        <a href="dashboard.html" class="logo">EdTech</a>
+        </div>
+        <ul class="menu">
+            <li><a href="agenda.html">Agenda</a></li>
+            <li><a href="avaliacoes.html">Avaliações</a></li>
+            <li><a href="materiais.html">Materiais</a></li>
+            <li><a href="forum-professor.html">Fórum</a></li>
+        </ul>
+        <div class="nav-right">
+        
+        <a href="desempenho.html"><div class="avatar">JD</div></a>
+        </div>
+    </nav>  
+
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <h1>Sua agenda</h1>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-container">
+        <!-- Calendar Section -->
+        <section class="calendar-section">
+            <div class="month-nav">
+                <button class="nav-btn">&larr;</button>
+                <h2 class="month-title">Novembro 2024</h2>
+                <button class="nav-btn">&rarr;</button>
+            </div>
+            <div class="calendar-header">
+                <span class="day-header">Dom</span>
+                <span class="day-header">Seg</span>
+                <span class="day-header">Ter</span>
+                <span class="day-header">Qua</span>
+                <span class="day-header">Qui</span>
+                <span class="day-header">Sex</span>
+                <span class="day-header">Sáb</span>
+            </div>
+            <div class="calendar-grid">
+                <!-- Week 1 -->
+                <div class="day other-month"><span class="date">29</span></div>
+                <div class="day other-month"><span class="date">30</span></div>
+                <div class="day other-month"><span class="date">31</span></div>
+                <div class="day"><span class="date">1</span></div>
+                <div class="day"><span class="date">2</span></div>
+                <div class="day"><span class="date">3</span></div>
+                <div class="day"><span class="date">4</span></div>
+                <!-- Week 2 -->
+                <div class="day"><span class="date">5</span><div class="badges"><span class="badge aula">Aula</span></div></div>
+                <div class="day"><span class="date">6</span></div>
+                <div class="day"><span class="date">7</span></div>
+                <div class="day"><span class="date">8</span><div class="badges"><span class="badge avaliacao">Avaliação</span></div></div>
+                <div class="day"><span class="date">9</span></div>
+                <div class="day"><span class="date">10</span></div>
+                <div class="day"><span class="date">11</span></div>
+                <!-- Week 3 -->
+                <div class="day today"><span class="date">12</span><div class="badges"><span class="badge reuniao">Reunião</span></div></div>
+                <div class="day"><span class="date">13</span></div>
+                <div class="day"><span class="date">14</span></div>
+                <div class="day"><span class="date">15</span></div>
+                <div class="day"><span class="date">16</span><div class="badges"><span class="badge atendimento">Atend.</span></div></div>
+                <div class="day"><span class="date">17</span></div>
+                <div class="day"><span class="date">18</span></div>
+                <!-- Week 4 -->
+                <div class="day"><span class="date">19</span></div>
+                <div class="day"><span class="date">20</span><div class="badges"><span class="badge aula">Aula</span></div></div>
+                <div class="day"><span class="date">21</span></div>
+                <div class="day"><span class="date">22</span></div>
+                <div class="day"><span class="date">23</span><div class="badges"><span class="badge avaliacao">Avaliação</span></div></div>
+                <div class="day"><span class="date">24</span></div>
+                <div class="day"><span class="date">25</span></div>
+                <!-- Week 5 -->
+                <div class="day"><span class="date">26</span></div>
+                <div class="day"><span class="date">27</span><div class="badges"><span class="badge reuniao">Reunião</span></div></div>
+                <div class="day"><span class="date">28</span></div>
+                <div class="day"><span class="date">29</span></div>
+                <div class="day"><span class="date">30</span><div class="badges"><span class="badge atendimento">Atend.</span></div></div>
+                <div class="day other-month"><span class="date">1</span></div>
+                <div class="day other-month"><span class="date">2</span></div>
+            </div>
+        </section>
+
+        <!-- Events Section -->
+        <section class="events-section">
+            <h3>Próximos eventos</h3>
+            <div class="events-list">
+                <a href="aula-ao-vivo.html">
+                <div class="event-card">
+                    <div class="event-time">Hoje, 10:00 - 11:00</div>
+                    <div class="event-title">Reunião com pais do 3º ano</div>
+                    <span class="badge reuniao event-badge">Reunião</span>
+                </div>
+                </a>
+                <div class="event-card">
+                    <div class="event-time">Amanhã, 14:00 - 15:30</div>
+                    <div class="event-title">Atendimento individual - João S.</div>
+                    <span class="badge atendimento event-badge">Atend. Ind.</span>
+                </div>
+                <div class="event-card">
+                    <div class="event-time">Dia 20, 15:00 - 16:00</div>
+                    <div class="event-title">Aula ao vivo de Matemática</div>
+                    <span class="badge aula event-badge">Aula</span>
+                </div>
+                <div class="event-card">
+                    <div class="event-time">Dia 23, 09:00 - 10:30</div>
+                    <div class="event-title">Avaliação de Ciências 2º ano</div>
+                    <span class="badge avaliacao event-badge">Avaliação</span>
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

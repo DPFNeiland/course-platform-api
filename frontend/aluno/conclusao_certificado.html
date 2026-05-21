@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conclusão do Curso - Certificado</title>
+    <link rel="stylesheet" href="../global.css">
+    <link rel="stylesheet" href="style/conclusao_certificado.css">
+    
+</head>
+<body>
+    <!-- HEADER -->
+    <header class="header">
+      <nav class="navbar">
+          <input type="checkbox" class="nav-toggle" id="nav-toggle">
+          <div class="nav-left">
+          <label for="nav-toggle" class="nav-toggle-label">
+              <span></span>
+              <span></span>
+              <span></span>
+          </label>
+          <a href="dashboard.html" class="logo">EdTech</a>
+          </div>
+          <ul class="menu">
+          <li><a href="boletim.html">Boletim</a></li>
+          <li><a href="conquistas.html">Conquistas</a></li>
+          <li><a href="forum.html">Fórum</a></li>
+          </ul>
+          <div class="nav-right">
+          <div class="avatar">JD</div>
+          </div>
+      </nav>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <div class="container">
+        <!-- TOP BAR -->
+        <div class="top-bar">
+            <h1>Olá, <span id="nomeAluno">Carregando...</span>!</h1>
+            <button class="btn-mudar-plano">Mudar Plano</button>
+        </div>
+
+        <!-- HERO SECTION -->
+        <div class="hero-conclusao">
+            <div class="checkmark">✓</div>
+            <h2>Parabéns!</h2>
+            <p>Você concluiu com êxito o curso</p>
+            <div class="status-badge">100% Concluído</div>
+        </div>
+
+        <!-- VERIFICAÇÃO DE REQUISITOS -->
+        <div class="requisitos-section">
+            <h3>Verificação de Requisitos</h3>
+            <div class="requisito-item">
+                <span class="requisito-label">Aulas Assistidas</span>
+                <span class="requisito-status">
+                    <span id="aulasStatus">0/0</span>
+                    <span class="checkmark-small">✓</span>
+                </span>
+            </div>
+            <div class="requisito-item">
+                <span class="requisito-label">Atividades Realizadas</span>
+                <span class="requisito-status">
+                    <span id="atividadesStatus">0/0</span>
+                    <span class="checkmark-small">✓</span>
+                </span>
+            </div>
+            <div class="requisito-item">
+                <span class="requisito-label">Média Final</span>
+                <span class="requisito-status">
+                    <span id="mediaStatus">0</span>
+                    <span class="checkmark-small">✓</span>
+                </span>
+            </div>
+            <div class="requisito-item">
+                <span class="requisito-label">Frequência</span>
+                <span class="requisito-status">
+                    <span id="frequenciaStatus">100%</span>
+                    <span class="checkmark-small">✓</span>
+                </span>
+            </div>
+        </div>
+
+        <!-- CERTIFICADO PREVIEW -->
+        <div class="certificado-section">
+            <h3>Seu Certificado</h3>
+            <div class="certificado-preview">
+                <div class="certificado-title">Certificado de Conclusão</div>
+                <div class="certificado-text">Certificamos que</div>
+                <div class="certificado-nome" id="certificadoNome">Carregando...</div>
+                <div class="certificado-text">concluiu com êxito o curso de</div>
+                <div class="certificado-curso" id="certificadoCurso">Carregando...</div>
+                <div class="certificado-info">
+                    <div class="certificado-info-item">
+                        <span class="certificado-info-label">Carga Horária</span>
+                        <span id="certificadoCargaHoraria">-</span>
+                    </div>
+                    <div class="certificado-info-item">
+                        <span class="certificado-info-label">Data de Emissão</span>
+                        <span id="certificadoData">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- GAMIFICAÇÃO -->
+        <div class="gamificacao-section">
+            <h3>🎮 Recompensas Desbloqueadas</h3>
+            <div class="reward-item">
+                <div class="reward-icon">💰</div>
+                <div class="reward-text">
+                    <strong>+50 Moedas</strong>
+                    <span>Ganhas por concluir este curso</span>
+                </div>
+            </div>
+            <div class="reward-item">
+                <div class="reward-icon">🏅</div>
+                <div class="reward-text">
+                    <strong id="insigniaText">Nova Insígnia</strong>
+                    <span id="insigniaDesc">Desbloqueada por dominar este curso</span>
+                </div>
+            </div>
+            <div class="reward-item">
+                <div class="reward-icon">⚡</div>
+                <div class="reward-text">
+                    <strong>Faltam 2 cursos para 20% de desconto!</strong>
+                    <span>Complete mais 2 cursos e ganhe desconto permanente no Plano Premium</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- AÇÕES -->
+        <div class="actions-section">
+            <button class="action-btn btn-primary" onclick="downloadCertificado()">
+                📥 Baixar Certificado (PDF)
+            </button>
+            <button class="action-btn btn-secondary" onclick="compartilharLinkedin()">
+                🔗 Compartilhar no LinkedIn
+            </button>
+            <a href="catalogo.html"><button class="action-btn btn-tertiary" onclick="voltarCatalogo()">
+                ← Voltar ao Catálogo
+            </button></a>
+        </div>
+    </div>
+
+    <!-- MODAL PARA DOWNLOAD -->
+    <div id="modalDownload" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">Baixar Certificado</div>
+            <div class="modal-body">
+                Seu certificado será baixado em formato PDF. Você poderá compartilhá-lo em suas redes profissionais.
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="fecharModal()">Cancelar</button>
+                <button class="btn-confirm" onclick="confirmarDownload()">Confirmar Download</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL PARA LINKEDIN -->
+    <div id="modalLinkedin" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">Compartilhar no LinkedIn</div>
+            <div class="modal-body" id="modalLinkedinBody">
+                Você será redirecionado para o LinkedIn com uma mensagem pré-preenchida.
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="fecharModalLinkedin()">Cancelar</button>
+                <button class="btn-confirm" onclick="confirmarCompartilhamento()">Compartilhar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Base de dados de certificados (mesma do meus_certificados.html)
+        const certificados = [
+            {
+                id: 1,
+                nome: "João Silva",
+                titulo: "React Avançado: Hooks e Context",
+                categoria: "tecnologia",
+                cargaHoraria: 40,
+                media: 8.5,
+                dataConclusao: "15 de Maio de 2026",
+                aulasTotal: 30,
+                atividadesTotal: 5,
+                icon: "⚛️",
+                insignia: "Mestre do React"
+            },
+            {
+                id: 2,
+                nome: "João Silva",
+                titulo: "JavaScript Básico",
+                categoria: "tecnologia",
+                cargaHoraria: 30,
+                media: 9.0,
+                dataConclusao: "10 de Maio de 2026",
+                aulasTotal: 25,
+                atividadesTotal: 4,
+                icon: "📜",
+                insignia: "Mestre do JavaScript"
+            },
+            {
+                id: 3,
+                nome: "João Silva",
+                titulo: "Design Thinking",
+                categoria: "design",
+                cargaHoraria: 20,
+                media: 8.0,
+                dataConclusao: "05 de Maio de 2026",
+                aulasTotal: 15,
+                atividadesTotal: 3,
+                icon: "🎨",
+                insignia: "Pensador de Design"
+            },
+            {
+                id: 4,
+                nome: "João Silva",
+                titulo: "Gestão de Projetos Ágil",
+                categoria: "negocios",
+                cargaHoraria: 35,
+                media: 8.7,
+                dataConclusao: "01 de Maio de 2026",
+                aulasTotal: 28,
+                atividadesTotal: 5,
+                icon: "📊",
+                insignia: "Agilista Certificado"
+            },
+            {
+                id: 5,
+                nome: "João Silva",
+                titulo: "Python para Data Science",
+                categoria: "tecnologia",
+                cargaHoraria: 50,
+                media: 9.2,
+                dataConclusao: "25 de Abril de 2026",
+                aulasTotal: 40,
+                atividadesTotal: 6,
+                icon: "🐍",
+                insignia: "Cientista de Dados"
+            },
+            {
+                id: 6,
+                nome: "João Silva",
+                titulo: "UI/UX Design Avançado",
+                categoria: "design",
+                cargaHoraria: 45,
+                media: 8.3,
+                dataConclusao: "20 de Abril de 2026",
+                aulasTotal: 35,
+                atividadesTotal: 5,
+                icon: "🎭",
+                insignia: "Designer Avançado"
+            }
+        ];
+
+        let dadosAluno = null;
+
+        // Obter ID da URL
+        function obterIdDaUrl() {
+            const params = new URLSearchParams(window.location.search);
+            return parseInt(params.get('id')) || 1;
+        }
+
+        // Inicializar página
+        function inicializar() {
+            const id = obterIdDaUrl();
+            dadosAluno = certificados.find(c => c.id === id);
+
+            if (!dadosAluno) {
+                dadosAluno = certificados[0];
+            }
+
+            // Preencher dados
+            document.getElementById('nomeAluno').textContent = dadosAluno.nome;
+            document.getElementById('aulasStatus').textContent = `${dadosAluno.aulasTotal}/${dadosAluno.aulasTotal}`;
+            document.getElementById('atividadesStatus').textContent = `${dadosAluno.atividadesTotal}/${dadosAluno.atividadesTotal}`;
+            document.getElementById('mediaStatus').textContent = dadosAluno.media.toFixed(1);
+            
+            document.getElementById('certificadoNome').textContent = dadosAluno.nome;
+            document.getElementById('certificadoCurso').textContent = dadosAluno.titulo;
+            document.getElementById('certificadoCargaHoraria').textContent = `${dadosAluno.cargaHoraria} horas`;
+            document.getElementById('certificadoData').textContent = dadosAluno.dataConclusao;
+            
+            document.getElementById('insigniaText').textContent = `Nova Insígnia: "${dadosAluno.insignia}"`;
+            document.getElementById('insigniaDesc').textContent = `Desbloqueada por dominar ${dadosAluno.titulo}`;
+        }
+
+        // Download do certificado
+        function downloadCertificado() {
+            document.getElementById('modalDownload').style.display = 'block';
+        }
+
+        function fecharModal() {
+            document.getElementById('modalDownload').style.display = 'none';
+        }
+
+        function confirmarDownload() {
+            alert(`Certificado de ${dadosAluno.nome} baixado com sucesso!\n\nCurso: ${dadosAluno.titulo}\nData: ${dadosAluno.dataConclusao}`);
+            fecharModal();
+        }
+
+        // Compartilhar no LinkedIn
+        function compartilharLinkedin() {
+            const modal = document.getElementById('modalLinkedin');
+            const body = document.getElementById('modalLinkedinBody');
+            
+            const mensagem = `Acabei de concluir o curso "${dadosAluno.titulo}" com sucesso! 🎓\n\nCarga horária: ${dadosAluno.cargaHoraria}h\nMédia final: ${dadosAluno.media.toFixed(1)}/10\nInsígnia desbloqueada: ${dadosAluno.insignia}\n\nEstou evoluindo continuamente em minha jornada de aprendizado! 🚀 #Educação #Aprendizado #Certificado`;
+            
+            body.innerHTML = `<strong>Mensagem a ser compartilhada:</strong><br><br>"${mensagem}"`;
+            modal.style.display = 'block';
+        }
+
+        function fecharModalLinkedin() {
+            document.getElementById('modalLinkedin').style.display = 'none';
+        }
+
+        function confirmarCompartilhamento() {
+            const mensagem = `Acabei de concluir o curso "${dadosAluno.titulo}" com sucesso! 🎓 Carga horária: ${dadosAluno.cargaHoraria}h. Média final: ${dadosAluno.media.toFixed(1)}/10. Insígnia desbloqueada: ${dadosAluno.insignia}. Estou evoluindo continuamente em minha jornada de aprendizado! 🚀 #Educação #Aprendizado #Certificado`;
+            
+            const urlLinkedin = `https://www.linkedin.com/sharing/share-offsite/?url=https://seusite.com`;
+            window.open(urlLinkedin, '_blank');
+            
+            fecharModalLinkedin();
+        }
+
+        // Voltar ao catálogo
+        function voltarCatalogo() {
+            window.location.href = 'meus_certificados.html';
+        }
+
+        // Fechar modal ao clicar fora
+        window.onclick = function(event) {
+            const modalDownload = document.getElementById('modalDownload');
+            const modalLinkedin = document.getElementById('modalLinkedin');
+            
+            if (event.target === modalDownload) {
+                modalDownload.style.display = 'none';
+            }
+            if (event.target === modalLinkedin) {
+                modalLinkedin.style.display = 'none';
+            }
+        }
+
+        // Inicializar ao carregar a página
+        document.addEventListener('DOMContentLoaded', inicializar);
+    </script>
+</body>
+</html>

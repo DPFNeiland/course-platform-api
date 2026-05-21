@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desempenho da Turma</title>    
+    <link rel="stylesheet" href="/global.css">
+    <link rel="stylesheet" href="style/desempenho.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+</head>
+<body>
+    <nav class="navbar">
+        <input type="checkbox" class="nav-toggle" id="nav-toggle">
+        <div class="nav-left">
+        <label for="nav-toggle" class="nav-toggle-label">
+            <span></span>
+            <span></span>
+            <span></span>
+        </label>
+        <a href="dashboard.html" class="logo">EdTech</a>
+        </div>
+        <ul class="menu">
+            <li><a href="agenda.html">Agenda</a></li>
+            <li><a href="avaliacoes.html">Avaliações</a></li>
+            <li><a href="materiais.html">Materiais</a></li>
+            <li><a href="forum-professor.html">Fórum</a></li>
+        </ul>
+        <div class="nav-right">
+        <a href="desempenho.html"><div class="avatar">JD</div></a>
+        </div>
+    </nav> 
+
+    <header>
+        <h1>Desempenho da Turma</h1>
+    </header>
+
+    <main>
+        <section class="kpis-grid">
+            <div class="card kpi-card">
+                <span class="kpi-number">8.5</span>
+                <span class="kpi-label">Média Geral</span>
+            </div>
+            <div class="card kpi-card">
+                <span class="kpi-number">95%</span>
+                <span class="kpi-label">Presença Média</span>
+            </div>
+            <div class="card kpi-card">
+                <span class="kpi-number">82%</span>
+                <span class="kpi-label">Engajamento</span>
+            </div>
+            <div class="card kpi-card">
+                <span class="kpi-number">75%</span>
+                <span class="kpi-label">Conclusão de Módulos</span>
+            </div>
+        </section>
+
+        <section class="charts-grid">
+            <div class="card">
+                <h3 class="section-title">Evolução das Notas</h3>
+                <div class="chart-container line-chart">
+                    <svg viewBox="0 0 500 200">
+                        <path d="M20 160 Q80 140 140 120 Q200 100 260 130 Q320 110 380 90 Q440 80 480 100" stroke="#3b82f6" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="20" cy="160" r="4" fill="#3b82f6"/>
+                        <circle cx="140" cy="120" r="4" fill="#3b82f6"/>
+                        <circle cx="260" cy="130" r="4" fill="#3b82f6"/>
+                        <circle cx="380" cy="90" r="4" fill="#3b82f6"/>
+                        <circle cx="480" cy="100" r="4" fill="#3b82f6"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="card">
+                <h3 class="section-title">Desempenho por Módulo</h3>
+                <div class="chart-container bar-chart">
+                    <div class="bar" style="height: 70%;" data-label="Módulo 1"></div>
+                    <div class="bar" style="height: 85%;" data-label="Módulo 2"></div>
+                    <div class="bar" style="height: 60%;" data-label="Módulo 3"></div>
+                    <div class="bar" style="height: 92%;" data-label="Módulo 4"></div>
+                    <div class="bar" style="height: 78%;" data-label="Módulo 5"></div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <div class="card">
+                <h3 class="section-title">Heatmap Semanal de Participação</h3>
+                <div class="heatmap-grid">
+                    <div class="heatmap-cell low"></div>
+                    <div class="heatmap-cell med"></div>
+                    <div class="heatmap-cell high"></div>
+                    <div class="heatmap-cell peak"></div>
+                    <div class="heatmap-cell med"></div>
+                    <div class="heatmap-cell low"></div>
+                    <div class="heatmap-cell low"></div>
+                    <div class="heatmap-cell med"></div>
+                    <div class="heatmap-cell high"></div>
+                    <div class="heatmap-cell peak"></div>
+                    <div class="heatmap-cell high"></div>
+                    <div class="heatmap-cell med"></div>
+                    <div class="heatmap-cell low"></div>
+                    <div class="heatmap-cell peak"></div>
+                    <div class="heatmap-cell high"></div>
+                    <div class="heatmap-cell med"></div>
+                    <div class="heatmap-cell high"></div>
+                    <div class="heatmap-cell peak"></div>
+                    <div class="heatmap-cell med"></div>
+                    <div class="heatmap-cell low"></div>
+                    <div class="heatmap-cell med"></div>
+                    <div class="heatmap-cell high"></div>
+                    <div class="heatmap-cell peak"></div>
+                    <div class="heatmap-cell high"></div>
+                    <div class="heatmap-cell med"></div>
+                    <div class="heatmap-cell low"></div>
+                    <div class="heatmap-cell med"></div>
+                    <div class="heatmap-cell high"></div>
+                    <div class="heatmap-cell med"></div>
+                    <div class="heatmap-cell low"></div>
+                    <div class="heatmap-cell low"></div>
+                    <div class="heatmap-cell med"></div>
+                    <div class="heatmap-cell high"></div>
+                    <div class="heatmap-cell med"></div>
+                </div>
+                <div class="heatmap-labels">
+                    <span>Seg</span>
+                    <span style="margin-left: auto;">Dom</span>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <div class="card">
+                <h3 class="section-title">Alunos</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Progresso</th>
+                                <th>Nota Média</th>
+                                <th>Presença</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>João Silva</td>
+                                <td>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 80%"></div>
+                                    </div>
+                                    80%
+                                </td>
+                                <td>9.2</td>
+                                <td>98%</td>
+                            </tr>
+                            <tr>
+                                <td>Maria Oliveira</td>
+                                <td>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 92%"></div>
+                                    </div>
+                                    92%
+                                </td>
+                                <td>9.5</td>
+                                <td>100%</td>
+                            </tr>
+                            <tr>
+                                <td>Pedro Santos</td>
+                                <td>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 65%"></div>
+                                    </div>
+                                    65%
+                                </td>
+                                <td>7.8</td>
+                                <td>88%</td>
+                            </tr>
+                            <tr>
+                                <td>Ana Costa</td>
+                                <td>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 75%"></div>
+                                    </div>
+                                    75%
+                                </td>
+                                <td>8.4</td>
+                                <td>95%</td>
+                            </tr>
+                            <tr>
+                                <td>Lucas Pereira</td>
+                                <td>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 88%"></div>
+                                    </div>
+                                    88%
+                                </td>
+                                <td>9.0</td>
+                                <td>96%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

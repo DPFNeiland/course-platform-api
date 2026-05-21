@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fórum dos Professores</title>
+    <link rel="stylesheet" href="/global.css">
+    <link rel="stylesheet" href="style/forum-professor.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <input type="checkbox" class="nav-toggle" id="nav-toggle">
+        <div class="nav-left">
+        <label for="nav-toggle" class="nav-toggle-label">
+            <span></span>
+            <span></span>
+            <span></span>
+        </label>
+        <a href="dashboard.html" class="logo">EdTech</a>
+        </div>
+        <ul class="menu">
+            <li><a href="agenda.html">Agenda</a></li>
+            <li><a href="avaliacoes.html">Avaliações</a></li>
+            <li><a href="materiais.html">Materiais</a></li>
+            <li><a href="forum-professor.html">Fórum</a></li>
+        </ul>
+        <div class="nav-right">
+        <a href="desempenho.html"><div class="avatar">JD</div></a>
+        </div>
+    </nav> 
+
+    <!-- Header -->
+    <header class="page-header">
+        <div class="header-content">
+            <h1>Fórum dos Professores</h1>
+            <p>Discuta metodologias, planejamento, comunicação e mais com outros professores da plataforma.</p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        <div class="content-wrapper">
+            <!-- Filters -->
+            <div>
+                <div class="filters">
+                    <button class="pill active">Todos</button>
+                    <button class="pill">Metodologia</button>
+                    <button class="pill">Planejamento</button>
+                    <button class="pill">Comunicação</button>
+                    <button class="pill">Off-topic</button>
+                </div>
+
+                <!-- Topics List -->
+                <div class="topics-grid">
+                    <div class="topic-card">
+                        <h3>Como implementar gamificação nas aulas de matemática?</h3>
+                        <div class="topic-meta">
+                            <div class="author">
+                                <div class="avatar">MM</div>
+                                <span>Maria Silva</span>
+                            </div>
+                            <div class="tags">
+                                <span class="tag">metodologia</span>
+                                <span class="tag">matemática</span>
+                            </div>
+                            <div class="stats">
+                                <span>23 respostas</span>
+                                <span>1 dia atrás</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="topic-card">
+                        <h3>Dicas para planejamento anual eficaz</h3>
+                        <div class="topic-meta">
+                            <div class="author">
+                                <div class="avatar">JP</div>
+                                <span>João Pedro</span>
+                            </div>
+                            <div class="tags">
+                                <span class="tag">planejamento</span>
+                            </div>
+                            <div class="stats">
+                                <span>15 respostas</span>
+                                <span>4h atrás</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="topic-card">
+                        <h3>Ferramentas de comunicação síncrona recomendadas</h3>
+                        <div class="topic-meta">
+                            <div class="author">
+                                <div class="avatar">AS</div>
+                                <span>Ana Santos</span>
+                            </div>
+                            <div class="tags">
+                                <span class="tag">comunicação</span>
+                                <span class="tag">aula ao vivo</span>
+                            </div>
+                            <div class="stats">
+                                <span>8 respostas</span>
+                                <span>ontem</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="topic-card">
+                        <h3>Café com professores: memes da sala de aula</h3>
+                        <div class="topic-meta">
+                            <div class="author">
+                                <div class="avatar">RC</div>
+                                <span>Ricardo Costa</span>
+                            </div>
+                            <div class="tags">
+                                <span class="tag">off-topic</span>
+                            </div>
+                            <div class="stats">
+                                <span>45 respostas</span>
+                                <span>2 dias atrás</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <h3>Tópicos populares</h3>
+                <div class="popular-topic">
+                    <a href="#">Gamificação nas aulas</a>
+                    <span>67 respostas</span>
+                </div>
+                <div class="popular-topic">
+                    <a href="#">Planejamento anual</a>
+                    <span>52 respostas</span>
+                </div>
+                <div class="popular-topic">
+                    <a href="#">Ferramentas de videochamada</a>
+                    <span>41 respostas</span>
+                </div>
+                <div class="popular-topic">
+                    <a href="#">Memes professores</a>
+                    <span>89 respostas</span>
+                </div>
+            </aside>
+        </div>
+    </main>
+
+    <!-- Floating Action Button -->
+    <button class="fab">Criar tópico</button>
+</body>
+</html>

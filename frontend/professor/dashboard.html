@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard do Professor - EdTech</title>
+    <link rel="stylesheet" href="/global.css">
+    <link rel="stylesheet" href="style/dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <input type="checkbox" class="nav-toggle" id="nav-toggle">
+        <div class="nav-left">
+        <label for="nav-toggle" class="nav-toggle-label">
+            <span></span>
+            <span></span>
+            <span></span>
+        </label>
+        <a href="dashboard.html" class="logo">EdTech</a>
+        </div>
+        <ul class="menu">
+            <li><a href="agenda.html">Agenda</a></li>
+            <li><a href="avaliacoes.html">Avaliações</a></li>
+            <li><a href="materiais.html">Materiais</a></li>
+            <li><a href="forum-professor.html">Fórum</a></li>
+        </ul>
+        <div class="nav-right">
+        <a href="desempenho.html"><div class="avatar">JD</div></a>
+        </div>
+    </nav>
+
+    <header>
+        <div class="container">
+            <h1>Olá, {nome do professor}</h1>
+        </div>
+    </header>
+
+    <section class="section">
+        <div class="container">
+            <h2>Métricas Principais</h2>
+            <div class="kpi-grid">
+                <div class="card kpi-card">
+                    <div class="icon">🔥</div>
+                    <div class="value">92%</div>
+                    <div class="label">Engajamento da turma</div>
+                </div>
+                <div class="card kpi-card">
+                    <div class="icon">👥</div>
+                    <div class="value">87%</div>
+                    <div class="label">Presença média</div>
+                </div>
+                <div class="card kpi-card">
+                    <div class="icon">📝</div>
+                    <div class="value">12</div>
+                    <div class="label">Avaliações pendentes</div>
+                </div>
+                <div class="card kpi-card">
+                    <div class="icon">🎓</div>
+                    <div class="value">8</div>
+                    <div class="label">Aulas ministradas no mês</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="charts-grid">
+                <div class="card chart-card">
+                    <h3>Desempenho por módulo</h3>
+                    <div class="chart-container">
+                        <svg class="chart-svg" viewBox="0 0 500 300">
+                            <defs>
+                                <linearGradient id="barGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+                                    <stop offset="0%" stop-color="var(--primary-blue-dark)"></stop>
+                                    <stop offset="100%" stop-color="var(--primary-blue)"></stop>
+                                </linearGradient>
+                            </defs>
+                            <!-- Grid -->
+                            <g stroke="#e5e7eb" stroke-width="1">
+                                <line x1="60" y1="40" x2="60" y2="260" />
+                                <line x1="60" y1="260" x2="460" y2="260" />
+                                <line x1="60" y1="200" x2="460" y2="200" />
+                                <line x1="60" y1="140" x2="460" y2="140" />
+                                <line x1="60" y1="80" x2="460" y2="80" />
+                            </g>
+                            <!-- Bars -->
+                            <rect x="90" y="160" width="35" height="100" rx="5" fill="url(#barGrad)" />
+                            <rect x="180" y="110" width="35" height="150" rx="5" fill="url(#barGrad)" />
+                            <rect x="270" y="200" width="35" height="60" rx="5" fill="url(#barGrad)" />
+                            <rect x="360" y="80" width="35" height="180" rx="5" fill="url(#barGrad)" />
+                            <!-- Labels -->
+                            <text x="107" y="280" font-size="12" fill="var(--text-muted)" text-anchor="middle">M1</text>
+                            <text x="198" y="280" font-size="12" fill="var(--text-muted)" text-anchor="middle">M2</text>
+                            <text x="288" y="280" font-size="12" fill="var(--text-muted)" text-anchor="middle">M3</text>
+                            <text x="378" y="280" font-size="12" fill="var(--text-muted)" text-anchor="middle">M4</text>
+                        </svg>
+                    </div>
+                </div>
+                <div class="card chart-card">
+                    <h3>Engajamento semanal</h3>
+                    <div class="chart-container">
+                        <svg class="chart-svg" viewBox="0 0 500 300">
+                            <!-- Grid -->
+                            <g stroke="#e5e7eb" stroke-width="1">
+                                <line x1="60" y1="40" x2="60" y2="260" />
+                                <line x1="60" y1="260" x2="460" y2="260" />
+                                <line x1="60" y1="200" x2="460" y2="200" />
+                                <line x1="60" y1="140" x2="460" y2="140" />
+                                <line x1="60" y1="80" x2="460" y2="80" />
+                            </g>
+                            <!-- Line -->
+                            <polyline points="80,190 130,170 180,140 230,180 280,110 330,130 380,150 430,120" 
+                                      fill="none" stroke="url(#lineGrad)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+                            <!-- Points -->
+                            <circle cx="80" cy="190" r="6" fill="var(--primary-blue)" stroke="white" stroke-width="2" />
+                            <circle cx="130" cy="170" r="6" fill="var(--primary-blue)" stroke="white" stroke-width="2" />
+                            <circle cx="180" cy="140" r="6" fill="var(--primary-blue)" stroke="white" stroke-width="2" />
+                            <circle cx="230" cy="180" r="6" fill="var(--primary-blue)" stroke="white" stroke-width="2" />
+                            <circle cx="280" cy="110" r="6" fill="var(--primary-blue)" stroke="white" stroke-width="2" />
+                            <circle cx="330" cy="130" r="6" fill="var(--primary-blue)" stroke="white" stroke-width="2" />
+                            <circle cx="380" cy="150" r="6" fill="var(--primary-blue)" stroke="white" stroke-width="2" />
+                            <circle cx="430" cy="120" r="6" fill="var(--primary-blue)" stroke="white" stroke-width="2" />
+                            <!-- Labels -->
+                            <text x="95" y="280" font-size="12" fill="var(--text-muted)" text-anchor="middle">S1</text>
+                            <text x="430" y="280" font-size="12" fill="var(--text-muted)" text-anchor="middle">S7</text>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <h2>Atividades Recentes</h2>
+            <div class="activities-grid">
+                <div class="card activity-card">
+                    <h4>Nova avaliação criada</h4>
+                    <p>Disciplina de Matemática - Turma A</p>
+                    <div class="meta">
+                        <span class="date">2 horas atrás</span>
+                        <span class="pill bg-blue">Pendente</span>
+                    </div>
+                </div>
+                <div class="card activity-card">
+                    <h4>Aluno Maria entregou tarefa</h4>
+                    <p>Atividade 3.2 - Física</p>
+                    <div class="meta">
+                        <span class="date">1 hora atrás</span>
+                        <span class="pill bg-green">Concluída</span>
+                    </div>
+                </div>
+                <div class="card activity-card">
+                    <h4>Resposta no fórum</h4>
+                    <p>Dúvida sobre módulo 4</p>
+                    <div class="meta">
+                        <span class="date">5 horas atrás</span>
+                        <span class="pill bg-green">Respondida</span>
+                    </div>
+                </div>
+                <div class="card activity-card">
+                    <h4>Aula agendada</h4>
+                    <p>Revisão geral - Turma B</p>
+                    <div class="meta">
+                        <span class="date">1 dia atrás</span>
+                        <span class="pill bg-orange">Em breve</span>
+                    </div>
+                </div>
+                <div class="card activity-card">
+                    <h4>Material atualizado</h4>
+                    <p>Slides da aula 5 enviados</p>
+                    <div class="meta">
+                        <span class="date">2 dias atrás</span>
+                        <span class="pill bg-green">Publicado</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

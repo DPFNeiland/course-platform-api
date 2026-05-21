@@ -1,0 +1,240 @@
+:root {
+    --bg-primary: #f8fafc;
+    --card-bg: #ffffff;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --primary-blue: #3b82f6;
+    --dark-blue: #1e40af;
+    --gradient-header: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 6px 10px -4px rgba(0, 0, 0, 0.05);
+    --border-radius: 12px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+
+header {
+    background: var(--gradient-header);
+    color: white;
+    padding: 5rem 2rem 4rem;
+    text-align: center;
+
+}
+
+header h1 {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+    display: grid;
+    gap: 2rem;
+}
+
+.card {
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+}
+
+.kpis-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.kpi-card {
+    text-align: center;
+    padding: 2rem;
+}
+
+.kpi-number {
+    display: block;
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--primary-blue);
+    margin-bottom: 0.5rem;
+}
+
+.kpi-label {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+.chart-container {
+    height: 300px;
+    position: relative;
+}
+
+/* Line Chart SVG */
+.line-chart svg {
+    width: 100%;
+    height: 100%;
+}
+
+.line-chart path {
+    stroke: var(--primary-blue);
+    stroke-width: 3;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* Bar Chart */
+.bar-chart {
+    display: flex;
+    gap: 1rem;
+    height: 100%;
+    align-items: flex-end;
+    padding: 2rem 1rem;
+}
+
+.bar {
+    flex: 1;
+    background: linear-gradient(180deg, var(--primary-blue), #1e40af);
+    border-radius: 6px 6px 0 0;
+    transition: var(--transition);
+    position: relative;
+}
+
+.bar::after {
+    content: attr(data-label);
+    position: absolute;
+    top: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.bar:hover {
+    transform: scale(1.05);
+}
+
+/* Heatmap */
+.heatmap-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    max-width: 350px;
+    margin: 1rem auto;
+}
+
+.heatmap-cell {
+    aspect-ratio: 1;
+    border-radius: 4px;
+    transition: var(--transition);
+}
+
+.heatmap-cell.low { background: rgba(34, 197, 94, 0.2); }
+.heatmap-cell.med { background: rgba(34, 197, 94, 0.5); }
+.heatmap-cell.high { background: rgba(34, 197, 94, 0.8); }
+.heatmap-cell.peak { background: rgba(34, 197, 94, 1); }
+
+.heatmap-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+/* Table */
+.table-container {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+th {
+    background: #f1f5f9;
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+td {
+    padding: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+tr:hover {
+    background: #f8fafc;
+}
+
+.progress-bar {
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 0.25rem 0;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-blue), #1e40af);
+    border-radius: 4px;
+    transition: var(--transition);
+}
+
+@media (max-width: 768px) {
+    .nav-links {
+        gap: 1rem;
+    }
+
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+
+    main {
+        padding: 1rem;
+    }
+
+    .kpis-grid {
+        grid-template-columns: 1fr;
+    }
+}

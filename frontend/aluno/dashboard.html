@@ -1,0 +1,215 @@
+<!-- /aluno/dashboard.html -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard do Aluno</title>
+    <link rel="stylesheet" href="../global.css">
+    <link rel="stylesheet" href="style/dashboard.css">
+</head>
+
+<body>
+    <header class="header">
+        <nav class="navbar">
+            <input type="checkbox" class="nav-toggle" id="nav-toggle">
+            <div class="nav-left">
+                <label for="nav-toggle" class="nav-toggle-label">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </label>
+                <a href="dashboard.html" class="logo">EdTech</a>
+            </div>
+            <ul class="menu">
+                <li><a href="boletim.html">Boletim</a></li>
+                <li><a href="conquistas.html">Conquistas</a></li>
+                <li><a href="forum.html">Fórum</a></li>
+            </ul>
+            <div class="nav-right">
+                <div class="avatar">JD</div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="greeting">
+            <h1>Olá, {{nomeAluno}}!</h1>
+            <button class="btn-pill btn-primary">Mudar Plano</button>
+        </section>
+
+        <section class="top-cards">
+            <div class="card gamificacao">
+                <h3>Gamificação</h3>
+                <div class="points-display">
+                    <span class="points-current">1.250</span>
+                    <span class="points-total">/ 2.000 pts</span>
+                </div>
+                <div class="progress">
+                    <div class="progress-fill" style="width: 62.5%;"></div>
+                </div>
+                <div class="achievements">
+                    <span class="badge badge-gold">🥇 Ouro</span>
+                    <span class="badge badge-silver">🥈 Prata</span>
+                </div>
+            </div>
+            <div class="card cursos-bonus">
+                <h3>Cursos Bônus</h3>
+                <ul class="bonus-list">
+                    <li>
+                        <span>Curso de JavaScript Básico</span>
+                        <span class="badge badge-success">Grátis</span>
+                    </li>
+                    <li>
+                        <span>Design Thinking</span>
+                        <span class="badge badge-success">Grátis</span>
+                    </li>
+                    <li>
+                        <span>Produtividade com Notion</span>
+                        <span class="badge badge-success">Grátis</span>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="section-andamento">
+            <h2>Cursos em Andamento</h2>
+            <div class="cards-grid">
+                <div class="card curso-card">
+                    <div class="curso-thumb"></div>
+                    <h4>React Avançado: Hooks e Context</h4>
+                    <div class="progress-wrap">
+                        <div class="progress">
+                            <div class="progress-fill" style="width: 75%;"></div>
+                        </div>
+                        <span class="progress-label">75%</span>
+                    </div>
+                    <div class="curso-footer">
+                        <span class="eta">Est. 12h restantes</span>
+                        <a href="sala-aula.html"><button class="btn-pill btn-continue">Continuar</button></a>
+                    </div>
+                </div>
+                <div class="card curso-card">
+                    <div class="curso-thumb" style="background: linear-gradient(135deg, #11998e, #38ef7d);"></div>
+                    <h4>Node.js e Express do Zero</h4>
+                    <div class="progress-wrap">
+                        <div class="progress">
+                            <div class="progress-fill" style="width: 45%;"></div>
+                        </div>
+                        <span class="progress-label">45%</span>
+                    </div>
+                    <div class="curso-footer">
+                        <span class="eta">Est. 20h restantes</span>
+                        <button class="btn-pill btn-continue">Continuar</button>
+                    </div>
+                </div>
+                <div class="card curso-card">
+                    <div class="curso-thumb" style="background: linear-gradient(135deg, #4facfe, #00f2fe);"></div>
+                    <h4>Python para Data Science</h4>
+                    <div class="progress-wrap">
+                        <div class="progress">
+                            <div class="progress-fill" style="width: 90%;"></div>
+                        </div>
+                        <span class="progress-label">90%</span>
+                    </div>
+                    <div class="curso-footer">
+                        <span class="eta">Est. 4h restantes</span>
+                        <button class="btn-pill btn-continue">Continuar</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section-catalogo">
+            <h2>Catálogo de Cursos</h2>
+            <div class="filtros">
+                <button class="filtro active">Todos</button>
+                <button class="filtro">Em Andamento</button>
+                <button class="filtro">Recomendados</button>
+                <button class="filtro">Front-end</button>
+                <button class="filtro">Back-end</button>
+            </div>
+            <div class="cards-grid">
+                <div class="card curso-card">
+                    <div class="curso-thumb" style="background: linear-gradient(135deg, #f093fb, #f5576c);"></div>
+                    <h4>Introdução ao Vue.js</h4>
+                    <p class="curso-desc">Aprenda os fundamentos do Vue.js e crie aplicações modernas.</p>
+                    <div class="curso-footer">
+                        <div class="curso-info">
+                            <span>⭐ 4.9 (128)</span>
+                            <span>20h</span>
+                        </div>
+                        <button class="btn-pill btn-primary">Iniciar</button>
+                    </div>
+                </div>
+                <div class="card curso-card">
+                    <div class="curso-thumb" style="background: linear-gradient(135deg, #fa709a, #fee140);"></div>
+                    <h4>UI/UX Design com Figma</h4>
+                    <p class="curso-desc">Domine o Figma e crie interfaces incríveis.</p>
+                    <div class="curso-footer">
+                        <div class="curso-info">
+                            <span>⭐ 4.8 (95)</span>
+                            <span>15h</span>
+                        </div>
+                        <button class="btn-pill btn-primary">Iniciar</button>
+                    </div>
+                </div>
+                <div class="card curso-card">
+                    <div class="curso-thumb" style="background: linear-gradient(135deg, #a8edea, #fed6e3);"></div>
+                    <h4>MongoDB e Mongoose</h4>
+                    <p class="curso-desc">Banco de dados NoSQL para aplicações fullstack.</p>
+                    <div class="curso-footer">
+                        <div class="curso-info">
+                            <span>⭐ 4.7 (67)</span>
+                            <span>12h</span>
+                        </div>
+                        <button class="btn-pill btn-primary">Iniciar</button>
+                    </div>
+                </div>
+                <div class="card curso-card">
+                    <div class="curso-thumb" style="background: linear-gradient(135deg, #ffecd2, #fcb69f);"></div>
+                    <h4>Tailwind CSS Avançado</h4>
+                    <p class="curso-desc">Estilos rápidos e responsivos com Tailwind.</p>
+                    <div class="curso-footer">
+                        <div class="curso-info">
+                            <span>⭐ 4.9 (156)</span>
+                            <span>10h</span>
+                        </div>
+                        <button class="btn-pill btn-primary">Iniciar</button>
+                    </div>
+                </div>
+                <div class="card curso-card">
+                    <div class="curso-thumb" style="background: linear-gradient(135deg, #d299c2, #fef9d7);"></div>
+                    <h4>Docker para Desenvolvedores</h4>
+                    <p class="curso-desc">Containerize suas aplicações com Docker.</p>
+                    <div class="curso-footer">
+                        <div class="curso-info">
+                            <span>⭐ 4.6 (89)</span>
+                            <span>18h</span>
+                        </div>
+                        <button class="btn-pill btn-primary">Iniciar</button>
+                    </div>
+                </div>
+                <div class="card curso-card">
+                    <div class="curso-thumb" style="background: linear-gradient(135deg, #89f7fe, #66a6ff);"></div>
+                    <h4>GraphQL com Apollo</h4>
+                    <p class="curso-desc">APIs modernas com GraphQL.</p>
+                    <div class="curso-footer">
+                        <div class="curso-info">
+                            <span>⭐ 4.8 (112)</span>
+                            <span>14h</span>
+                        </div>
+                        <button class="btn-pill btn-primary">Iniciar</button>
+                    </div>
+                </div>
+
+            </div>
+            <div class="saber-mais">
+                <a href="catalogo.html"><button class="btn-pill btn-primary">Ver mais</button></a>
+            </div>
+        </section>
+    </main>
+</body>
+
+</html>

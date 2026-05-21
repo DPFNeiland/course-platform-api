@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Usuários</title>
+    <link rel="stylesheet" href="/global.css">
+</head>
+<body>
+    <nav class="navbar">
+        <ul class="navbar-nav">
+            <li><a href="/curador/dashboard.html" class="nav-link">Dashboard</a></li>
+            <li><a href="/curador/aprovacao-cursos.html" class="nav-link">Aprovação de Cursos</a></li>
+            <li><a href="/curador/gamificacao.html" class="nav-link">Gamificação</a></li>
+            <li><a href="/curador/monitoramento.html" class="nav-link">Monitoramento</a></li>
+            <li><a href="/curador/usuarios.html" class="nav-link active">Usuários</a></li>
+            <li><a href="/logout" class="nav-link">Logout</a></li>
+        </ul>
+    </nav>
+    <main class="main-content">
+        <h1 class="page-title">Gestão de Usuários</h1>
+        <div class="search-controls">
+            <input type="text" class="search-bar" placeholder="Buscar usuários...">
+            <select class="filter-select">
+                <option>Todos</option>
+                <option>Aluno</option>
+                <option>Professor</option>
+            </select>
+        </div>
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Email</th>
+                        <th>Perfil</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>João Silva</td>
+                        <td>joao@email.com</td>
+                        <td>Aluno</td>
+                        <td class="status ativo">Ativo</td>
+                        <td>
+                            <button class="btn btn-primary">Editar Acessos</button>
+                            <button class="btn btn-info">Ver Logs</button>
+                            <button class="btn btn-warning">Suspender</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Maria Santos</td>
+                        <td>maria@email.com</td>
+                        <td>Professor</td>
+                        <td class="status inativo">Inativo</td>
+                        <td>
+                            <button class="btn btn-primary">Editar Acessos</button>
+                            <button class="btn btn-info">Ver Logs</button>
+                            <button class="btn btn-success">Reativar</button>
+                        </td>
+                    </tr>
+                    <!-- More rows -->
+                </tbody>
+            </table>
+        </div>
+        <div class="pagination">
+            <button class="btn btn-secondary">Anterior</button>
+            <span>Exibindo 1-10 de 50 usuários</span>
+            <button class="btn btn-secondary">Próxima</button>
+        </div>
+    </main>
+    <script src="/curador/curador.js"></script>
+</body>
+</html>

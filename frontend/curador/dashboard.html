@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard do Curador</title>
+    <link rel="stylesheet" href="/global.css">
+    <link rel="stylesheet" href="style/dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8fafc;
+        }
+
+        
+        main {
+            padding-top: 80px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 50%, #1e3a8a 100%);
+            color: white;
+            padding: 120px 0 80px;
+            text-align: center;
+            clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .header p {
+            font-size: 1.3rem;
+            opacity: 0.95;
+            font-weight: 400;
+        }
+
+        .cards-section {
+            padding: 80px 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .card {
+            background: white;
+            padding: 2.5rem 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .card:hover {
+            transform: translateY(-12px);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .card h3 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: #1e3a8a;
+            font-weight: 600;
+        }
+
+        .card p {
+            color: #64748b;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            padding: 1rem 2.5rem;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(59, 130, 246, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .nav-container {
+                padding: 0 1rem;
+            }
+
+            .nav-links {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+                justify-content: center;
+            }
+
+            .nav-links a {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .header h1 {
+                font-size: 2.5rem;
+            }
+
+            .header p {
+                font-size: 1.1rem;
+            }
+
+            .container {
+                padding: 0 1.5rem;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .card {
+                padding: 2rem 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 100px 0 60px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <input type="checkbox" class="nav-toggle" id="nav-toggle">
+        <div class="nav-left">
+        <label for="nav-toggle" class="nav-toggle-label">
+            <span></span>
+            <span></span>
+            <span></span>
+        </label>
+        <a href="dashboard.html" class="logo">EdTech</a>
+        </div>
+        <ul class="menu">
+            <li><a href="catalogo.html">Catálogo de Cursos</a></li>
+        </ul>
+        <div class="nav-right">
+        
+        <a href="#"><div class="avatar">JD</div></a>
+        </div>
+    </nav>  
+
+    <main>
+        <section class="header">
+            <div class="container">
+                <h1>Olá, Fulano!</h1>
+                <p>Bem-vindo ao seu painel de curador. Gerencie cursos, usuários e muito mais.</p>
+            </div>
+        </section>
+
+        <section class="cards-section">
+            <div class="container">
+                <div class="grid">
+                    <div class="card">
+                        <h3>Aprovar Cursos</h3>
+                        <p>Revise e aprove cursos submetidos pelos professores.</p>
+                        <a href="aprovar-cursos.html" class="btn">Acessar</a>
+                    </div>
+                    <div class="card">
+                        <h3>Monitorar</h3>
+                        <p>Acompanhe o progresso e atividades dos usuários.</p>
+                        <a href="monitorar.html" class="btn">Acessar</a>
+                    </div>
+                    <div class="card">
+                        <h3>Gamificação</h3>
+                        <p>Gerencie badges, pontos e recompensas.</p>
+                        <a href="gamificacao.html" class="btn">Acessar</a>
+                    </div>
+                    <div class="card">
+                        <h3>Usuários</h3>
+                        <p>Visualize e gerencie perfis de usuários.</p>
+                        <a href="usuarios.html" class="btn">Acessar</a>
+                    </div>
+                    <div class="card">
+                        <h3>Relatórios</h3>
+                        <p>Gere relatórios detalhados de desempenho.</p>
+                        <a href="relatorios.html" class="btn">Acessar</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

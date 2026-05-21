@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo de Cursos</title>
+    <link rel="stylesheet" href="../global.css">
+    <link rel="stylesheet" href="../aluno/style/catalogo.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <header class="header">
+        <nav class="navbar">
+            <input type="checkbox" class="nav-toggle" id="nav-toggle">
+            <div class="nav-left">
+            <label for="nav-toggle" class="nav-toggle-label">
+                <span></span>
+                <span></span>
+                <span></span>
+            </label>
+            <a href="dashboard.html" class="logo">EdTech</a>
+            </div>
+            <ul class="menu">
+                <li><a href="catalogo.html">Catálogo de Cursos</a></li>
+            </ul>
+            <div class="nav-right">
+            
+            <a href="#"><div class="avatar">JD</div></a>
+            </div>
+        </nav>  
+    </header>
+
+    <!-- Header -->
+    <header class="page-header">
+        <h1>Catálogo de Cursos</h1>
+    </header>
+
+    <!-- Filters -->
+    <div class="filters">
+        <button class="filter-pill active">Todos</button>
+        <button class="filter-pill">Recomendados</button>
+        <button class="filter-pill">Front-end</button>
+        <button class="filter-pill">Back-end</button>
+        <button class="filter-pill">Data Science</button>
+        <button class="filter-pill">Soft Skills</button>
+    </div>
+
+    <!-- Courses Grid -->
+    <div class="courses-grid">
+        <div class="course-card">
+            <div class="course-thumb" style="background: linear-gradient(135deg, var(--primary-blue), var(--accent-coral));"></div>
+            <h3 class="course-title">JavaScript Moderno</h3>
+            <p class="course-desc">Domine os fundamentos e avançados do JavaScript.</p>
+            <div class="course-badges">
+                <span class="badge-pill">Front-end</span>
+            </div>
+            <div class="course-meta">
+                <span>Carga horária: 40h</span>
+                <span>Nota média: 4.8</span>
+            </div>
+            <button class="btn-pill primary">Visualizar</button>
+        </div>
+        <div class="course-card">
+            <div class="course-thumb" style="background: linear-gradient(135deg, var(--success-green), var(--primary-blue));"></div>
+            <h3 class="course-title">Node.js & Express</h3>
+            <p class="course-desc">Construa APIs robustas com Node.js.</p>
+            <div class="course-badges">
+                <span class="badge-pill">Back-end</span>
+            </div>
+            <div class="course-meta">
+                <span>Carga horária: 32h</span>
+                <span>Nota média: 4.7</span>
+            </div>
+            <button class="btn-pill primary">Visualizar</button>
+        </div>
+        <div class="course-card">
+            <div class="course-thumb" style="background: linear-gradient(135deg, var(--warning-yellow), var(--success-green));"></div>
+            <h3 class="course-title">Data Science com Python</h3>
+            <p class="course-desc">Análise de dados e machine learning.</p>
+            <div class="course-badges">
+                <span class="badge-pill">Data Science</span>
+            </div>
+            <div class="course-meta">
+                <span>Carga horária: 50h</span>
+                <span>Nota média: 4.9</span>
+            </div>
+            <button class="btn-pill primary">Visualizar</button>
+        </div>
+        <div class="course-card">
+            <div class="course-thumb" style="background: linear-gradient(135deg, var(--primary-blue-dark), var(--accent-coral));"></div>
+            <h3 class="course-title">React Avançado</h3>
+            <p class="course-desc">Crie aplicativos web com React e Hooks.</p>
+            <div class="course-badges">
+                <span class="badge-pill">Front-end</span>
+            </div>
+            <div class="course-meta">
+                <span>Carga horária: 36h</span>
+                <span>Nota média: 4.6</span>
+            </div>
+            <button class="btn-pill primary">Visualizar</button>
+        </div>
+        <div class="course-card">
+            <div class="course-thumb" style="background: linear-gradient(135deg, var(--success-green), var(--warning-yellow));"></div>
+            <h3 class="course-title">Banco de Dados SQL</h3>
+            <p class="course-desc">Modelagem e consultas avançadas em SQL.</p>
+            <div class="course-badges">
+                <span class="badge-pill">Back-end</span>
+            </div>
+            <div class="course-meta">
+                <span>Carga horária: 28h</span>
+                <span>Nota média: 4.8</span>
+            </div>
+            <button class="btn-pill primary">Visualizar</button>
+        </div>
+        <div class="course-card">
+            <div class="course-thumb" style="background: linear-gradient(135deg, var(--accent-coral), var(--primary-blue));"></div>
+            <h3 class="course-title">Habilidades de Comunicação</h3>
+            <p class="course-desc">Melhore sua comunicação no trabalho.</p>
+            <div class="course-badges">
+                <span class="badge-pill">Soft Skills</span>
+            </div>
+            <div class="course-meta">
+                <span>Carga horária: 20h</span>
+                <span>Nota média: 4.9</span>
+            </div>
+            <button class="btn-pill primary">Visualizar</button>
+        </div>
+    </div>
+</body>
+</html>
+
+

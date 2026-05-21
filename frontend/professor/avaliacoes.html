@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avaliações - Professor | EdTech</title>
+    <link rel="stylesheet" href="/global.css">
+    <link rel="stylesheet" href="style/avaliacoes.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <input type="checkbox" class="nav-toggle" id="nav-toggle">
+        <div class="nav-left">
+        <label for="nav-toggle" class="nav-toggle-label">
+            <span></span>
+            <span></span>
+            <span></span>
+        </label>
+        <a href="dashboard.html" class="logo">EdTech</a>
+        </div>
+        <ul class="menu">
+            <li><a href="agenda.html">Agenda</a></li>
+            <li><a href="avaliacoes.html">Avaliações</a></li>
+            <li><a href="materiais.html">Materiais</a></li>
+            <li><a href="forum-professor.html">Fórum</a></li>
+        </ul>
+        <div class="nav-right">
+        <a href="desempenho.html"><div class="avatar">JD</div></a>
+        </div>
+    </nav>  
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <h1>Avaliações</h1>
+        </div>
+    </header>
+
+    <!-- Filters -->
+    <section class="filters">
+        <div class="container">
+            <div class="filter-pills">
+                <button class="pill active">Todas</button>
+                <button class="pill">Pendentes</button>
+                <button class="pill">Em correção</button>
+                <button class="pill">Corrigidas</button>
+                <button class="pill">Atrasadas</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Grid -->
+    <section class="evaluations-grid">
+        <div class="container">
+            <div class="grid">
+                <article class="card">
+                    <h3>Prova de Matemática 1</h3>
+                    <p class="meta">Turma 10A / Matemática Básica</p>
+                    <p class="date">Data de entrega: 15/10/2024</p>
+                    <div class="progress">
+                        <span>12 / 25 enviaram</span>
+                        <div class="bar"><div class="fill" style="width: 48%;"></div></div>
+                    </div>
+                    <span class="status pendente">Pendentes</span>
+                    <button class="btn-pill">Corrigir</button>
+                </article>
+                <article class="card">
+                    <h3>Quiz de História</h3>
+                    <p class="meta">Turma 11B / História Geral</p>
+                    <p class="date">Data de entrega: 12/10/2024</p>
+                    <div class="progress">
+                        <span>20 / 22 enviaram</span>
+                        <div class="bar"><div class="fill" style="width: 91%;"></div></div>
+                    </div>
+                    <span class="status em-correcao">Em correção</span>
+                    <button class="btn-pill">Corrigir</button>
+                </article>
+                <article class="card">
+                    <h3>Trabalho de Ciências</h3>
+                    <p class="meta">Turma 9C / Ciências Naturais</p>
+                    <p class="date">Data de entrega: 20/10/2024</p>
+                    <div class="progress">
+                        <span>5 / 30 enviaram</span>
+                        <div class="bar"><div class="fill" style="width: 17%;"></div></div>
+                    </div>
+                    <span class="status atrasada">Atrasadas</span>
+                    <button class="btn-pill">Corrigir</button>
+                </article>
+                <article class="card">
+                    <h3>Avaliação Final Português</h3>
+                    <p class="meta">Turma 12D / Português</p>
+                    <p class="date">Data de entrega: 05/10/2024</p>
+                    <div class="progress">
+                        <span>25 / 25 enviaram</span>
+                        <div class="bar"><div class="fill" style="width: 100%;"></div></div>
+                    </div>
+                    <span class="status corrigida">Corrigidas</span>
+                    <button class="btn-pill">Corrigir</button>
+                </article>
+                <article class="card">
+                    <h3>Teste de Física</h3>
+                    <p class="meta">Turma 10E / Física</p>
+                    <p class="date">Data de entrega: 18/10/2024</p>
+                    <div class="progress">
+                        <span>18 / 20 enviaram</span>
+                        <div class="bar"><div class="fill" style="width: 90%;"></div></div>
+                    </div>
+                    <span class="status pendente">Pendentes</span>
+                    <button class="btn-pill">Corrigir</button>
+                </article>
+                <article class="card">
+                    <h3>Prova de Biologia</h3>
+                    <p class="meta">Turma 11F / Biologia</p>
+                    <p class="date">Data de entrega: 22/10/2024</p>
+                    <div class="progress">
+                        <span>3 / 28 enviaram</span>
+                        <div class="bar"><div class="fill" style="width: 11%;"></div></div>
+                    </div>
+                    <span class="status pendente">Pendentes</span>
+                    <button class="btn-pill">Corrigir</button>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- Avaliações em andamento -->
+    <section class="ongoing">
+        <div class="container">
+            <h2>Avaliações em andamento</h2>
+            <div class="horizontal-grid">
+                <article class="horizontal-card">
+                    <h3>Prova Parcial Inglês</h3>
+                    <p class="meta">Turma 10A</p>
+                    <div class="progress">
+                        <span>8 / 15 enviaram</span>
+                        <div class="bar"><div class="fill" style="width: 53%;"></div></div>
+                    </div>
+                    <span class="status em-correcao">Em correção</span>
+                    <button class="btn-pill">Ver</button>
+                </article>
+                <article class="horizontal-card">
+                    <h3>Quiz de Geografia</h3>
+                    <p class="meta">Turma 11B</p>
+                    <div class="progress">
+                        <span>14 / 16 enviaram</span>
+                        <div class="bar"><div class="fill" style="width: 88%;"></div></div>
+                    </div>
+                    <span class="status corrigida">Corrigidas</span>
+                    <button class="btn-pill">Ver</button>
+                </article>
+                <article class="horizontal-card">
+                    <h3>Trabalho de Arte</h3>
+                    <p class="meta">Turma 9C</p>
+                    <div class="progress">
+                        <span>2 / 20 enviaram</span>
+                        <div class="bar"><div class="fill" style="width: 10%;"></div></div>
+                    </div>
+                    <span class="status atrasada">Atrasadas</span>
+                    <button class="btn-pill">Ver</button>
+                </article>
+            </div>
+        </div>
+    </section>
+</body>
+</html>
