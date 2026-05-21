@@ -6,6 +6,7 @@ import jakarta.persistence.Embeddable;
 
 import java.util.Objects;
 
+// regras de validacao do RA do aluno
 @Embeddable
 public class AlunoRA {
 

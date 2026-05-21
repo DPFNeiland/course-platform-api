@@ -1,3 +1,5 @@
+// código documentado por Betina Volpi com o intuito de revisar a matéria,
+// além de explicar como funciona para possíveis leitores que possam utilizá-lo
 package ananditos.sandraxandreia.service;
 
 import ananditos.sandraxandreia.domain.aluno.Aluno;
@@ -19,7 +21,9 @@ import static ananditos.sandraxandreia.service.validation.emailNormalizado.norma
 
 @Service
 public class AlunoService {
+    // ferramenta para ler e gravar no banco de dados
     private final AlunoRepository alunoRepository;
+    // para criptografar as senhas
     private final PasswordEncoder passwordEncoder;
 
     public AlunoService(AlunoRepository alunoRepository1, PasswordEncoder passwordEncoder) {
@@ -27,6 +31,9 @@ public class AlunoService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    // O banco de dados fala o idioma "Domínio" (a classe Aluno).
+    // A tela do usuário fala o idioma "DTO" (AlunoResponseDTO).
+    // para não vazar dados!
     private AlunoResponseDTO toResponse(Aluno aluno) {
         return new AlunoResponseDTO(
                 aluno.getId(),
@@ -42,10 +49,12 @@ public class AlunoService {
         );
     }
 
+    // para criar novo aluno
     public AlunoResponseDTO criar(AlunoRequestDTO request) {
         String emailNormalizado = normalizarEMAIL(request.getEmail());
         String cpf = normalizarCPF(request.getCpf());
 
+        // verifica se já existe alguém com esse email
         if (alunoRepository.existsByEmailValor(emailNormalizado)) {
             throw new RuntimeException("E-mail ja cadastrado");
         }
@@ -54,6 +63,8 @@ public class AlunoService {
             throw new RuntimeException("CPF ja cadastrado");
         }
 
+        // se não deu erro, extrai dados que foram escritos pelo usuário e
+        // validados pelo AlunoRequestDTO
         var aluno = new Aluno(
                 null,
                 request.getNome(),
@@ -66,7 +77,11 @@ public class AlunoService {
                 request.getStatus()
 
         );
+
+        // salva entidade aluno no banco e retorna com ID novo
         Aluno salvo = alunoRepository.save(aluno);
+        // pega a entidade e extrai infos que o usuário pode ver
+        //(tira senhas, limpa formatos e retorna DTO para a camada Controller)
         return toResponse(salvo);
     }
 
@@ -84,9 +99,20 @@ public class AlunoService {
     }
 
     public AlunoResponseDTO atualizar(Long id, AlunoRequestDTO request) {
+        //1° Busca aluno por ID (se nao achar dá erro)
         Aluno aluno = alunoRepository.findById(id).
                 orElseThrow(() -> new IllegalArgumentException("`Professor` nao encontrado para o id: " + id));
 
+        if (alunoRepository.existsByEmailValor(request.getEmail())) {
+            throw new RuntimeException("E-mail ja cadastrado");
+        }
+
+        if (alunoRepository.existsByCpfValor(request.getCpf())) {
+            throw new RuntimeException("CPF ja cadastrado");
+        }
+
+
+        // 2° Substitui os antigos pelos novos que vieram do request
         aluno.setNome(request.getNome());
         aluno.setEmail(new UsuarioEmail(request.getEmail()));
         aluno.setCpf(new UsuarioCpf(request.getCpf()));
@@ -96,8 +122,10 @@ public class AlunoService {
         aluno.setRa(new AlunoRA(request.getRa()));
         aluno.setStatus(request.getStatus());
 
+        // 3° Salva no banco de dados
         Aluno salvo = alunoRepository.save(aluno);
 
+        // 4° Traduz e retorna resposta
         return toResponse(salvo);
 
     }

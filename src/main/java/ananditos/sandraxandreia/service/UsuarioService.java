@@ -87,6 +87,14 @@ public class UsuarioService {
         public UsuarioResponseDTO atualizar(Long id, UsuarioRequestDTO request) {
             Usuario usuario = repository.findById(id)
                     .orElseThrow(() -> new IllegalArgumentException("Usuario nao encontrado para o id: " + id));
+            if (repository.existsByEmailValor(request.getEmail())) {
+                throw new RuntimeException("E-mail ja cadastrado");
+            }
+
+            if (repository.existsByCpfValor(request.getCpf())) {
+                throw new RuntimeException("CPF ja cadastrado");
+            }
+
             usuario.setNome(request.getNome());
             usuario.setEmail(new UsuarioEmail(request.getEmail()));
             usuario.setCpf(new UsuarioCpf(request.getCpf()));
