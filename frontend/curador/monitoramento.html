@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monitoramento - Curador</title>
+    <link rel="stylesheet" href="/global.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -17,57 +18,7 @@
             color: #333;
             background-color: #f8fafc;
         }
-        /* Navbar */
-        .navbar {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            box-shadow: 0 4px 20px rgba(30, 58, 138, 0.3);
-            z-index: 1000;
-            padding: 1rem 0;
-        }
-        .nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 2rem;
-        }
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: white;
-        }
-        .nav-links {
-            display: flex;
-            list-style: none;
-            gap: 2rem;
-        }
-        .nav-links a {
-            color: rgba(255,255,255,0.9);
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s;
-        }
-        .nav-links a:hover,
-        .nav-links a.active {
-            color: white;
-        }
-        /* Header */
-        .header {
-            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-            color: white;
-            text-align: center;
-            padding: 120px 2rem 80px;
-            margin-top: 80px;
-        }
-        .header h1 {
-            font-size: 3rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-        }
+
         /* Main Content */
         .container {
             max-width: 1200px;
@@ -195,14 +146,21 @@
 <body>
     <!-- Navbar -->
     <nav class="navbar">
-        <div class="nav-container">
-            <div class="logo">Curador</div>
-            <ul class="nav-links">
-                <li><a href="/curador/dashboard.html">Dashboard</a></li>
-                <li><a href="/curador/monitoramento.html" class="active">Monitoramento</a></li>
-                <li><a href="/curador/usuarios.html">Usuários</a></li>
-                <li><a href="/curador/cursos.html">Cursos</a></li>
-            </ul>
+        <input type="checkbox" class="nav-toggle" id="nav-toggle">
+        <div class="nav-left">
+            <label for="nav-toggle" class="nav-toggle-label">
+                <span></span>
+                <span></span>
+                <span></span>
+            </label>
+            <a href="dashboard.html" class="logo">EdTech</a>
+        </div>
+        <ul class="menu">
+            <li><a href="catalogo.html">Catálogo de Cursos</a></li>
+        </ul>
+        <div class="nav-right">
+
+            <a href="#"><div class="avatar">JD</div></a>
         </div>
     </nav>
 

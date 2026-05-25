@@ -148,8 +148,6 @@ const renderBoletim = () => {
     const status = item?.matricula.status || 'SEM_MATRICULA';
     document.querySelector('.midia-final .numero')?.replaceChildren(document.createTextNode('-'));
     document.querySelector('.status-label')?.replaceChildren(document.createTextNode(formatEnum(status)));
-    document.querySelector('.presenca-val')?.replaceChildren(document.createTextNode('Sem dados'));
-    document.querySelector('.faltas-val')?.replaceChildren(document.createTextNode('Backend sem presenca'));
     tableBody.innerHTML = item
       ? `<tr><td>${item.curso.nome}</td><td class="nota">-</td><td>${formatEnum(status)}</td><td>${item.matricula.dataMatricula || '-'}</td></tr>`
       : '<tr><td colspan="4">Nenhuma matricula encontrada.</td></tr>';
@@ -167,7 +165,7 @@ const renderAchievements = () => {
   grid.innerHTML = `
     <div class="card"><div class="icon">Cursos</div><h3>${appState.matriculas.length} matricula(s)</h3><p>Total vindo do banco.</p><span class="badge badge-aprendizado">Matriculas</span></div>
     <div class="card"><div class="icon">Ativos</div><h3>${active} em andamento</h3><p>Cursos que voce iniciou.</p><span class="badge badge-progresso">Progresso</span></div>
-    <div class="card"><div class="icon">Concluidos</div><h3>${finished} encerrado(s)</h3><p>Cursos marcados como concluidos.</p><span class="badge badge-especial">Certificados</span></div>
+    <div class="card"><div class="icon">Concluídos</div><h3>${finished} encerrado(s)</h3><p>Cursos marcados como concluidos.</p><span class="badge badge-especial">Certificados</span></div>
   `;
   const ranking = document.querySelector('.ranking');
   if (ranking) {
@@ -227,7 +225,7 @@ const renderCertificateDetail = () => {
 const renderForum = () => {
   const discussions = document.querySelector('.discussions .container, .discussions');
   if (!discussions || document.querySelector('[data-approved-courses]')) return;
-  discussions.innerHTML = '<p class="empty-state">Forum ainda nao possui endpoint no backend. As publicacoes nao sao salvas no banco.</p>';
+
 };
 
 const refreshData = async () => {
