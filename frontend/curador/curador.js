@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', async function() {
       el.textContent = (state.user.nome || 'CU').slice(0, 2).toUpperCase();
     });
     const greeting = document.querySelector('.header h1');
-    if (greeting) greeting.textContent = `Ola, ${state.user.nome || 'Curador'}!`;
+    if (greeting) greeting.textContent = `Olá, ${state.user.nome || 'Curador'}!`;
   };
 
   const renderPendingCourses = () => {
