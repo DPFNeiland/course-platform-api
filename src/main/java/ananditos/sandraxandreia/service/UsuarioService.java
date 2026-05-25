@@ -36,7 +36,8 @@ public class UsuarioService {
                 usuario.getEmail().getValor(),
                 usuario.getCpf().getValor(),
                 usuario.getGenero(),
-                usuario.getDataNascimento().getData()
+                usuario.getDataNascimento().getData(),
+                usuario.getPerfil()
         );
     }
 

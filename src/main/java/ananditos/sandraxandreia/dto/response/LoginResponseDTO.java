@@ -1,18 +1,16 @@
 package ananditos.sandraxandreia.dto.response;
 
-import ananditos.sandraxandreia.domain.usuario.UsuarioCargo;
-
 public class LoginResponseDTO {
     private Long id;
     private String nome;
     private String email;
-    private UsuarioCargo cargo;
+    private String cargo;
     private String perfil;
 
     public LoginResponseDTO() {
     }
 
-    public LoginResponseDTO(Long id, String nome, String email, UsuarioCargo cargo, String perfil) {
+    public LoginResponseDTO(Long id, String nome, String email, String cargo, String perfil) {
         this.id = id;
         this.nome = nome;
         this.email = email;
@@ -32,7 +30,7 @@ public class LoginResponseDTO {
         return email;
     }
 
-    public UsuarioCargo getCargo() {
+    public String getCargo() {
         return cargo;
     }
 
