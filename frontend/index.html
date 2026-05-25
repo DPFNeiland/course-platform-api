@@ -53,10 +53,18 @@
             </div>
 
             <div id="register-section" class="form-container hidden">
-                <h2>Criar Conta de Aluno</h2>
+                <h2>Criar Conta</h2>
                 <p class="subtitle">Junte-se a nós e comece sua jornada.</p>
                 
                 <form id="registerForm">
+                    <div class="input-group">
+                        <label for="reg-perfil">Tipo de conta</label>
+                        <select id="reg-perfil" required>
+                            <option value="aluno" selected>Aluno</option>
+                            <option value="professor">Professor</option>
+                            <option value="curador">Curador</option>
+                        </select>
+                    </div>
                     <div class="input-group">
                         <label for="reg-nome">Nome Completo</label>
                         <input type="text" id="reg-nome" placeholder="Seu nome" required>
@@ -82,9 +90,25 @@
                         <label for="reg-dataNascimento">Data de Nascimento</label>
                         <input type="date" id="reg-dataNascimento" required>
                     </div>
-                    <div class="input-group">
+                    <div class="input-group profile-field aluno-field">
                         <label for="reg-ra">RA (Registro Acadêmico)</label>
                         <input type="text" id="reg-ra" placeholder="Ex: AB1234" pattern="[A-Za-z]{2}\d{4}" title="Formato exigido: 2 letras e 4 números" required>
+                    </div>
+                    <div class="input-group profile-field professor-field hidden">
+                        <label for="reg-areaFormacao">Área de formação</label>
+                        <input type="text" id="reg-areaFormacao" placeholder="Ex: Tecnologia" disabled>
+                    </div>
+                    <div class="input-group profile-field professor-field hidden">
+                        <label for="reg-horaAula">Valor hora/aula</label>
+                        <input type="number" id="reg-horaAula" min="0" step="0.01" placeholder="Ex: 80" disabled>
+                    </div>
+                    <div class="input-group profile-field professor-field hidden">
+                        <label for="reg-tipoEnsino">Tipo de ensino</label>
+                        <select id="reg-tipoEnsino" disabled>
+                            <option value="ASSINCRONO">Assíncrono</option>
+                            <option value="SINCRONO">Síncrono</option>
+                            <option value="AMBOS">Ambos</option>
+                        </select>
                     </div>
                     <div class="input-group">
                         <label for="reg-senha">Senha</label>

@@ -35,9 +35,38 @@
 
     <header>
         <div class="container">
-            <h1>Olá, {nome do professor}</h1>
+            <h1>Olá, <span data-field="nomeProfessor">Professor</span></h1>
         </div>
     </header>
+
+    <section class="section">
+        <div class="container">
+            <h2>Cadastrar Novo Curso</h2>
+            <form id="courseForm" class="card" style="display: grid; gap: 1rem; padding: 1.5rem;">
+                <label>
+                    Nome do curso
+                    <input type="text" id="course-nome" required placeholder="Ex: Java para Iniciantes">
+                </label>
+                <label>
+                    Tipo de assinatura
+                    <select id="course-tipoAssinatura" required>
+                        <option value="COMUM">Comum</option>
+                        <option value="PREMIUM">Premium</option>
+                    </select>
+                </label>
+                <label>
+                    Tipo de curso
+                    <select id="course-tipoCurso" required>
+                        <option value="SINCRONO">Sincrono</option>
+                        <option value="ASSINCRONO">Assincrono</option>
+                        <option value="AMBOS">Ambos</option>
+                    </select>
+                </label>
+                <button type="submit" class="btn">Enviar para avaliacao</button>
+                <p id="course-feedback" aria-live="polite"></p>
+            </form>
+        </div>
+    </section>
 
     <section class="section">
         <div class="container">
@@ -182,5 +211,6 @@
             </div>
         </div>
     </section>
+    <script src="professor.js"></script>
 </body>
 </html>

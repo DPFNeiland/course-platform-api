@@ -24,6 +24,7 @@ public class CursoService {
 
     private CursoResponseDTO toResponse(Curso curso) {
         return new CursoResponseDTO(
+                curso.getId(),
                 curso.getNome(),
                 curso.getTipoAssinatura(),
                 curso.getTipoCurso(),

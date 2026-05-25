@@ -28,6 +28,7 @@ public class MatriculaService {
 
     private MatriculaResponseDTO toResponse(Matricula matricula) {
         return new MatriculaResponseDTO(
+                matricula.getId(),
                 matricula.getDataMatricula().getData(),
                 matricula.getStatus(),
                 matricula.getAluno().getId(),

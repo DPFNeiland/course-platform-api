@@ -117,6 +117,17 @@ p.subtitle {
     border-color: var(--primary);
 }
 
+.profile-helper {
+    background: var(--gray-100);
+    border: 1px solid var(--gray-300);
+    border-radius: 8px;
+    color: var(--gray-600);
+    font-size: 0.9rem;
+    line-height: 1.4;
+    margin-bottom: 20px;
+    padding: 12px 16px;
+}
+
 .btn-primary {
     width: 100%;
     padding: 14px;

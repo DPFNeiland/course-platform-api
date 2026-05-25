@@ -48,11 +48,19 @@ public class Usuario {
     @Column(nullable = false)
     private GeneroUsuario genero;
 
+    @Enumerated(EnumType.STRING)
+    @Column
+    private PerfilUsuario perfil;
+
     public Usuario() {
         // Construtor padrao exigido pela JPA.
     }
 
     public Usuario(Long id, String nome, String email, String senhaCriptografada, String cpf, GeneroUsuario genero, String dataNascimento) {
+        this(id, nome, email, senhaCriptografada, cpf, genero, dataNascimento, PerfilUsuario.CURADOR);
+    }
+
+    public Usuario(Long id, String nome, String email, String senhaCriptografada, String cpf, GeneroUsuario genero, String dataNascimento, PerfilUsuario perfil) {
         this.id = id;
         this.nome = nome;
         this.email = new UsuarioEmail(email);
@@ -60,6 +68,7 @@ public class Usuario {
         this.cpf = new UsuarioCpf(cpf);
         this.genero = genero;
         this.dataNascimento = new UsuarioDataNascimento(dataNascimento);
+        this.perfil = perfil;
 
     }
 
@@ -119,18 +128,26 @@ public class Usuario {
         this.genero = genero;
     }
 
+    public PerfilUsuario getPerfil() {
+        return perfil;
+    }
+
+    public void setPerfil(PerfilUsuario perfil) {
+        this.perfil = perfil;
+    }
+
 
 
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Usuario usuario = (Usuario) o;
-        return Objects.equals(id, usuario.id) && Objects.equals(nome, usuario.nome) && Objects.equals(email, usuario.email) && Objects.equals(cpf, usuario.cpf) && Objects.equals(senha, usuario.senha) && Objects.equals(dataNascimento, usuario.dataNascimento) && genero == usuario.genero;
+        return Objects.equals(id, usuario.id) && Objects.equals(nome, usuario.nome) && Objects.equals(email, usuario.email) && Objects.equals(cpf, usuario.cpf) && Objects.equals(senha, usuario.senha) && Objects.equals(dataNascimento, usuario.dataNascimento) && genero == usuario.genero && perfil == usuario.perfil;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, nome, email, cpf, senha, dataNascimento, genero);
+        return Objects.hash(id, nome, email, cpf, senha, dataNascimento, genero, perfil);
     }
 
     @Override
@@ -143,6 +160,7 @@ public class Usuario {
                 ", senha=" + senha +
                 ", dataNascimento=" + dataNascimento +
                 ", genero=" + genero +
+                ", perfil=" + perfil +
                 '}';
     }
 }
