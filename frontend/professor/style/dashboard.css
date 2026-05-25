@@ -96,6 +96,79 @@ header h1 {
     box-shadow: 0 20px 40px rgba(0,0,0,0.12);
 }
 
+.course-form {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(180px, 0.8fr) minmax(180px, 0.8fr);
+    gap: 1.25rem;
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.course-form label {
+    color: var(--text-muted);
+    display: grid;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.course-form input,
+.course-form select {
+    appearance: none;
+    background: #F9FAFB;
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    color: var(--text-main);
+    font: inherit;
+    min-height: 48px;
+    padding: 0.75rem 0.95rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    width: 100%;
+}
+
+.course-form select {
+    background-image: linear-gradient(45deg, transparent 50%, var(--text-muted) 50%), linear-gradient(135deg, var(--text-muted) 50%, transparent 50%);
+    background-position: calc(100% - 18px) 20px, calc(100% - 12px) 20px;
+    background-repeat: no-repeat;
+    background-size: 6px 6px, 6px 6px;
+    padding-right: 2.5rem;
+}
+
+.course-form input:focus,
+.course-form select:focus {
+    background: white;
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.14);
+    outline: none;
+}
+
+.course-submit {
+    align-self: end;
+    background: linear-gradient(135deg, var(--primary-blue), var(--primary-blue-dark));
+    border: 0;
+    border-radius: 12px;
+    color: white;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+    min-height: 48px;
+    padding: 0.85rem 1.25rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.course-submit:hover {
+    box-shadow: 0 12px 24px rgba(59, 130, 246, 0.25);
+    transform: translateY(-2px);
+}
+
+#course-feedback {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    grid-column: 1 / -1;
+    min-height: 1.4rem;
+}
+
 .kpi-card {
     text-align: center;
 }
@@ -195,6 +268,15 @@ header h1 {
     .charts-grid {
         grid-template-columns: 1fr;
     }
+
+    .course-form {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .course-form label:first-child,
+    .course-submit {
+        grid-column: 1 / -1;
+    }
 }
 
 @media (max-width: 768px) {
@@ -230,6 +312,16 @@ header h1 {
 
     .section {
         padding: 3rem 0;
+    }
+
+    .course-form {
+        grid-template-columns: 1fr;
+        padding: 1.25rem;
+    }
+
+    .course-form label:first-child,
+    .course-submit {
+        grid-column: auto;
     }
 }
 

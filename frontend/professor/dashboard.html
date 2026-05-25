@@ -24,7 +24,6 @@
         </div>
         <ul class="menu">
             <li><a href="agenda.html">Agenda</a></li>
-            <li><a href="avaliacoes.html">Avaliações</a></li>
             <li><a href="materiais.html">Materiais</a></li>
         </ul>
         <div class="nav-right">
@@ -41,7 +40,7 @@
     <section class="section">
         <div class="container">
             <h2>Cadastrar Novo Curso</h2>
-            <form id="courseForm" class="card" style="display: grid; gap: 1rem; padding: 1.5rem;">
+            <form id="courseForm" class="card course-form">
                 <label>
                     Nome do curso
                     <input type="text" id="course-nome" required placeholder="Ex: Java para Iniciantes">
@@ -61,7 +60,7 @@
                         <option value="AMBOS">Ambos</option>
                     </select>
                 </label>
-                <button type="submit" class="btn">Enviar para avaliacao</button>
+                <button type="submit" class="btn course-submit">Enviar para avaliacao</button>
                 <p id="course-feedback" aria-live="polite"></p>
             </form>
         </div>
