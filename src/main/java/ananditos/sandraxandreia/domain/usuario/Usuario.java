@@ -58,22 +58,18 @@ public class Usuario  implements UserDetails {
 
     @Enumerated(EnumType.STRING)
     @Column
-    private PerfilUsuario perfil;
+    private UsuarioCargo perfil;
 
     public Usuario() {
         // Construtor padrao exigido pela JPA.
     }
 
-    public Usuario(Long id, String nome, String email, String senhaCriptografada, String cpf, GeneroUsuario genero, String dataNascimento) {
-        this(id, nome, email, senhaCriptografada, cpf, genero, dataNascimento, PerfilUsuario.CURADOR);
-    }
-
-    public Usuario(Long id, String nome, String email, String senhaCriptografada, String cpf, GeneroUsuario genero, String dataNascimento, PerfilUsuario perfil) {
+    public Usuario(Long id, String nome, String email, String senhaCriptografada, String cpf, GeneroUsuario genero, String dataNascimento, UsuarioCargo perfil) {
         this.id = id;
         this.nome = nome;
         this.email = new UsuarioEmail(email);
         this.cpf = new UsuarioCpf(cpf);
-        this.senha = new UsuarioSenhaCriptografada(senha);
+        this.senha = new UsuarioSenhaCriptografada(senhaCriptografada);
         this.dataNascimento = new UsuarioDataNascimento(dataNascimento);
         this.perfil = perfil;
 
@@ -135,17 +131,12 @@ public class Usuario  implements UserDetails {
         this.genero = genero;
     }
 
-    public PerfilUsuario getPerfil() {
+    public UsuarioCargo getPerfil() {
         return perfil;
     }
 
-    public void setPerfil(PerfilUsuario perfil) {
+    public void setPerfil(UsuarioCargo perfil) {
         this.perfil = perfil;
-    }
-
-
-    public void setCargo(UsuarioCargo cargo) {
-        this.cargo = cargo;
     }
 
     @Override
@@ -159,7 +150,6 @@ public class Usuario  implements UserDetails {
     public int hashCode() {
         return Objects.hash(id, nome, email, cpf, senha, dataNascimento, genero, perfil);
     }
-
 
     @Override
     public String toString() {
@@ -177,23 +167,23 @@ public class Usuario  implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        if (this.cargo == UsuarioCargo.ADMIN)
+        if (this.perfil == UsuarioCargo.ADMIN)
             return List.of(
                     new SimpleGrantedAuthority(UsuarioCargo.ADMIN.getRole()),
                     new SimpleGrantedAuthority(UsuarioCargo.PROFESSOR.getRole()),
                     new SimpleGrantedAuthority(UsuarioCargo.ALUNO.getRole()),
                     new SimpleGrantedAuthority(UsuarioCargo.CURADOR.getRole()));
 
-        if (this.cargo == UsuarioCargo.PROFESSOR)
+        if (this.perfil == UsuarioCargo.PROFESSOR)
             return List.of(new SimpleGrantedAuthority(UsuarioCargo.PROFESSOR.getRole()));
 
-        if (this.cargo == UsuarioCargo.ALUNO)
+        if (this.perfil == UsuarioCargo.ALUNO)
             return List.of(new SimpleGrantedAuthority(UsuarioCargo.ALUNO.getRole()));
 
-        if (this.cargo == UsuarioCargo.CURADOR)
+        if (this.perfil == UsuarioCargo.CURADOR)
             return List.of(new SimpleGrantedAuthority(UsuarioCargo.CURADOR.getRole()));
 
-        if (this.cargo == UsuarioCargo.ANONIMO)
+        if (this.perfil == UsuarioCargo.ANONIMO)
             return List.of(new SimpleGrantedAuthority(UsuarioCargo.ANONIMO.getRole()));
 
         return List.of();

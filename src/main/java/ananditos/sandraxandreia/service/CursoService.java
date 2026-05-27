@@ -113,18 +113,6 @@ public class CursoService {
         return professorRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Professor nao encontrado"));
     }
-
-    private CursoResponseDTO toResponse(Curso curso) {
-        return new CursoResponseDTO(
-                curso.getId(),
-                curso.getNome(),
-                curso.getTipoAssinatura(),
-                curso.getTipoCurso(),
-                curso.getStatus(),
-                curso.getProfessor().getId()
-        );
-    }
-
     private void validarNomeDuplicado(String nome, Long idAtual) {
         if (!cursoRepository.existsByNomeIgnoreCase(nome)) {
             return;

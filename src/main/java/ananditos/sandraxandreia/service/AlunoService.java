@@ -41,7 +41,7 @@ public class AlunoService {
                 aluno.getEmail().getValor(),
                 aluno.getCpf().getValor(),
                 aluno.getGenero(),
-                aluno.getCargo(),
+                aluno.getPerfil(),
                 aluno.getDataNascimento().getData(),
                 aluno.getRa().getValor(),
                 aluno.getStatus()
@@ -69,10 +69,10 @@ public class AlunoService {
                 null,
                 request.getNome(),
                 request.getEmail(),
-                request.getCpf(),
                 passwordEncoder.encode(request.getSenha()),
-                request.getDataNascimento(),
+                request.getCpf(),
                 request.getGenero(),
+                request.getDataNascimento(),
                 request.getRa(),
                 request.getStatus()
 

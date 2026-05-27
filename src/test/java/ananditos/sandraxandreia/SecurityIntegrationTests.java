@@ -58,8 +58,8 @@ class SecurityIntegrationTests {
                 "aluno@teste.com",
                 "52998224725",
                 passwordEncoder.encode("123456"),
-                "1/1/2000",
                 GeneroUsuario.MASCULINO,
+                "1/1/2000",
                 "AB1234",
                 StatusAluno.CURSANDO
         ));
@@ -70,8 +70,8 @@ class SecurityIntegrationTests {
                 "professor@teste.com",
                 "39053344705",
                 passwordEncoder.encode("123456"),
-                "1/1/1985",
                 GeneroUsuario.FEMININO,
+                "1/1/1985",
                 "Engenharia de Software",
                 100.0,
                 TipoEnsinoProfessor.AMBOS

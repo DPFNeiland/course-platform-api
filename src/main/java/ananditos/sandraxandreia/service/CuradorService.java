@@ -37,10 +37,10 @@ public class CuradorService {
                 null,
                 request.getNome(),
                 request.getEmail(),
-                request.getCpf(),
                 passwordEncoder.encode(request.getSenha()),
-                request.getDataNascimento(),
-                request.getGenero()
+                request.getCpf(),
+                request.getGenero(),
+                request.getDataNascimento()
         );
 
         return toResponse(curadorRepository.save(curador));
@@ -87,7 +87,7 @@ public class CuradorService {
                 curador.getCpf().getValor(),
                 curador.getGenero(),
                 curador.getDataNascimento().getData(),
-                curador.getCargo()
+                curador.getPerfil()
         );
     }
 
