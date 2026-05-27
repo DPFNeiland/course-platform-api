@@ -6,11 +6,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -45,9 +42,9 @@ public class SecurityConfig {
                                 "/h2-console/**"
                         ).permitAll()
 
-                        // authenticated() = exige autenticacao.
-                        // Aqui estamos protegendo as rotas REST principais.
-                        .requestMatchers("/api/**").authenticated()
+                        // Cadastro inicial para que alunos e professores possam criar
+                        // credenciais e depois autenticar com HTTP Basic.
+                        .requestMatchers(HttpMethod.POST, "/aluno", "/professor", "/curador").permitAll()
 
                         // Cadastro inicial para que alunos e professores possam criar
                         // credenciais e depois autenticar com HTTP Basic.
@@ -55,7 +52,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/login", "/aluno", "/professor", "/curador").permitAll()
 
                         // anyRequest() pega o que nao foi coberto acima.
-                        .anyRequest().permitAll())
+                        .anyRequest().authenticated())
 
                 // frameOptions() foi liberado para o console H2 funcionar no navegador.
                 .headers(headers -> headers.frameOptions(frame -> frame.disable()))

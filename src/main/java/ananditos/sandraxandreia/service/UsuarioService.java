@@ -1,5 +1,6 @@
 package ananditos.sandraxandreia.service;
 
+
 import ananditos.sandraxandreia.domain.usuario.Usuario;
 import ananditos.sandraxandreia.domain.usuario.vo.UsuarioCpf;
 import ananditos.sandraxandreia.domain.usuario.vo.UsuarioDataNascimento;
@@ -13,6 +14,9 @@ import org.springframework.stereotype.Service;
 
 
 import java.util.List;
+
+import static ananditos.sandraxandreia.service.validation.cpfNormalizado.normalizarCPF;
+import static ananditos.sandraxandreia.service.validation.emailNormalizado.normalizarEMAIL;
 
 @Service
 public class UsuarioService {
@@ -44,9 +48,8 @@ public class UsuarioService {
 
 
     public UsuarioResponseDTO criar(UsuarioRequestDTO request) {
-
-        String emailNormalizado = request.getEmail() == null ? null : request.getEmail().trim().toLowerCase();
-        String cpf = request.getCpf() == null ? null : request.getCpf().trim().toLowerCase();
+        String emailNormalizado = normalizarEMAIL(request.getEmail());
+        String cpf = normalizarCPF(request.getCpf());
 
         if (repository.existsByEmailValor(emailNormalizado)) {
             throw new RuntimeException("E-mail ja cadastrado");
@@ -59,10 +62,11 @@ public class UsuarioService {
                 null,
                 request.getNome(),
                 request.getEmail(),
-                passwordEncoder.encode(request.getSenha()),
                 request.getCpf(),
+                passwordEncoder.encode(request.getSenha()),
+                request.getDataNascimento(),
                 request.getGenero(),
-                request.getDataNascimento()
+                request.getCargo()
 
         );
         Usuario salvo = repository.save(usuario);
@@ -94,9 +98,10 @@ public class UsuarioService {
             usuario.setNome(request.getNome());
             usuario.setEmail(new UsuarioEmail(request.getEmail()));
             usuario.setCpf(new UsuarioCpf(request.getCpf()));
-            usuario.setSenha(new UsuarioSenhaCriptografada(request.getSenha()));
+            usuario.setSenha(new UsuarioSenhaCriptografada(passwordEncoder.encode(request.getSenha())));
             usuario.setGenero(request.getGenero());
             usuario.setDataNascimento(new UsuarioDataNascimento(request.getDataNascimento()));
+            usuario.setCargo(request.getCargo());
             Usuario salvo = repository.save(usuario);
             return toResponse(salvo);
     }

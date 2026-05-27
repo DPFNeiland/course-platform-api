@@ -16,6 +16,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static ananditos.sandraxandreia.service.validation.cpfNormalizado.normalizarCPF;
+import static ananditos.sandraxandreia.service.validation.emailNormalizado.normalizarEMAIL;
+
 @Service
 public class AlunoService {
     // ferramenta para ler e gravar no banco de dados
@@ -38,6 +41,7 @@ public class AlunoService {
                 aluno.getEmail().getValor(),
                 aluno.getCpf().getValor(),
                 aluno.getGenero(),
+                aluno.getCargo(),
                 aluno.getDataNascimento().getData(),
                 aluno.getRa().getValor(),
                 aluno.getStatus()
@@ -47,10 +51,8 @@ public class AlunoService {
 
     // para criar novo aluno
     public AlunoResponseDTO criar(AlunoRequestDTO request) {
-        //O sistema pega o email que o usuário digitou e limpa.
-        // O .trim() remove espaços em branco acidentais e .toLowerCase() transforma tudo em minúsculo
-        String emailNormalizado = request.getEmail() == null ? null : request.getEmail().trim().toLowerCase();
-        String cpf = request.getCpf() == null ? null : request.getCpf().trim().toLowerCase();
+        String emailNormalizado = normalizarEMAIL(request.getEmail());
+        String cpf = normalizarCPF(request.getCpf());
 
         // verifica se já existe alguém com esse email
         if (alunoRepository.existsByEmailValor(emailNormalizado)) {
@@ -67,12 +69,13 @@ public class AlunoService {
                 null,
                 request.getNome(),
                 request.getEmail(),
-                passwordEncoder.encode(request.getSenha()),
                 request.getCpf(),
-                request.getGenero(),
+                passwordEncoder.encode(request.getSenha()),
                 request.getDataNascimento(),
+                request.getGenero(),
                 request.getRa(),
                 request.getStatus()
+
         );
 
         // salva entidade aluno no banco e retorna com ID novo
@@ -113,7 +116,7 @@ public class AlunoService {
         aluno.setNome(request.getNome());
         aluno.setEmail(new UsuarioEmail(request.getEmail()));
         aluno.setCpf(new UsuarioCpf(request.getCpf()));
-        aluno.setSenha(new UsuarioSenhaCriptografada(request.getSenha()));
+        aluno.setSenha(new UsuarioSenhaCriptografada(passwordEncoder.encode(request.getSenha())));
         aluno.setGenero(request.getGenero());
         aluno.setDataNascimento(new UsuarioDataNascimento(request.getDataNascimento()));
         aluno.setRa(new AlunoRA(request.getRa()));

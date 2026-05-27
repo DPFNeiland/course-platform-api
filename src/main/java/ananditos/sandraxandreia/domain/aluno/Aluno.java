@@ -7,6 +7,7 @@ import ananditos.sandraxandreia.domain.usuario.GeneroUsuario;
 import ananditos.sandraxandreia.domain.usuario.PerfilUsuario;
 import ananditos.sandraxandreia.domain.usuario.Usuario;
 import ananditos.sandraxandreia.domain.aluno.vo.AlunoRA;
+import ananditos.sandraxandreia.domain.usuario.UsuarioCargo;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;

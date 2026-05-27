@@ -14,6 +14,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static ananditos.sandraxandreia.service.validation.cpfNormalizado.normalizarCPF;
+import static ananditos.sandraxandreia.service.validation.emailNormalizado.normalizarEMAIL;
+
 @Service
 public class ProfessorService {
     private final ProfessorRepository professorRepository;
@@ -31,16 +34,18 @@ public class ProfessorService {
                 professor.getCpf().getValor(),
                 professor.getGenero(),
                 professor.getDataNascimento().getData(),
+                professor.getCargo(),
                 professor.getAreaFormacao().getValor(),
                 professor.getHoraAula(),
                 professor.getTipoEnsino()
 
-        );
+                );
     }
 
     public ProfessorResponseDTO criar(ProfessorRequestDTO request) {
-        String emailNormalizado = request.getEmail() == null ? null : request.getEmail().trim().toLowerCase();
-        String cpf = request.getCpf() == null ? null : request.getCpf().trim().toLowerCase();
+        String emailNormalizado = normalizarEMAIL(request.getEmail());
+        String cpf = normalizarCPF(request.getCpf());
+
 
         if (professorRepository.existsByEmailValor(emailNormalizado)) {
             throw new RuntimeException("E-mail ja cadastrado");
@@ -53,10 +58,10 @@ public class ProfessorService {
                 null,
                 request.getNome(),
                 request.getEmail(),
-                passwordEncoder.encode(request.getSenha()),
                 request.getCpf(),
-                request.getGenero(),
+                passwordEncoder.encode(request.getSenha()),
                 request.getDataNascimento(),
+                request.getGenero(),
                 request.getAreaFormacao(),
                 request.getHoraAula(),
                 request.getTipoEnsino()
@@ -92,7 +97,7 @@ public class ProfessorService {
         professor.setNome(request.getNome());
         professor.setEmail(new UsuarioEmail(request.getEmail()));
         professor.setCpf(new UsuarioCpf(request.getCpf()));
-        professor.setSenha(new UsuarioSenhaCriptografada(request.getSenha()));
+        professor.setSenha(new UsuarioSenhaCriptografada(passwordEncoder.encode(request.getSenha())));
         professor.setGenero(request.getGenero());
         professor.setAreaFormacao(new ProfessorAreaFormacao(request.getAreaFormacao()));
         professor.setDataNascimento(new UsuarioDataNascimento(request.getDataNascimento()));

@@ -1,18 +1,26 @@
 package ananditos.sandraxandreia.domain.usuario;
 
+import ananditos.sandraxandreia.domain.usuario.vo.UsuarioCpf;
+import ananditos.sandraxandreia.domain.usuario.vo.UsuarioDataNascimento;
+import ananditos.sandraxandreia.domain.usuario.vo.UsuarioEmail;
+import ananditos.sandraxandreia.domain.usuario.vo.UsuarioSenhaCriptografada;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-import ananditos.sandraxandreia.domain.usuario.vo.UsuarioCpf;
-import ananditos.sandraxandreia.domain.usuario.vo.UsuarioDataNascimento;
-import ananditos.sandraxandreia.domain.usuario.vo.UsuarioEmail;
-import ananditos.sandraxandreia.domain.usuario.vo.UsuarioSenhaCriptografada;
-import jakarta.persistence.*;
-
+import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -23,7 +31,7 @@ import java.util.Objects;
 @Entity
 @Table(name = "usuario")
 @Inheritance(strategy = InheritanceType.JOINED)
-public class Usuario {
+public class Usuario  implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -64,9 +72,8 @@ public class Usuario {
         this.id = id;
         this.nome = nome;
         this.email = new UsuarioEmail(email);
-        this.senha = new UsuarioSenhaCriptografada(senhaCriptografada);
         this.cpf = new UsuarioCpf(cpf);
-        this.genero = genero;
+        this.senha = new UsuarioSenhaCriptografada(senha);
         this.dataNascimento = new UsuarioDataNascimento(dataNascimento);
         this.perfil = perfil;
 
@@ -137,6 +144,9 @@ public class Usuario {
     }
 
 
+    public void setCargo(UsuarioCargo cargo) {
+        this.cargo = cargo;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -150,6 +160,7 @@ public class Usuario {
         return Objects.hash(id, nome, email, cpf, senha, dataNascimento, genero, perfil);
     }
 
+
     @Override
     public String toString() {
         return "Usuario{" +
@@ -162,6 +173,60 @@ public class Usuario {
                 ", genero=" + genero +
                 ", perfil=" + perfil +
                 '}';
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        if (this.cargo == UsuarioCargo.ADMIN)
+            return List.of(
+                    new SimpleGrantedAuthority(UsuarioCargo.ADMIN.getRole()),
+                    new SimpleGrantedAuthority(UsuarioCargo.PROFESSOR.getRole()),
+                    new SimpleGrantedAuthority(UsuarioCargo.ALUNO.getRole()),
+                    new SimpleGrantedAuthority(UsuarioCargo.CURADOR.getRole()));
+
+        if (this.cargo == UsuarioCargo.PROFESSOR)
+            return List.of(new SimpleGrantedAuthority(UsuarioCargo.PROFESSOR.getRole()));
+
+        if (this.cargo == UsuarioCargo.ALUNO)
+            return List.of(new SimpleGrantedAuthority(UsuarioCargo.ALUNO.getRole()));
+
+        if (this.cargo == UsuarioCargo.CURADOR)
+            return List.of(new SimpleGrantedAuthority(UsuarioCargo.CURADOR.getRole()));
+
+        if (this.cargo == UsuarioCargo.ANONIMO)
+            return List.of(new SimpleGrantedAuthority(UsuarioCargo.ANONIMO.getRole()));
+
+        return List.of();
+    }
+
+    @Override
+    public String getPassword() {
+        return senha.getValor();
+    }
+
+    @Override
+    public String getUsername() {
+        return this.email.getValor();
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return UserDetails.super.isAccountNonExpired();
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return UserDetails.super.isAccountNonLocked();
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return UserDetails.super.isCredentialsNonExpired();
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return UserDetails.super.isEnabled();
     }
 }
 

@@ -5,20 +5,21 @@ import ananditos.sandraxandreia.dto.response.UsuarioResponseDTO;
 import ananditos.sandraxandreia.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 /**
- * Camada Controller.
- *
- * Recebe requisicoes HTTP, conversa com a camada de servico
+ * Camada Controller.\ * Recebe requisicoes HTTP, conversa com a camada de servico
  * e devolve respostas em JSON.
  */
 @RestController
 @RequestMapping("/usuario")
 @Tag(name = "Usuario", description = "Endpoints didaticos para a entidade Usuario")
+@PreAuthorize("hasRole('ADMIN')")
 public class UsuarioController {
 
     private final UsuarioService service;
@@ -30,7 +31,7 @@ public class UsuarioController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Cadastra um novo usuario")
-    public UsuarioResponseDTO criar(@RequestBody UsuarioRequestDTO usuario) {
+    public UsuarioResponseDTO criar(@Valid @RequestBody UsuarioRequestDTO usuario) {
         return service.criar(usuario);
     }
 
@@ -48,7 +49,7 @@ public class UsuarioController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Atualiza um usuario existente")
-    public UsuarioResponseDTO atualizar(@PathVariable Long id, @RequestBody UsuarioRequestDTO usuario) {
+    public UsuarioResponseDTO atualizar(@PathVariable Long id, @Valid @RequestBody UsuarioRequestDTO usuario) {
         return service.atualizar(id, usuario);
     }
 
@@ -56,7 +57,6 @@ public class UsuarioController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Remove um usuario pelo id")
     public void deletar(@PathVariable Long id) {
-
         service.deletar(id);
     }
 }

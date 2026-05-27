@@ -38,6 +38,9 @@ public class Curso {
     @OneToMany(mappedBy = "curso", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Matricula> alunos = new ArrayList<>();
 
+    @OneToMany(mappedBy = "curso", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MaterialCurso> materiais = new ArrayList<>();
+
     public Curso(Long id, String nome, CursoAssinatura tipoAssinatura, TipoCurso tipoCurso) {
         this.id = id;
         this.nome = nome;
@@ -56,6 +59,14 @@ public class Curso {
 
     public void setAlunos(List<Matricula> alunos) {
         this.alunos = alunos;
+    }
+
+    public List<MaterialCurso> getMateriais() {
+        return materiais;
+    }
+
+    public void setMateriais(List<MaterialCurso> materiais) {
+        this.materiais = materiais;
     }
 
     public Long getId() {
