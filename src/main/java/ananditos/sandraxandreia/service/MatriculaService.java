@@ -28,6 +28,17 @@ public class MatriculaService {
         this.alunoRepository = alunoRepository;
     }
 
+    private MatriculaResponseDTO toResponse(Matricula matricula) {
+        return new MatriculaResponseDTO(
+                matricula.getId(),
+                matricula.getDataMatricula().getData(),
+                matricula.getStatus(),
+                matricula.getAluno().getId(),
+                matricula.getCurso().getId()
+
+        );
+    }
+
     public MatriculaResponseDTO criar(MatriculaRequestDTO request) {
         Aluno aluno = buscarAluno(request.getAlunoId());
         Curso curso = buscarCurso(request.getCursoId());

@@ -1,0 +1,295 @@
+:root {
+  --bg-body: #F4F7FE;
+  --bg-card: #FFFFFF;
+  --primary-blue: #3B82F6;
+  --primary-blue-dark: #1E3A8A;
+  --accent-coral: #FF6B6B;
+  --success-green: #10B981;
+  --warning-yellow: #F59E0B;
+  --text-main: #1F2937;
+  --text-muted: #6B7280;
+  --border-light: #E5E7EB;
+
+  --font-family: 'Inter', system-ui, sans-serif;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-pill: 9999px;
+
+  --shadow-soft: 0 10px 40px rgba(0,0,0,0.08);
+  --shadow-hover: 0 20px 60px rgba(0,0,0,0.18);
+
+  --transition-default: all .3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg-body);
+  font-family: var(--font-family);
+  color: var(--text-main);
+  line-height: 1.6;
+}
+
+.btn-view {
+    width: 100%;
+    background: var(--primary-blue);
+    color: white;
+    border: none;
+    padding: 0.875rem 1.5rem;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-default);
+    font-size: 1rem;
+    margin: 80px 0;
+}
+
+.certificado{
+  display: flex;
+  justify-content: center;
+}
+
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--primary-blue);
+}
+
+/* HEADER ------------------------------------------------ */
+
+.main-header {
+  text-align: center;
+  padding: 3rem 2rem;
+  background: linear-gradient(135deg, var(--primary-blue), var(--primary-blue-dark));
+  color: white;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  margin-bottom: 3rem;
+}
+
+.main-header h1 {
+  margin: 0;
+  font-size: 3rem;
+  font-weight: 700;
+}
+
+/* CONTAINER -------------------------------------------- */
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+/* GRID DE CONQUISTAS ----------------------------------- */
+
+.achievements-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+  gap: 2rem;
+  margin-bottom: 4rem;
+}
+
+.card {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--border-light);
+  transition: var(--transition-default);
+}
+
+.card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-hover);
+}
+
+.icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.card h3 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.card p {
+  margin: 0.5rem 0 1.25rem;
+  color: var(--text-muted);
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.4rem 1rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+/* BADGES ESPECÍFICAS ----------------------------------- */
+
+.badge-aprendizado {
+  background: linear-gradient(135deg, #3B82F6, #1E3A8A);
+  color: white;
+}
+
+.badge-progresso {
+  background: linear-gradient(135deg, #10B981, #059669);
+  color: white;
+}
+
+.badge-especial {
+  background: linear-gradient(135deg, #FF6B6B, #EF4444);
+  color: white;
+}
+
+.badge-consistencia {
+  background: linear-gradient(135deg, #F59E0B, #D97706);
+  color: white;
+}
+
+/* PROGRESS BAR ----------------------------------------- */
+
+.progress-bar {
+  background: var(--border-light);
+  height: 8px;
+  border-radius: 9999px;
+  overflow: hidden;
+  margin-top: 1rem;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, var(--success-green), var(--warning-yellow));
+  transition: width .4s ease;
+}
+
+/* CONQUISTAS ESPECIAIS --------------------------------- */
+
+.special-section {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  padding: 3rem;
+  border-radius: var(--radius-lg);
+  color: white;
+  margin-bottom: 4rem;
+}
+
+.special-section h2 {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+/* RANKING ----------------------------------------------- */
+
+.ranking-section h2 {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.ranking {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 650px;
+  margin: 0 auto;
+}
+
+.rank-item {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.4rem 1.25rem;
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--border-light);
+}
+
+.rank-position {
+  font-size: 1.75rem;
+  width: 40px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.medal {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.medal-gold {
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+}
+
+.medal-silver {
+  background: linear-gradient(135deg, #C0C0C0, #A9A9A9);
+}
+
+.medal-bronze {
+  background: linear-gradient(135deg, #CD7F32, #B8860B);
+}
+
+.rank-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--primary-blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+}
+
+.rank-name {
+  flex: 1;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.rank-score {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--primary-blue);
+}
+
+/* RESPONSIVIDADE --------------------------------------- */
+
+@media (max-width: 768px) {
+  .achievements-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .navbar {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+
+  .main-header h1 {
+    font-size: 2.2rem;
+  }
+
+  .rank-item {
+    flex-wrap: wrap;
+    text-align: center;
+    justify-content: center;
+  }
+}

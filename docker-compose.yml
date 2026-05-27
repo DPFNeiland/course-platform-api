@@ -60,6 +60,19 @@ services:
     networks:
       - app_net
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: sandra-x-andreia-frontend
+    restart: always
+    depends_on:
+      - app
+    ports:
+      - "5173:80"
+    networks:
+      - app_net
+
 volumes:
   postgres_data:
   pgadmin_data:

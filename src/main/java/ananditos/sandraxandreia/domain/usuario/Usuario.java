@@ -57,22 +57,26 @@ public class Usuario  implements UserDetails {
     private GeneroUsuario genero;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private UsuarioCargo cargo;
+    @Column
+    private PerfilUsuario perfil;
 
     public Usuario() {
         // Construtor padrao exigido pela JPA.
     }
 
-    public Usuario(Long id, String nome, String email, String cpf, String senha, String dataNascimento, GeneroUsuario genero, UsuarioCargo cargo) {
+    public Usuario(Long id, String nome, String email, String senhaCriptografada, String cpf, GeneroUsuario genero, String dataNascimento) {
+        this(id, nome, email, senhaCriptografada, cpf, genero, dataNascimento, PerfilUsuario.CURADOR);
+    }
+
+    public Usuario(Long id, String nome, String email, String senhaCriptografada, String cpf, GeneroUsuario genero, String dataNascimento, PerfilUsuario perfil) {
         this.id = id;
         this.nome = nome;
         this.email = new UsuarioEmail(email);
         this.cpf = new UsuarioCpf(cpf);
         this.senha = new UsuarioSenhaCriptografada(senha);
         this.dataNascimento = new UsuarioDataNascimento(dataNascimento);
-        this.genero = genero;
-        this.cargo = cargo;
+        this.perfil = perfil;
+
     }
 
     public Long getId() {
@@ -131,9 +135,14 @@ public class Usuario  implements UserDetails {
         this.genero = genero;
     }
 
-    public UsuarioCargo getCargo() {
-        return cargo;
+    public PerfilUsuario getPerfil() {
+        return perfil;
     }
+
+    public void setPerfil(PerfilUsuario perfil) {
+        this.perfil = perfil;
+    }
+
 
     public void setCargo(UsuarioCargo cargo) {
         this.cargo = cargo;
@@ -143,12 +152,12 @@ public class Usuario  implements UserDetails {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Usuario usuario = (Usuario) o;
-        return Objects.equals(id, usuario.id) && Objects.equals(nome, usuario.nome) && Objects.equals(email, usuario.email) && Objects.equals(cpf, usuario.cpf) && Objects.equals(senha, usuario.senha) && Objects.equals(dataNascimento, usuario.dataNascimento) && genero == usuario.genero && cargo == usuario.cargo;
+        return Objects.equals(id, usuario.id) && Objects.equals(nome, usuario.nome) && Objects.equals(email, usuario.email) && Objects.equals(cpf, usuario.cpf) && Objects.equals(senha, usuario.senha) && Objects.equals(dataNascimento, usuario.dataNascimento) && genero == usuario.genero && perfil == usuario.perfil;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, nome, email, cpf, senha, dataNascimento, genero, cargo);
+        return Objects.hash(id, nome, email, cpf, senha, dataNascimento, genero, perfil);
     }
 
 
@@ -162,7 +171,7 @@ public class Usuario  implements UserDetails {
                 ", senha=" + senha +
                 ", dataNascimento=" + dataNascimento +
                 ", genero=" + genero +
-                ", cargo=" + cargo +
+                ", perfil=" + perfil +
                 '}';
     }
 

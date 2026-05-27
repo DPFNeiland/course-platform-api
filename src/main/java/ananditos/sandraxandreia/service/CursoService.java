@@ -22,6 +22,18 @@ public class CursoService {
         this.professorRepository = professorRepository;
     }
 
+    private CursoResponseDTO toResponse(Curso curso) {
+        return new CursoResponseDTO(
+                curso.getId(),
+                curso.getNome(),
+                curso.getTipoAssinatura(),
+                curso.getTipoCurso(),
+                curso.getStatus(),
+                curso.getProfessor().getId()
+
+        );
+    }
+
     public CursoResponseDTO criar(CursoRequestDTO request) {
         validarNomeDuplicado(request.getNome(), null);
         Professor professor = buscarProfessor(request.getProfessorId());
