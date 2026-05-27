@@ -7,7 +7,7 @@ public class CursoResponseDTO {
 
     private Long id;
 
-    private String nome;
+    public String nome;
 
     private CursoAssinatura tipoAssinatura;
 

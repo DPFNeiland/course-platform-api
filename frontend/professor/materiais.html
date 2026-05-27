@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Materiais - Professor</title>
+    <link rel="stylesheet" href="/global.css">
+    <link rel="stylesheet" href="style/materiais.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+</head>
+<body>
+    <nav class="navbar">
+        <input type="checkbox" class="nav-toggle" id="nav-toggle">
+        <div class="nav-left">
+        <label for="nav-toggle" class="nav-toggle-label">
+            <span></span>
+            <span></span>
+            <span></span>
+        </label>
+        <a href="dashboard.html" class="logo">EdTech</a>
+        </div>
+        <ul class="menu">
+            <li><a href="agenda.html">Agenda</a></li>
+            <li><a href="materiais.html">Materiais</a></li>
+        </ul>
+        <div class="nav-right">
+        <a href="#"><div class="avatar">JD</div></a>
+        </div>
+    </nav>  
+
+    <header class="header">
+        <div class="header-content">
+            <h1>Materiais didáticos</h1>
+            <p>Gerencie seus materiais de aula de forma organizada e eficiente</p>
+        </div>
+    </header>
+
+    <main>
+        <section class="upload-section">
+            <div class="card">
+                <h3><i class="fas fa-cloud-upload-alt"></i> Enviar material</h3>
+                <button class="btn-pill">
+                    <i class="fas fa-plus"></i>
+                    Enviar material
+                </button>
+            </div>
+        </section>
+
+        <section class="folders-section">
+            <h2>Pastas</h2>
+            <div class="grid">
+                <div class="folder-card">
+                    <div class="icon">
+                        <i class="fas fa-folder-open"></i>
+                    </div>
+                    <h4>Matemática 1º Ano</h4>
+                    <span>12 materiais</span>
+                </div>
+                <div class="folder-card">
+                    <div class="icon">
+                        <i class="fas fa-folder-open"></i>
+                    </div>
+                    <h4>Prova Final</h4>
+                    <span>5 materiais</span>
+                </div>
+                <div class="folder-card">
+                    <div class="icon">
+                        <i class="fas fa-folder-open"></i>
+                    </div>
+                    <h4>Exercícios</h4>
+                    <span>8 materiais</span>
+                </div>
+            </div>
+        </section>
+    </main>
+    <script src="professor.js"></script>
+</body>
+</html>

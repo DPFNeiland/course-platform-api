@@ -4,6 +4,7 @@ package ananditos.sandraxandreia.domain.aluno;
 
 import ananditos.sandraxandreia.domain.matricula.Matricula;
 import ananditos.sandraxandreia.domain.usuario.GeneroUsuario;
+import ananditos.sandraxandreia.domain.usuario.PerfilUsuario;
 import ananditos.sandraxandreia.domain.usuario.Usuario;
 import ananditos.sandraxandreia.domain.aluno.vo.AlunoRA;
 import ananditos.sandraxandreia.domain.usuario.UsuarioCargo;
@@ -36,8 +37,9 @@ public class Aluno extends Usuario {
         // 2° preenche os campos um a um.
     }
 
-    public Aluno(Long id, String nome, String email, String cpf, String senha, String dataNascimento, GeneroUsuario genero, String ra, StatusAluno status) {
-        super(id, nome, email, cpf, senha, dataNascimento, genero, UsuarioCargo.ALUNO);
+    public Aluno(Long id, String nome, String email, String senhaCriptografada, String cpf, GeneroUsuario genero, String dataNascimento, String ra, StatusAluno status) {
+        // super comunica com o Usuario (classe pai)
+        super(id, nome, email, senhaCriptografada, cpf, genero, dataNascimento, PerfilUsuario.ALUNO);
         this.ra = new AlunoRA(ra);
         this.status = status;
     }

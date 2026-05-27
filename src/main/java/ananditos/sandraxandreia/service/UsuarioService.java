@@ -41,7 +41,7 @@ public class UsuarioService {
                 usuario.getCpf().getValor(),
                 usuario.getGenero(),
                 usuario.getDataNascimento().getData(),
-                usuario.getCargo()
+                usuario.getPerfil()
         );
     }
 

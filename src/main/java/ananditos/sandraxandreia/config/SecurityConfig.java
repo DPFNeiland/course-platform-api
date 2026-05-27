@@ -9,6 +9,11 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 @EnableMethodSecurity
@@ -23,6 +28,8 @@ public class SecurityConfig {
                 // Para APIs REST didaticas/testes, costuma-se desabilitar.
                 // Em producao, isso deve ser analisado com cuidado.
                 .csrf(csrf -> csrf.disable())
+
+                .cors(Customizer.withDefaults())
 
                 // authorizeHttpRequests() define quem pode acessar cada rota.
                 .authorizeHttpRequests(auth -> auth
@@ -39,6 +46,11 @@ public class SecurityConfig {
                         // credenciais e depois autenticar com HTTP Basic.
                         .requestMatchers(HttpMethod.POST, "/aluno", "/professor", "/curador").permitAll()
 
+                        // Cadastro inicial para que alunos e professores possam criar
+                        // credenciais e depois autenticar com HTTP Basic.
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/login", "/aluno", "/professor", "/curador").permitAll()
+
                         // anyRequest() pega o que nao foi coberto acima.
                         .anyRequest().authenticated())
 
@@ -51,6 +63,33 @@ public class SecurityConfig {
 
         // build() monta o objeto final da configuracao de seguranca.
         return http.build();
+    }
+
+    // UserDetailsService e o servico que fornece usuarios para autenticacao.
+    // Nesta versao, usamos um usuario em memoria, sem tabela no banco.
+    @Bean
+    public UserDetailsService users(PasswordEncoder passwordEncoder) {
+        return new InMemoryUserDetailsManager(
+                // User.withUsername(...) cria um usuario de forma fluente.
+                User.withUsername("admin")
+                        // encode(...) criptografa a senha antes de armazenar.
+                        .password(passwordEncoder.encode("123456"))
+                        .roles("ADMIN")
+                        .build()
+        );
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("http://localhost:5173", "http://127.0.0.1:5173"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(false);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 
     // PasswordEncoder e um bean importante da aplicacao.
