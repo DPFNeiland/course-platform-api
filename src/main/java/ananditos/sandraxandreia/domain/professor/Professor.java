@@ -5,6 +5,7 @@ import ananditos.sandraxandreia.domain.usuario.GeneroUsuario;
 import ananditos.sandraxandreia.domain.usuario.PerfilUsuario;
 import ananditos.sandraxandreia.domain.usuario.Usuario;
 import ananditos.sandraxandreia.domain.professor.vo.ProfessorAreaFormacao;
+import ananditos.sandraxandreia.domain.usuario.UsuarioCargo;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -15,7 +16,7 @@ import java.util.Objects;
 @Table(name = "professor")
 public class Professor extends Usuario {
 
-    @Column(nullable = false, length = 100)
+    @Embedded
     private ProfessorAreaFormacao areaFormacao;
 
     @Column(nullable = false)
@@ -41,6 +42,7 @@ public class Professor extends Usuario {
         this.horaAula = horaAula;
         this.tipoEnsino = tipoEnsino;
     }
+
     public ProfessorAreaFormacao getAreaFormacao() {
         return areaFormacao;
     }

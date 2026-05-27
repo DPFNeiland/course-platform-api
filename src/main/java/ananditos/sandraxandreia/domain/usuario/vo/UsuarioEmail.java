@@ -1,10 +1,12 @@
 package ananditos.sandraxandreia.domain.usuario.vo;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 
 import java.util.Objects;
 import java.util.regex.Pattern;
 
+@Embeddable
 public class UsuarioEmail {
 
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");

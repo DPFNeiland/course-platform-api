@@ -7,7 +7,9 @@ import ananditos.sandraxandreia.dto.response.AlunoResponseDTO;
 import ananditos.sandraxandreia.service.AlunoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,50 +18,46 @@ import java.util.List;
 @RequestMapping("/aluno") // endereço base da API
 @Tag(name = "Aluno", description = "API REST de aluno")
 public class AlunoController {
-        private final AlunoService service;
+    private final AlunoService service;
 
-        public AlunoController(AlunoService service) {
-            this.service = service;
+    public AlunoController(AlunoService service) {
+        this.service = service;
+    }
 
-        }
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("permitAll()")
+    @Operation(summary = "Cadastra um novo aluno")
+    public AlunoResponseDTO criar(@Valid @RequestBody AlunoRequestDTO aluno) {
+        return service.criar(aluno);
+    }
 
-        @PostMapping //criar
-        @ResponseStatus(HttpStatus.CREATED)
-        @Operation(summary = "Cadastra um novo aluno")
+    @GetMapping
+    @PreAuthorize("hasRole('ALUNO')")
+    @Operation(summary = "Lista todos os alunos")
+    public List<AlunoResponseDTO> listarTodos() {
+        return service.listarTodos();
+    }
 
-        public AlunoResponseDTO criar(
-                // para o JSON enviado ser transformado em um AlunoRequestDTO
-                // e, assim, validar as regras
-                // @RequestBody -> usado no POST e PUT
-                @RequestBody AlunoRequestDTO aluno)
-        {
-            return service.criar(aluno);
-        }
+    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ALUNO')")
+    @Operation(summary = "Busca um aluno pelo id")
+    public AlunoResponseDTO buscarPorId(@PathVariable Long id) {
+        return service.buscarPorId(id);
+    }
 
-        @GetMapping //busca todos
-        @Operation(summary = "Lista todos os alunos")
-        public List<AlunoResponseDTO> listarTodos() {
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ALUNO')")
+    @Operation(summary = "Atualiza um aluno existente")
+    public AlunoResponseDTO atualizar(@PathVariable Long id, @Valid @RequestBody AlunoRequestDTO aluno) {
+        return service.atualizar(id, aluno);
+    }
 
-            return service.listarTodos();
-        }
-
-        @GetMapping("/{id}") //busca pelo id
-        @Operation(summary = "Busca um aluno pelo id")
-        public AlunoResponseDTO buscarPorId(@PathVariable Long id) {
-
-            return service.buscarPorId(id);
-        }
-
-        @PutMapping("/{id}") //atualiza pelo id
-        @Operation(summary = "Atualiza um aluno existente")
-        public AlunoResponseDTO atualizar(@PathVariable Long id, @RequestBody AlunoRequestDTO aluno) {
-            return service.atualizar(id, aluno);
-        }
-
-        @DeleteMapping("/{id}") //deleta pelo id
-        @ResponseStatus(HttpStatus.NO_CONTENT) //não recebe nenhum JSON como resposta (deletou)
-        @Operation(summary = "Remove um aluno pelo id")
-        public void deletar(@PathVariable Long id) {
-            service.deletar(id);
-        }
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ALUNO')")
+    @Operation(summary = "Remove um aluno pelo id")
+    public void deletar(@PathVariable Long id) {
+        service.deletar(id);
+    }
 }
