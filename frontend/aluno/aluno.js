@@ -201,10 +201,45 @@ const renderSalaAula = () => {
 
 const renderCertificates = () => {
   const finished = appState.matriculas.filter(m => m.status === 'ENCERRADA');
+  const certificateItems = finished.map((matricula, index) => ({
+    matricula,
+    curso: cursoPorId(matricula.cursoId),
+    gradient: `gradient-${(index % 6) + 1}`
+  }));
+
+  document.querySelector('#totalCursos')?.replaceChildren(document.createTextNode(String(finished.length)));
+  document.querySelector('#totalHoras')?.replaceChildren(document.createTextNode('-'));
+  document.querySelector('#mediaGeral')?.replaceChildren(document.createTextNode('-'));
+
   document.querySelectorAll('.certificates-grid, .certificados-grid').forEach(container => {
-    container.innerHTML = finished.length
-      ? finished.map(m => `<article class="certificate-card card"><h3>${cursoPorId(m.cursoId)?.nome || `Curso #${m.cursoId}`}</h3><p>Concluido em ${m.dataMatricula || '-'}</p><a class="btn-visualizar" href="conclusao_certificado.html?cursoId=${m.cursoId}">Visualizar</a></article>`).join('')
-      : '<p class="empty-state">Nenhum certificado disponivel. Conclua um curso para gerar certificado.</p>';
+    container.innerHTML = certificateItems.length
+      ? certificateItems.map(({ matricula, curso, gradient }) => `
+        <article class="certificado-card">
+          <div class="certificado-card-header ${gradient}">CERT</div>
+          <div class="certificado-card-body">
+            <div class="certificado-card-title">${curso?.nome || `Curso #${matricula.cursoId}`}</div>
+            <div class="certificado-card-info">
+              <div class="certificado-card-info-item">
+                <span class="certificado-card-info-label">Status:</span>
+                <span class="certificado-card-info-value">${formatEnum(matricula.status)}</span>
+              </div>
+              <div class="certificado-card-info-item">
+                <span class="certificado-card-info-label">Concluido em:</span>
+                <span class="certificado-card-info-value">${matricula.dataMatricula || '-'}</span>
+              </div>
+              <div class="certificado-card-info-item">
+                <span class="certificado-card-info-label">Professor:</span>
+                <span class="certificado-card-info-value">#${curso?.professorId || '-'}</span>
+              </div>
+            </div>
+          </div>
+          <div class="certificado-card-footer">
+            <a href="conclusao_certificado.html?cursoId=${matricula.cursoId}" class="btn-visualizar">Visualizar</a>
+            <button class="btn-compartilhar" type="button" data-share-certificate="${matricula.cursoId}">Compartilhar</button>
+          </div>
+        </article>
+      `).join('')
+      : '<div style="grid-column: 1 / -1;"><div class="empty-state"><div class="empty-state-title">Nenhum certificado disponivel</div><div class="empty-state-text">Conclua um curso para gerar certificado.</div><a class="btn-comecal" href="catalogo.html">Explorar Cursos</a></div></div>';
   });
 };
 
@@ -287,6 +322,24 @@ const handleClick = async event => {
   }
 
   if (event.target.matches('.logout-btn')) logout();
+
+  const share = event.target.closest('[data-share-certificate]');
+  if (share) {
+    const curso = cursoPorId(Number(share.dataset.shareCertificate));
+    const modal = document.querySelector('#modalCompartilhar');
+    const body = document.querySelector('#modalCompartilharBody');
+    if (body) body.innerHTML = `Voce esta prestes a compartilhar o certificado de "<strong>${curso?.nome || 'curso concluido'}</strong>" no LinkedIn.`;
+    if (modal) modal.style.display = 'block';
+  }
+
+  if (event.target.matches('[data-close-certificate-modal]')) {
+    document.querySelector('#modalCompartilhar').style.display = 'none';
+  }
+
+  if (event.target.matches('[data-confirm-certificate-share]')) {
+    window.open('https://www.linkedin.com/feed/?linkOrigin=LI_BADGE', '_blank');
+    document.querySelector('#modalCompartilhar').style.display = 'none';
+  }
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
