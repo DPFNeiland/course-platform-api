@@ -110,8 +110,8 @@ class ProjectFlowIntegrationTests {
                 "aluno.fluxo@teste.com",
                 "52998224725",
                 passwordEncoder.encode("123456"),
-                "1/1/2000",
                 GeneroUsuario.MASCULINO,
+                "1/1/2000",
                 "ZX1234",
                 StatusAluno.CURSANDO
         ));
@@ -122,8 +122,8 @@ class ProjectFlowIntegrationTests {
                 "professor.fluxo@teste.com",
                 "39053344705",
                 passwordEncoder.encode("123456"),
-                "1/1/1985",
                 GeneroUsuario.FEMININO,
+                "1/1/1985",
                 "Engenharia de Software",
                 100.0,
                 TipoEnsinoProfessor.AMBOS
@@ -135,8 +135,8 @@ class ProjectFlowIntegrationTests {
                 "curador.fluxo@teste.com",
                 "98765432100",
                 passwordEncoder.encode("123456"),
-                "1/1/1990",
-                GeneroUsuario.NAO_INFORMADO
+                GeneroUsuario.NAO_INFORMADO,
+                "1/1/1990"
         ));
     }
 
@@ -273,8 +273,8 @@ class ProjectFlowIntegrationTests {
                 "visitante.professor@teste.com",
                 "31415926590",
                 passwordEncoder.encode("123456"),
-                "1/1/1988",
                 GeneroUsuario.MASCULINO,
+                "1/1/1988",
                 "Tecnologia",
                 80.0,
                 TipoEnsinoProfessor.AMBOS

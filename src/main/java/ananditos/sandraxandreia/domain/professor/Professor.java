@@ -2,7 +2,6 @@ package ananditos.sandraxandreia.domain.professor;
 
 import ananditos.sandraxandreia.domain.curso.Curso;
 import ananditos.sandraxandreia.domain.usuario.GeneroUsuario;
-import ananditos.sandraxandreia.domain.usuario.PerfilUsuario;
 import ananditos.sandraxandreia.domain.usuario.Usuario;
 import ananditos.sandraxandreia.domain.professor.vo.ProfessorAreaFormacao;
 import ananditos.sandraxandreia.domain.usuario.UsuarioCargo;
@@ -37,7 +36,7 @@ public class Professor extends Usuario {
     }
 
     public Professor(Long id, String nome, String email, String senhaCriptografada, String cpf, GeneroUsuario genero, String dataNascimento, String areaFormacao, double horaAula, TipoEnsinoProfessor tipoEnsino) {
-        super(id, nome, email, senhaCriptografada, cpf, genero, dataNascimento, PerfilUsuario.PROFESSOR);
+        super(id, nome, email, senhaCriptografada, cpf, genero, dataNascimento, UsuarioCargo.PROFESSOR);
         this.areaFormacao = new ProfessorAreaFormacao(areaFormacao);
         this.horaAula = horaAula;
         this.tipoEnsino = tipoEnsino;

@@ -120,16 +120,6 @@ public class MatriculaService {
                 .orElseThrow(() -> new RuntimeException("Curso nao encontrado"));
     }
 
-    private MatriculaResponseDTO toResponse(Matricula matricula) {
-        return new MatriculaResponseDTO(
-                matricula.getId(),
-                matricula.getDataMatricula().getData(),
-                matricula.getStatus(),
-                matricula.getAluno().getId(),
-                matricula.getCurso().getId()
-        );
-    }
-
     private void validarCursoDisponivelParaMatricula(Curso curso) {
         if (curso.getStatus() != StatusCurso.APROVADO) {
             throw new RuntimeException("Somente cursos aprovados podem receber matriculas");

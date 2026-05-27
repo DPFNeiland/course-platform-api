@@ -34,7 +34,7 @@ public class ProfessorService {
                 professor.getCpf().getValor(),
                 professor.getGenero(),
                 professor.getDataNascimento().getData(),
-                professor.getCargo(),
+                professor.getPerfil(),
                 professor.getAreaFormacao().getValor(),
                 professor.getHoraAula(),
                 professor.getTipoEnsino()
@@ -60,8 +60,8 @@ public class ProfessorService {
                 request.getEmail(),
                 request.getCpf(),
                 passwordEncoder.encode(request.getSenha()),
-                request.getDataNascimento(),
                 request.getGenero(),
+                request.getDataNascimento(),
                 request.getAreaFormacao(),
                 request.getHoraAula(),
                 request.getTipoEnsino()

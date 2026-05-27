@@ -1,7 +1,7 @@
 package ananditos.sandraxandreia.dto.response;
 
 import ananditos.sandraxandreia.domain.usuario.GeneroUsuario;
-import ananditos.sandraxandreia.domain.usuario.PerfilUsuario;
+import ananditos.sandraxandreia.domain.usuario.UsuarioCargo;
 
 import java.time.LocalDate;
 
@@ -12,16 +12,12 @@ public class UsuarioResponseDTO {
     private String cpf;
     private GeneroUsuario genero;
     private LocalDate dataNascimento;
-    private PerfilUsuario perfil;
+    private UsuarioCargo perfil;
 
     public UsuarioResponseDTO() {
     }
 
-    public UsuarioResponseDTO(Long id, String nome, String email, String cpf, GeneroUsuario genero, LocalDate dataNascimento) {
-        this(id, nome, email, cpf, genero, dataNascimento, null);
-    }
-
-    public UsuarioResponseDTO(Long id, String nome, String email, String cpf, GeneroUsuario genero, LocalDate dataNascimento, PerfilUsuario perfil) {
+    public UsuarioResponseDTO(Long id, String nome, String email, String cpf, GeneroUsuario genero, LocalDate dataNascimento, UsuarioCargo perfil) {
         this.id = id;
         this.nome = nome;
         this.email = email;
@@ -37,6 +33,6 @@ public class UsuarioResponseDTO {
     public String getCpf() { return cpf; }
     public GeneroUsuario getGenero() { return genero; }
     public LocalDate getDataNascimento() {return dataNascimento;}
-    public PerfilUsuario getPerfil() { return perfil; }
+    public UsuarioCargo getPerfil() { return perfil; }
 
 }

@@ -64,8 +64,8 @@ public class UsuarioService {
                 request.getEmail(),
                 request.getCpf(),
                 passwordEncoder.encode(request.getSenha()),
-                request.getDataNascimento(),
                 request.getGenero(),
+                request.getDataNascimento(),
                 request.getCargo()
 
         );
@@ -101,7 +101,7 @@ public class UsuarioService {
             usuario.setSenha(new UsuarioSenhaCriptografada(passwordEncoder.encode(request.getSenha())));
             usuario.setGenero(request.getGenero());
             usuario.setDataNascimento(new UsuarioDataNascimento(request.getDataNascimento()));
-            usuario.setCargo(request.getCargo());
+            usuario.setPerfil(request.getCargo());
             Usuario salvo = repository.save(usuario);
             return toResponse(salvo);
     }
