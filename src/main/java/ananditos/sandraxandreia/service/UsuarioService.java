@@ -62,8 +62,8 @@ public class UsuarioService {
                 null,
                 request.getNome(),
                 request.getEmail(),
-                request.getCpf(),
                 passwordEncoder.encode(request.getSenha()),
+                request.getCpf(),
                 request.getGenero(),
                 request.getDataNascimento(),
                 request.getCargo()

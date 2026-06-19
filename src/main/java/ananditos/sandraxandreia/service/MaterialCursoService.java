@@ -66,7 +66,7 @@ public class MaterialCursoService {
     }
 
     public MaterialCurso buscarArquivo(Long cursoId, Long materialId) {
-        MaterialCurso material = materialCursoRepository.findByIdAndCursoId(materialId, cursoId)
+        MaterialCurso material = materialCursoRepository.findByIdAndCurso_Id(materialId, cursoId)
                 .orElseThrow(() -> new IllegalArgumentException("Material nao encontrado para o curso informado"));
 
         if (material.getTipo() != TipoMaterialCurso.ARQUIVO) {

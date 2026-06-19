@@ -35,6 +35,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.util.List;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
@@ -108,8 +109,8 @@ class ProjectFlowIntegrationTests {
                 null,
                 "Aluno Fluxo",
                 "aluno.fluxo@teste.com",
-                "52998224725",
                 passwordEncoder.encode("123456"),
+                "52998224725",
                 GeneroUsuario.MASCULINO,
                 "1/1/2000",
                 "ZX1234",
@@ -120,8 +121,8 @@ class ProjectFlowIntegrationTests {
                 null,
                 "Professor Fluxo",
                 "professor.fluxo@teste.com",
-                "39053344705",
                 passwordEncoder.encode("123456"),
+                "39053344705",
                 GeneroUsuario.FEMININO,
                 "1/1/1985",
                 "Engenharia de Software",
@@ -133,8 +134,8 @@ class ProjectFlowIntegrationTests {
                 null,
                 "Curador Fluxo",
                 "curador.fluxo@teste.com",
-                "98765432100",
                 passwordEncoder.encode("123456"),
+                "98765432100",
                 GeneroUsuario.NAO_INFORMADO,
                 "1/1/1990"
         ));
@@ -256,7 +257,7 @@ class ProjectFlowIntegrationTests {
                 .andReturn();
 
         String corpo = resultado.getResponse().getContentAsString();
-        String materialId = corpo.replaceAll(".*\"id\":(\\d+).*", "$1");
+        Long materialId = new ObjectMapper().readTree(corpo).get("id").asLong();
 
         mockMvc.perform(get("/curso/{cursoId}/materiais/{materialId}/arquivo", curso.getId(), materialId)
                         .with(httpBasic(professor.getEmail().getValor(), "123456")))
@@ -271,8 +272,8 @@ class ProjectFlowIntegrationTests {
                 null,
                 "Professor Visitante",
                 "visitante.professor@teste.com",
-                "31415926590",
                 passwordEncoder.encode("123456"),
+                "31415926590",
                 GeneroUsuario.MASCULINO,
                 "1/1/1988",
                 "Tecnologia",

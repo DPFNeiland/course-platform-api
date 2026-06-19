@@ -34,5 +34,6 @@ public class UsuarioResponseDTO {
     public GeneroUsuario getGenero() { return genero; }
     public LocalDate getDataNascimento() {return dataNascimento;}
     public UsuarioCargo getPerfil() { return perfil; }
+    public UsuarioCargo getCargo() { return perfil; }
 
 }

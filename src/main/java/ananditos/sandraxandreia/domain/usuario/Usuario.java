@@ -71,6 +71,7 @@ public class Usuario  implements UserDetails {
         this.cpf = new UsuarioCpf(cpf);
         this.senha = new UsuarioSenhaCriptografada(senhaCriptografada);
         this.dataNascimento = new UsuarioDataNascimento(dataNascimento);
+        this.genero = genero;
         this.perfil = perfil;
 
     }

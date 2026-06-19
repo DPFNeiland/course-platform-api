@@ -175,6 +175,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (resposta.status === 201) {
                 const usuario = await resposta.json();
                 const sessao = montarSessao(usuario, perfil);
+                sessao.token = btoa(`${usuarioDTO.email}:${usuarioDTO.senha}`);
                 sessionStorage.setItem('user', JSON.stringify(sessao));
                 sessionStorage.setItem('session', JSON.stringify(sessao));
                 redirectByPerfil(sessao.perfil);
@@ -215,6 +216,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const usuario = await resposta.json();
             const sessao = montarSessao(usuario);
+            sessao.token = btoa(`${email}:${senha}`);
             sessionStorage.setItem('user', JSON.stringify(sessao));
             sessionStorage.setItem('session', JSON.stringify(sessao));
             redirectByPerfil(sessao.perfil);

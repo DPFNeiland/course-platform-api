@@ -8,5 +8,5 @@ import java.util.Optional;
 
 public interface MaterialCursoRepository extends JpaRepository<MaterialCurso, Long> {
     List<MaterialCurso> findByCursoIdOrderByDataCadastroAsc(Long cursoId);
-    Optional<MaterialCurso> findByIdAndCursoId(Long id, Long cursoId);
+    Optional<MaterialCurso> findByIdAndCurso_Id(Long id, Long cursoId);
 }
