@@ -47,10 +47,6 @@ public class SecurityConfig {
 
                         // Cadastro inicial para que alunos e professores possam criar
                         // credenciais e depois autenticar com HTTP Basic.
-                        .requestMatchers(HttpMethod.POST, "/aluno", "/professor", "/curador").permitAll()
-
-                        // Cadastro inicial para que alunos e professores possam criar
-                        // credenciais e depois autenticar com HTTP Basic.
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/login", "/aluno", "/professor", "/curador").permitAll()
 
@@ -68,24 +64,14 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // UserDetailsService e o servico que fornece usuarios para autenticacao.
-    // Nesta versao, usamos um usuario em memoria, sem tabela no banco.
-    @Bean
-    public UserDetailsService users(PasswordEncoder passwordEncoder) {
-        return new InMemoryUserDetailsManager(
-                // User.withUsername(...) cria um usuario de forma fluente.
-                User.withUsername("admin")
-                        // encode(...) criptografa a senha antes de armazenar.
-                        .password(passwordEncoder.encode("123456"))
-                        .roles("ADMIN")
-                        .build()
-        );
-    }
-
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173", "http://127.0.0.1:5173"));
+        configuration.setAllowedOrigins(List.of(
+                "http://localhost:5173", "http://127.0.0.1:5173",
+                "http://localhost:5500", "http://127.0.0.1:5500",
+                "http://localhost:3000", "http://127.0.0.1:3000"
+        ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(false);

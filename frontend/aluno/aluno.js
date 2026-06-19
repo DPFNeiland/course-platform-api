@@ -10,8 +10,20 @@ const appState = {
 };
 
 const api = async (path, options = {}) => {
+  const sessionStr = sessionStorage.getItem('session') || sessionStorage.getItem('user');
+  let token = null;
+  if (sessionStr) {
+    try {
+      const session = JSON.parse(sessionStr);
+      token = session.token;
+    } catch (e) {}
+  }
+  const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+  if (token) {
+    headers['Authorization'] = `Basic ${token}`;
+  }
   const response = await fetch(`${API_BASE_URL}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+    headers,
     ...options
   });
   if (!response.ok) {

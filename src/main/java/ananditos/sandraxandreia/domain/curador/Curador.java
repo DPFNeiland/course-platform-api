@@ -14,6 +14,6 @@ public class Curador extends Usuario {
     }
 
     public Curador(Long id, String nome, String email, String senhaCriptografada, String cpf, GeneroUsuario genero, String dataNascimento) {
-        super(id, nome, email, senhaCriptografada, cpf, genero, dataNascimento, UsuarioCargo.PROFESSOR);
+        super(id, nome, email, senhaCriptografada, cpf, genero, dataNascimento, UsuarioCargo.CURADOR);
     }
 }
