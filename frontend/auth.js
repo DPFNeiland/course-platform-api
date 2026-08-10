@@ -17,6 +17,19 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 5000);
     }
 
+    function extrairMensagemErro(erroData, status) {
+        if (erroData) {
+            if (erroData.erros && typeof erroData.erros === 'object') {
+                const mensagens = Object.values(erroData.erros);
+                if (mensagens.length > 0) return mensagens.join('; ');
+            }
+            if (erroData.erro) return erroData.erro;
+            if (erroData.message) return erroData.message;
+            if (erroData.error) return erroData.error;
+        }
+        return status ? `Erro no servidor (HTTP ${status})` : 'Erro ao cadastrar. Verifique os dados e tente novamente.';
+    }
+
     function formatDateForApi(dateValue) {
         const [year, month, day] = dateValue.split('-');
         return `${Number(day)}/${Number(month)}/${year}`;
@@ -181,8 +194,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 redirectByPerfil(sessao.perfil);
             } else {
                 const erroData = await resposta.json().catch(() => null);
-                const mensagem = erroData?.message || erroData?.error || 'Erro ao cadastrar. Verifique os dados e tente novamente.';
-                showError(mensagem);
+                showError(extrairMensagemErro(erroData, resposta.status));
             }
         })
         .catch(erro => {
@@ -209,8 +221,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(async (resposta) => {
             if (!resposta.ok) {
                 const erroData = await resposta.json().catch(() => null);
-                const mensagem = erroData?.message || erroData?.error || 'E-mail ou senha invalidos.';
-                showError(mensagem);
+                showError(extrairMensagemErro(erroData, resposta.status));
                 return;
             }
 
