@@ -243,7 +243,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         nome: document.getElementById('course-nome').value,
         tipoAssinatura: document.getElementById('course-tipoAssinatura').value,
         tipoCurso: document.getElementById('course-tipoCurso').value,
-        professorIid: state.user.id
+        professorId: state.user.id
       };
 
       try {
