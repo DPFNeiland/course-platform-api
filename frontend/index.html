@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Educacional - Login & Cadastro</title>
+    <link rel="stylesheet" href="global.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="info-side">
+            <h1>Bem-vindo!</h1>
+            <p>Acesse nossa plataforma educacional e transforme sua jornada de aprendizado hoje mesmo.</p>
+            <div style="margin-top: 40px;">
+                <svg width="200" height="200" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+                    <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+                </svg>
+            </div>
+        </div>
+
+        <div class="form-side">
+            <div id="error" style="display: none; color: red; margin-bottom: 15px; text-align: center;"></div>
+
+            <div id="login-section" class="form-container">
+                <h2>Entrar</h2>
+                <p class="subtitle">Bem-vindo de volta! Por favor, insira seus dados.</p>
+                
+                <form id="loginForm">
+                    <div class="input-group">
+                        <label for="email">E-mail</label>
+                        <input type="email" id="email" placeholder="seu@email.com" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="senha">Senha</label>
+                        <input type="password" id="senha" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="btn-primary">Entrar</button>
+                </form>
+
+                <div class="divider">ou continue com</div>
+
+                <div class="social-login">
+                    <button class="btn-social">Google</button>
+                    <button class="btn-social">Microsoft</button>
+                </div>
+
+                <p class="toggle-text">
+                    Não tem uma conta? <a href="#" id="show-register">Cadastre-se</a>
+                </p>
+            </div>
+
+            <div id="register-section" class="form-container hidden">
+                <h2>Criar Conta</h2>
+                <p class="subtitle">Junte-se a nós e comece sua jornada.</p>
+                
+                <form id="registerForm">
+                    <div class="input-group">
+                        <label for="reg-perfil">Tipo de conta</label>
+                        <select id="reg-perfil" required>
+                            <option value="aluno" selected>Aluno</option>
+                            <option value="professor">Professor</option>
+                            <option value="curador">Curador</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="reg-nome">Nome Completo</label>
+                        <input type="text" id="reg-nome" placeholder="Seu nome" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="reg-email">E-mail</label>
+                        <input type="email" id="reg-email" placeholder="seu@email.com" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="reg-cpf">CPF (Apenas números)</label>
+                        <input type="text" id="reg-cpf" placeholder="12345678900" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="reg-genero">Gênero</label>
+                        <select id="reg-genero" required>
+                            <option value="" disabled selected>Selecione...</option>
+                            <option value="MASCULINO">Masculino</option>
+                            <option value="FEMININO">Feminino</option>
+                            <option value="NAO_INFORMADO">Prefiro nao informar</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="reg-dataNascimento">Data de Nascimento</label>
+                        <input type="date" id="reg-dataNascimento" required>
+                    </div>
+                    <div class="input-group profile-field aluno-field">
+                        <label for="reg-ra">RA (Registro Acadêmico)</label>
+                        <input type="text" id="reg-ra" placeholder="Ex: AB1234" pattern="[A-Za-z]{2}\d{4}" title="Formato exigido: 2 letras e 4 números" required>
+                    </div>
+                    <div class="input-group profile-field professor-field hidden">
+                        <label for="reg-areaFormacao">Área de formação</label>
+                        <input type="text" id="reg-areaFormacao" placeholder="Ex: Tecnologia" disabled>
+                    </div>
+                    <div class="input-group profile-field professor-field hidden">
+                        <label for="reg-horaAula">Valor hora/aula</label>
+                        <input type="number" id="reg-horaAula" min="0" step="0.01" placeholder="Ex: 80" disabled>
+                    </div>
+                    <div class="input-group profile-field professor-field hidden">
+                        <label for="reg-tipoEnsino">Tipo de ensino</label>
+                        <select id="reg-tipoEnsino" disabled>
+                            <option value="ASSINCRONO">Assíncrono</option>
+                            <option value="SINCRONO">Síncrono</option>
+                            <option value="AMBOS">Ambos</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="reg-senha">Senha</label>
+                        <input type="password" id="reg-senha" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="btn-primary">Criar Conta</button>
+                </form>
+
+                <p class="toggle-text">
+                    Já tem uma conta? <a href="#" id="show-login">Faça Login</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+</body>
+</html>

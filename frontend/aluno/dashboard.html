@@ -1,0 +1,103 @@
+<!-- /aluno/dashboard.html -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard do Aluno</title>
+    <link rel="stylesheet" href="../global.css">
+    <link rel="stylesheet" href="style/dashboard.css">
+</head>
+
+<body>
+    <header class="header">
+        <nav class="navbar">
+            <input type="checkbox" class="nav-toggle" id="nav-toggle">
+            <div class="nav-left">
+                <label for="nav-toggle" class="nav-toggle-label">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </label>
+                <a href="dashboard.html" class="logo">EdTech</a>
+            </div>
+            <ul class="menu">
+                <li><a href="boletim.html">Boletim</a></li>
+                <li><a href="conquistas.html">Conquistas</a></li>
+                <li><a href="forum.html">Fórum</a></li>
+            </ul>
+            <div class="nav-right">
+                <div class="avatar">JD</div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="greeting">
+            <h1>Olá, <span data-field="nomeAluno">Aluno</span>!</h1>
+            <button class="btn-pill btn-primary">Mudar Plano</button>
+        </section>
+
+        <section class="top-cards">
+            <div class="card gamificacao">
+                <h3>Gamificação</h3>
+                <div class="points-display">
+                    <span class="points-current">1.250</span>
+                    <span class="points-total">/ 2.000 pts</span>
+                </div>
+                <div class="progress">
+                    <div class="progress-fill" style="width: 62.5%;"></div>
+                </div>
+                <div class="achievements">
+                    <span class="badge badge-gold">🥇 Ouro</span>
+                    <span class="badge badge-silver">🥈 Prata</span>
+                </div>
+            </div>
+            <div class="card cursos-bonus">
+                <h3>Cursos Bônus</h3>
+                <ul class="bonus-list">
+                    <li>
+                        <span>Curso de JavaScript Básico</span>
+                        <span class="badge badge-success">Grátis</span>
+                    </li>
+                    <li>
+                        <span>Design Thinking</span>
+                        <span class="badge badge-success">Grátis</span>
+                    </li>
+                    <li>
+                        <span>Produtividade com Notion</span>
+                        <span class="badge badge-success">Grátis</span>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="section-andamento">
+            <h2>Cursos em Andamento</h2>
+            <div class="cards-grid" data-student-progress>
+                <p class="empty-state">Nenhum curso iniciado ainda.</p>
+            </div>
+        </section>
+
+        <section class="section-catalogo">
+            <h2>Catálogo de Cursos</h2>
+            <div class="filtros">
+                <button class="filtro active">Todos</button>
+                <button class="filtro">Em Andamento</button>
+                <button class="filtro">Recomendados</button>
+                <button class="filtro">Front-end</button>
+                <button class="filtro">Back-end</button>
+            </div>
+            <div class="cards-grid" data-approved-courses data-limit="6">
+                <p class="empty-state">Carregando cursos aprovados...</p>
+            </div>
+            <div class="saber-mais">
+                <a href="catalogo.html"><button class="btn-pill btn-primary">Ver mais</button></a>
+            </div>
+        </section>
+    </main>
+    <script src="aluno.js"></script>
+</body>
+
+</html>

@@ -37,4 +37,8 @@ public class CursoRequestDTO {
     public Long getProfessorId() {
         return professorId;
     }
+
+    public Long getProfessorId() {
+        return professorIid;
+    }
 }

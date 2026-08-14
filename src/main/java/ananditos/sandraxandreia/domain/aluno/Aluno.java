@@ -6,6 +6,7 @@ import ananditos.sandraxandreia.domain.matricula.Matricula;
 import ananditos.sandraxandreia.domain.usuario.GeneroUsuario;
 import ananditos.sandraxandreia.domain.usuario.Usuario;
 import ananditos.sandraxandreia.domain.aluno.vo.AlunoRA;
+import ananditos.sandraxandreia.domain.usuario.UsuarioCargo;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -30,14 +31,14 @@ public class Aluno extends Usuario {
 
     public Aluno() {
         // O Hibernate/JPA exige que toda entidade tenha
-        // um construtor vazio. Busca os dados no banco:
+        // um construtor vazio. Busca os dados no Banco:
         // 1° cria Aluno vazio
         // 2° preenche os campos um a um.
     }
 
     public Aluno(Long id, String nome, String email, String senhaCriptografada, String cpf, GeneroUsuario genero, String dataNascimento, String ra, StatusAluno status) {
         // super comunica com o Usuario (classe pai)
-        super(id, nome, email, senhaCriptografada, cpf, genero, dataNascimento);
+        super(id, nome, email, senhaCriptografada, cpf, genero, dataNascimento, UsuarioCargo.ALUNO);
         this.ra = new AlunoRA(ra);
         this.status = status;
     }
