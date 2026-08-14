@@ -1,0 +1,329 @@
+
+:root {
+    --bg-body: #F4F7FE;
+    --bg-card: #FFFFFF;
+    --primary-blue: #3B82F6;
+    --primary-blue-dark: #1E3A8A;
+    --accent-coral: #FF6B6B;
+    --success-green: #10B981;
+    --warning-yellow: #F59E0B;
+    --text-main: #1F2937;
+    --text-muted: #6B7280;
+    --border-light: #E5E7EB;
+
+    --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+    --radius-pill: 9999px;
+    --shadow-soft: 0 10px 25px -5px rgba(0,0,0,0.05);
+    --transition-default: all .3s ease;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-family);
+    background: var(--bg-body);
+    color: var(--text-main);
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+}
+
+.greeting {
+    max-width: 1200px;
+    margin: 3rem auto 2rem;
+    padding: 0 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.greeting h1 {
+    font-size: clamp(1.8rem, 5vw, 2.5rem);
+    margin: 0;
+    font-weight: 700;
+}
+
+.top-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto 4rem;
+    padding: 0 2rem;
+}
+
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+h2 {
+    font-size: 1.75rem;
+    margin: 4rem 0 1.5rem;
+    padding: 0 2rem;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    font-weight: 600;
+}
+
+.card {
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-soft);
+    padding: 1.5rem;
+    transition: var(--transition-default);
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1);
+}
+
+h3 {
+    margin: 0 0 1rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+h4 {
+    margin: 0 0 0.75rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+.points-display {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin: 1rem 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.points-current {
+    color: var(--primary-blue);
+}
+
+.progress {
+    height: 0.75rem;
+    background: var(--border-light);
+    border-radius: var(--radius-pill);
+    overflow: hidden;
+    margin: 1rem 0;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-blue), var(--success-green));
+    border-radius: var(--radius-pill);
+    transition: width 0.5s ease;
+}
+
+.achievements {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.bonus-list {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0 0;
+}
+
+.bonus-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.bonus-list li:last-child {
+    border-bottom: none;
+}
+
+.curso-thumb {
+    height: 160px;
+    background: linear-gradient(135deg, var(--primary-blue), var(--accent-coral));
+    border-radius: 12px;
+    margin-bottom: 1rem;
+}
+
+.progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.progress-label {
+    font-weight: 500;
+    color: var(--text-muted);
+    min-width: 50px;
+    font-size: 0.875rem;
+}
+
+.curso-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+}
+
+.eta {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+
+.curso-desc {
+    color: var(--text-muted);
+    margin: 0.5rem 0 1rem;
+    font-size: 0.9rem;
+}
+
+.curso-info {
+    display: flex;
+    gap: 1rem;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+
+.filtros {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0 2rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.filtro {
+    padding: 0.5rem 1.25rem;
+    background: var(--bg-card);
+    color: var(--text-muted);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-pill);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: var(--transition-default);
+    font-family: inherit;
+    font-weight: 500;
+}
+
+.filtro:hover:not(.active) {
+    background: var(--bg-body);
+    box-shadow: var(--shadow-soft);
+}
+
+.filtro.active {
+    background: var(--primary-blue);
+    color: white;
+    border-color: var(--primary-blue);
+    box-shadow: var(--shadow-soft);
+}
+
+.btn-pill {
+    padding: 0.625rem 1.5rem;
+    border: none;
+    border-radius: var(--radius-pill);
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: var(--transition-default);
+    box-shadow: var(--shadow-soft);
+    font-family: inherit;
+}
+
+.btn-pill:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 15px 35px rgba(59,130,246,0.3);
+}
+
+.btn-primary {
+    background: var(--primary-blue);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--primary-blue-dark);
+    box-shadow: 0 15px 35px rgba(59,130,246,0.4);
+}
+
+.btn-continue {
+    background: var(--success-green);
+    color: white;
+    padding: 0.5rem 1.25rem;
+    font-size: 0.875rem;
+}
+
+.btn-continue:hover {
+    background: #059669;
+    box-shadow: 0 15px 35px rgba(16,185,129,0.4);
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-pill);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.badge-gold {
+    background: var(--warning-yellow);
+    color: #000;
+}
+
+.badge-silver {
+    background: #D1D5DB;
+    color: var(--text-main);
+}
+
+.badge-success {
+    background: var(--success-green);
+    color: white;
+}
+
+a {text-decoration: none;}
+
+.saber-mais{
+    padding: 3.5rem;
+    text-align: center;
+}
+
+@media (max-width: 768px) {
+    .greeting {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .top-cards,
+    .cards-grid {
+        grid-template-columns: 1fr;
+        padding: 0 1rem;
+    }
+
+    h2 {
+        padding: 0 1rem;
+    }
+
+    .filtros {
+        padding: 0 1rem;
+        justify-content: center;
+    }
+}
+

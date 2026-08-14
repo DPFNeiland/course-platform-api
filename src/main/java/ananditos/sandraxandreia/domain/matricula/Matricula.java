@@ -7,7 +7,13 @@ import jakarta.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "matricula")
+@Table(
+        name = "matricula",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uk_matricula_aluno_curso",
+                columnNames = {"aluno_id", "curso_id"}
+        )
+)
 public class Matricula {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,6 +22,7 @@ public class Matricula {
     @Embedded
     private MatriculaDataMatricula dataMatricula;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 100)
     private StatusMatricula status;
 

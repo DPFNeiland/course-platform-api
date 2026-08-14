@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meus Certificados</title>
+    <link rel="stylesheet" href="../global.css">
+    <link rel="stylesheet" href="style/certificado.css">
+</head>
+<body>
+    <header class="header">
+        <nav class="navbar">
+            <input type="checkbox" class="nav-toggle" id="nav-toggle">
+            <div class="nav-left">
+                <label for="nav-toggle" class="nav-toggle-label">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </label>
+                <a href="dashboard.html" class="logo">EdTech</a>
+            </div>
+            <ul class="menu">
+                <li><a href="boletim.html">Boletim</a></li>
+                <li><a href="conquistas.html">Conquistas</a></li>
+                <li><a href="forum.html">Forum</a></li>
+            </ul>
+            <div class="nav-right">
+                <div class="avatar">AL</div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="top-bar">
+            <h1>Meus Certificados</h1>
+        </div>
+
+        <div class="stats-section" id="statsSection">
+            <div class="stat-card">
+                <div class="stat-number" id="totalCursos">0</div>
+                <div class="stat-label">Cursos Concluidos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalHoras">-</div>
+                <div class="stat-label">Horas de Aprendizado</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="mediaGeral">-</div>
+                <div class="stat-label">Media Geral</div>
+            </div>
+        </div>
+
+        <div class="filtros-section">
+            <button class="filtro-btn ativo" type="button">Todos</button>
+        </div>
+
+        <div id="certificadosContainer" class="certificados-grid">
+            <p class="empty-state">Carregando certificados...</p>
+        </div>
+    </main>
+
+    <div id="modalCompartilhar" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">Compartilhar Certificado</div>
+            <div class="modal-body" id="modalCompartilharBody">
+                Voce sera redirecionado para o LinkedIn para compartilhar seu certificado.
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" type="button" data-close-certificate-modal>Cancelar</button>
+                <button class="btn-confirm" type="button" data-confirm-certificate-share>Compartilhar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="aluno.js"></script>
+</body>
+</html>

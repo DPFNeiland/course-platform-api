@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aprovacao de Cursos - Curador</title>
+    <link rel="stylesheet" href="/global.css">
+    <link rel="stylesheet" href="style/aprovacao-cursos.css">
+    <style>
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .course-card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        summary {
+            list-style: none;
+            padding: 1.5rem;
+            cursor: pointer;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .meta {
+            display: grid;
+            gap: 0.25rem;
+            color: #64748b;
+            font-size: 0.875rem;
+        }
+
+        .status-pill {
+            align-self: flex-start;
+            background: #fcd34d;
+            border-radius: 999px;
+            color: #92400e;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.25rem 0.75rem;
+            white-space: nowrap;
+        }
+
+        .card-content {
+            padding: 0 1.5rem 1.5rem;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .actions button {
+            border: 0;
+            border-radius: 8px;
+            color: #fff;
+            cursor: pointer;
+            font-weight: 600;
+            padding: 0.75rem 1rem;
+        }
+
+        .btn-approve {
+            background: #10b981;
+        }
+
+        .btn-reject {
+            background: #ef4444;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <input type="checkbox" class="nav-toggle" id="nav-toggle">
+    <div class="nav-left">
+        <label for="nav-toggle" class="nav-toggle-label">
+            <span></span>
+            <span></span>
+            <span></span>
+        </label>
+        <a href="dashboard.html" class="logo">EdTech</a>
+    </div>
+    <ul class="menu">
+        <li><a href="catalogo.html">Catálogo de Cursos</a></li>
+    </ul>
+    <div class="nav-right">
+
+        <a href="#"><div class="avatar">JD</div></a>
+    </div>
+</nav>
+
+<main>
+        <h1>Aprovação de Cursos</h1>
+        <div class="courses-grid" data-pending-courses>
+            <p class="empty-state">Carregando cursos em avaliacao...</p>
+        </div>
+    </main>
+
+    <script src="curador.js"></script>
+</body>
+</html>

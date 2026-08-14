@@ -1,8 +1,10 @@
 package ananditos.sandraxandreia.dto.request;
 
 import ananditos.sandraxandreia.domain.usuario.GeneroUsuario;
+import ananditos.sandraxandreia.domain.usuario.UsuarioCargo;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
 public class UsuarioRequestDTO {
@@ -13,18 +15,20 @@ public class UsuarioRequestDTO {
     @NotBlank(message = "E-mail e obrigatorio")
     private String email;
 
-    @NotBlank(message = "Cpf eh obrigaatorio")
+    @NotBlank(message = "Cpf eh obrigatorio")
     @Pattern(regexp = "\\d{11}|\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}", message = "CPF deve ter 11 digitos ou estar no formato 000.000.000-00")
     private String cpf;
 
     @NotBlank(message = "Senha e obrigatoria")
     private String senha;
 
-    @NotBlank(message = "Genero eh obrigatorio")
+    @NotNull(message = "Genero eh obrigatorio")
     private GeneroUsuario genero;
 
-    @NotBlank(message = "Data de nascimento é obrigatória")
+    @NotBlank(message = "Data de nascimento e obrigatoria")
     private String dataNascimento;
+
+    private UsuarioCargo cargo;
 
     public UsuarioRequestDTO() {
     }
@@ -34,6 +38,8 @@ public class UsuarioRequestDTO {
     public String getSenha() { return senha; }
     public String getCpf() { return cpf; }
     public GeneroUsuario getGenero() { return genero; }
-    public String getDataNascimento() {return dataNascimento; }
-
+    public String getDataNascimento() { return dataNascimento; }
+    public UsuarioCargo getCargo() {
+        return cargo;
+    }
 }

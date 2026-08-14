@@ -5,6 +5,8 @@ import ananditos.sandraxandreia.domain.curso.StatusCurso;
 import ananditos.sandraxandreia.domain.curso.TipoCurso;
 public class CursoResponseDTO {
 
+    private Long id;
+
     public String nome;
 
     private CursoAssinatura tipoAssinatura;
@@ -15,7 +17,8 @@ public class CursoResponseDTO {
 
     private StatusCurso status;
 
-    public CursoResponseDTO(String nome, CursoAssinatura tipoAssinatura, TipoCurso tipoCurso, StatusCurso status,  Long professorId) {
+    public CursoResponseDTO(Long id, String nome, CursoAssinatura tipoAssinatura, TipoCurso tipoCurso, StatusCurso status, Long professorId) {
+        this.id = id;
         this.nome = nome;
         this.tipoAssinatura = tipoAssinatura;
         this.tipoCurso = tipoCurso;
@@ -24,6 +27,10 @@ public class CursoResponseDTO {
     }
 
     public CursoResponseDTO() {
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public String getNome() {

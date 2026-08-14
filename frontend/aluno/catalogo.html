@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catalogo de Cursos</title>
+    <link rel="stylesheet" href="../global.css">
+    <link rel="stylesheet" href="style/catalogo.css">
+</head>
+<body>
+    <header class="header">
+        <nav class="navbar">
+            <input type="checkbox" class="nav-toggle" id="nav-toggle">
+            <div class="nav-left">
+                <label for="nav-toggle" class="nav-toggle-label">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </label>
+                <a href="dashboard.html" class="logo">EdTech</a>
+            </div>
+            <ul class="menu">
+                <li><a href="boletim.html">Boletim</a></li>
+                <li><a href="conquistas.html">Conquistas</a></li>
+                <li><a href="forum.html">Forum</a></li>
+            </ul>
+            <div class="nav-right">
+                <div class="avatar">JD</div>
+            </div>
+        </nav>
+    </header>
+
+    <header class="page-header">
+        <h1>Catalogo de Cursos</h1>
+    </header>
+
+    <div class="filters">
+        <button class="filter-pill active">Todos</button>
+        <button class="filter-pill">Recomendados</button>
+        <button class="filter-pill">Sincrono</button>
+        <button class="filter-pill">Assincrono</button>
+        <button class="filter-pill">Premium</button>
+        <button class="filter-pill">Comum</button>
+    </div>
+
+    <div class="courses-grid" data-approved-courses>
+        <p class="empty-state">Carregando cursos aprovados...</p>
+    </div>
+
+    <script src="aluno.js"></script>
+</body>
+</html>
