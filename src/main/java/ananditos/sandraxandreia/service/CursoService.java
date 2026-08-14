@@ -36,7 +36,6 @@ public class CursoService {
 
     public CursoResponseDTO criar(CursoRequestDTO request) {
         validarNomeDuplicado(request.getNome(), null);
-        Professor professor = buscarProfessor(request.getProfessorId());
 
         if (cursoRepository.existsByNome(request.getNome())) {
             throw new RuntimeException("Esse nome de curso já existe");
