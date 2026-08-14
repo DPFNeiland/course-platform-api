@@ -17,7 +17,7 @@ public class CursoRequestDTO {
     private TipoCurso tipoCurso;
 
     @NotNull(message = "Professor obrigatohrio")
-    private Long professorIid;
+    private Long professorId;
 
     public CursoRequestDTO() {
     }
@@ -34,8 +34,8 @@ public class CursoRequestDTO {
         return tipoCurso;
     }
 
-    public Long getProfessorIid() {
-        return professorIid;
+    public Long getProfessorId() {
+        return professorId;
     }
 
     public Long getProfessorId() {

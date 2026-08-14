@@ -38,7 +38,15 @@ public class CursoService {
         validarNomeDuplicado(request.getNome(), null);
         Professor professor = buscarProfessor(request.getProfessorId());
 
-        Curso curso = new Curso(
+        if (cursoRepository.existsByNome(request.getNome())) {
+            throw new RuntimeException("Esse nome de curso já existe");
+        }
+
+        Professor professor = professorRepository.findById(request.getProfessorId()).
+                orElseThrow(() -> new RuntimeException("Professor não encontrado"));
+
+
+        var curso = new Curso(
                 null,
                 request.getNome(),
                 request.getTipoAssinatura(),

@@ -7,7 +7,7 @@ services:
     hostname: postgres
     restart: always
     environment:
-      POSTGRES_DB: postgres
+      POSTGRES_DB: SandraXAndreiaDB
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
@@ -52,7 +52,7 @@ services:
         condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: postgres
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/postgres
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/SandraXAndreiaDB
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
     ports:
