@@ -39,7 +39,7 @@ public class CursoService {
             throw new RuntimeException("Esse nome de curso já existe");
         }
 
-        Professor professor = professorRepository.findById(request.getProfessorIid()).
+        Professor professor = professorRepository.findById(request.getProfessorId()).
                 orElseThrow(() -> new RuntimeException("Professor não encontrado"));
 
 
