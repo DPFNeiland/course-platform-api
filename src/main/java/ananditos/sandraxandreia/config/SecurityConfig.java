@@ -27,9 +27,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http
-                // csrf() configura protecao CSRF.
-                // Para APIs REST didaticas/testes, costuma-se desabilitar.
-                // Em producao, isso deve ser analisado com cuidado.
+                // CSRF pode ser desabilitado porque a API nao usa cookies de sessao:
+                // ela e stateless e recebe o JWT explicitamente no header Authorization.
                 .csrf(csrf -> csrf.disable())
 
                 .cors(Customizer.withDefaults())
@@ -82,7 +81,7 @@ public class SecurityConfig {
                 "http://localhost:3000", "http://127.0.0.1:3000"
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
         configuration.setAllowCredentials(false);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

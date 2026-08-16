@@ -3,18 +3,13 @@ document.addEventListener('DOMContentLoaded', async function() {
   const state = { user: null, cursos: [], matriculas: [], alunos: [], professores: [], usuarios: [] };
 
   const api = async (path, options = {}) => {
-    const sessionStr = sessionStorage.getItem('session') || sessionStorage.getItem('user');
-    let token = null;
-    if (sessionStr) {
-      try {
-        const session = JSON.parse(sessionStr);
-        token = session.token;
-      } catch (e) {}
+    const session = obterSessao();
+    if (!session?.token || !Number.isFinite(Date.parse(session.expiraEm)) || Date.parse(session.expiraEm) <= Date.now()) {
+      logout();
+      throw new Error('Sessao expirada. Faca login novamente.');
     }
     const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
+    headers['Authorization'] = `Bearer ${session.token}`;
     const response = await fetch(`${API_BASE_URL}${path}`, {
       headers,
       ...options
@@ -36,12 +31,16 @@ document.addEventListener('DOMContentLoaded', async function() {
     .replaceAll('_', ' ')
     .replace(/\b\w/g, letter => letter.toUpperCase());
 
-  const userStr = sessionStorage.getItem('user') || sessionStorage.getItem('session');
-  try {
-    state.user = userStr ? JSON.parse(userStr) : null;
-  } catch {
-    state.user = null;
-  }
+  const obterSessao = () => {
+    try {
+      const value = sessionStorage.getItem('session');
+      return value ? JSON.parse(value) : null;
+    } catch {
+      return null;
+    }
+  };
+
+  state.user = obterSessao();
 
   const perfil = String(state.user?.perfil || state.user?.cargo || '').trim().toLowerCase();
   if (!state.user || !['curador', 'admin'].includes(perfil)) {
@@ -49,7 +48,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     return;
   }
   state.user.perfil = perfil;
-  sessionStorage.setItem('user', JSON.stringify(state.user));
   sessionStorage.setItem('session', JSON.stringify(state.user));
 
   const cursoPorId = id => state.cursos.find(curso => Number(curso.id) === Number(id));

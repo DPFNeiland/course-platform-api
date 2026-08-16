@@ -43,12 +43,13 @@ public class AuthController {
         }
 
         String perfil = toPerfil(usuario);
+        String cargo = usuario.getPerfil() == null ? perfil.toUpperCase() : usuario.getPerfil().name();
         JwtService.TokenEmitido token = jwtService.emitir(usuario.getEmail().getValor());
         return new LoginResponseDTO(
                 usuario.getId(),
                 usuario.getNome(),
                 usuario.getEmail().getValor(),
-                perfil,
+                cargo,
                 perfil,
                 token.token(),
                 token.expiraEm()
