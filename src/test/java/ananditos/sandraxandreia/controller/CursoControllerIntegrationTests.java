@@ -6,6 +6,7 @@ import ananditos.sandraxandreia.domain.professor.TipoEnsinoProfessor;
 import ananditos.sandraxandreia.domain.usuario.GeneroUsuario;
 import ananditos.sandraxandreia.repository.CursoRepository;
 import ananditos.sandraxandreia.repository.ProfessorRepository;
+import ananditos.sandraxandreia.security.JwtService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,9 @@ class CursoControllerIntegrationTests {
 
     @Autowired
     private CursoRepository cursoRepository;
+
+    @Autowired
+    private JwtService jwtService;
 
     private Professor professor;
 
@@ -67,6 +71,7 @@ class CursoControllerIntegrationTests {
                 """.formatted(professor.getId());
 
         mockMvc.perform(post("/curso")
+                        .header("Authorization", bearer())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
                 .andExpect(status().isCreated())
@@ -95,6 +100,7 @@ class CursoControllerIntegrationTests {
                 """.formatted(professor.getId());
 
         mockMvc.perform(post("/curso")
+                        .header("Authorization", bearer())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
                 .andExpect(status().isBadRequest());
@@ -114,11 +120,16 @@ class CursoControllerIntegrationTests {
                 """;
 
         mockMvc.perform(post("/curso")
+                        .header("Authorization", bearer())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
                 .andExpect(status().isBadRequest());
 
         assertThat(cursoRepository.findAll())
                 .noneMatch(curso -> curso.getNome().equals("Curso Sem Professor"));
+    }
+
+    private String bearer() {
+        return "Bearer " + jwtService.emitir(professor.getEmail().getValor()).token();
     }
 }

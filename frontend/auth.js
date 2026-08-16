@@ -59,8 +59,27 @@ document.addEventListener('DOMContentLoaded', function() {
             nome: usuario?.nome,
             email: usuario?.email,
             cargo: perfil,
-            perfil
+            perfil,
+            token: usuario?.token,
+            expiraEm: usuario?.expiraEm
         };
+    }
+
+    async function autenticar(email, senha, perfilFallback) {
+        const resposta = await fetch(`${API_BASE_URL}/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, senha })
+        });
+        if (!resposta.ok) {
+            const erroData = await resposta.json().catch(() => null);
+            throw new Error(extrairMensagemErro(erroData, resposta.status));
+        }
+        const usuario = await resposta.json();
+        const sessao = montarSessao(usuario, perfilFallback);
+        sessionStorage.setItem('user', JSON.stringify(sessao));
+        sessionStorage.setItem('session', JSON.stringify(sessao));
+        return sessao;
     }
 
     function getSelectedPerfil() {
@@ -186,11 +205,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(async (resposta) => {
             if (resposta.status === 201) {
-                const usuario = await resposta.json();
-                const sessao = montarSessao(usuario, perfil);
-                sessao.token = btoa(`${usuarioDTO.email}:${usuarioDTO.senha}`);
-                sessionStorage.setItem('user', JSON.stringify(sessao));
-                sessionStorage.setItem('session', JSON.stringify(sessao));
+                const sessao = await autenticar(usuarioDTO.email, usuarioDTO.senha, perfil);
                 redirectByPerfil(sessao.perfil);
             } else {
                 const erroData = await resposta.json().catch(() => null);
@@ -211,25 +226,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const email = document.getElementById('email').value;
         const senha = document.getElementById('senha').value;
 
-        fetch(`${API_BASE_URL}/login`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ email, senha })
-        })
-        .then(async (resposta) => {
-            if (!resposta.ok) {
-                const erroData = await resposta.json().catch(() => null);
-                showError(extrairMensagemErro(erroData, resposta.status));
-                return;
-            }
-
-            const usuario = await resposta.json();
-            const sessao = montarSessao(usuario);
-            sessao.token = btoa(`${email}:${senha}`);
-            sessionStorage.setItem('user', JSON.stringify(sessao));
-            sessionStorage.setItem('session', JSON.stringify(sessao));
+        autenticar(email, senha)
+        .then((sessao) => {
             redirectByPerfil(sessao.perfil);
         })
         .catch(erro => {

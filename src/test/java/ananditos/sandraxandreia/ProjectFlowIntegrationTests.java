@@ -21,6 +21,7 @@ import ananditos.sandraxandreia.repository.MaterialCursoRepository;
 import ananditos.sandraxandreia.repository.MatriculaRepository;
 import ananditos.sandraxandreia.repository.ProfessorRepository;
 import ananditos.sandraxandreia.repository.UsuarioRepository;
+import ananditos.sandraxandreia.security.JwtService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +39,6 @@ import java.util.List;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
@@ -55,6 +55,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ProjectFlowIntegrationTests {
 
     private MockMvc mockMvc;
+
+    @Autowired
+    private JwtService jwtService;
 
     @Autowired
     private WebApplicationContext webApplicationContext;
@@ -162,7 +165,7 @@ class ProjectFlowIntegrationTests {
                 .andExpect(jsonPath("$.email").value("novo.curador@teste.com"));
 
         mockMvc.perform(get("/curador")
-                        .with(httpBasic(curador.getEmail().getValor(), "123456")))
+                        .header("Authorization", bearer(curador.getEmail().getValor())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[?(@.email=='novo.curador@teste.com')]").exists());
     }
@@ -179,7 +182,7 @@ class ProjectFlowIntegrationTests {
                 """;
 
         mockMvc.perform(post("/assinatura")
-                        .with(httpBasic(curador.getEmail().getValor(), "123456"))
+                        .header("Authorization", bearer(curador.getEmail().getValor()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
                 .andExpect(status().isCreated())
@@ -187,7 +190,7 @@ class ProjectFlowIntegrationTests {
                 .andExpect(jsonPath("$.assinatura").value("COMUM"));
 
         mockMvc.perform(get("/assinatura")
-                        .with(httpBasic("aluno.fluxo@teste.com", "123456"))
+                        .header("Authorization", bearer("aluno.fluxo@teste.com"))
                         .param("plano", "COMUM"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].nome").value("Plano Basico"));
@@ -204,7 +207,7 @@ class ProjectFlowIntegrationTests {
                 """;
 
         mockMvc.perform(post("/assinatura")
-                        .with(httpBasic(curador.getEmail().getValor(), "123456"))
+                        .header("Authorization", bearer(curador.getEmail().getValor()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
                 .andExpect(status().isBadRequest())
@@ -226,7 +229,7 @@ class ProjectFlowIntegrationTests {
                 """;
 
         mockMvc.perform(post("/curso/{cursoId}/materiais/link", curso.getId())
-                        .with(httpBasic(professor.getEmail().getValor(), "123456"))
+                        .header("Authorization", bearer(professor.getEmail().getValor()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
                 .andExpect(status().isCreated())
@@ -250,7 +253,7 @@ class ProjectFlowIntegrationTests {
         MvcResult resultado = mockMvc.perform(multipart("/curso/{cursoId}/materiais/arquivo", curso.getId())
                         .file(arquivo)
                         .param("titulo", "Roteiro da aula")
-                        .with(httpBasic(professor.getEmail().getValor(), "123456")))
+                        .header("Authorization", bearer(professor.getEmail().getValor())))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.tipo").value("ARQUIVO"))
                 .andExpect(jsonPath("$.nomeArquivo").value("roteiro.txt"))
@@ -260,7 +263,7 @@ class ProjectFlowIntegrationTests {
         Long materialId = new ObjectMapper().readTree(corpo).get("id").asLong();
 
         mockMvc.perform(get("/curso/{cursoId}/materiais/{materialId}/arquivo", curso.getId(), materialId)
-                        .with(httpBasic(professor.getEmail().getValor(), "123456")))
+                        .header("Authorization", bearer(professor.getEmail().getValor())))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Content-Disposition", org.hamcrest.Matchers.containsString("roteiro.txt")))
                 .andExpect(content().bytes("conteudo da aula".getBytes()));
@@ -293,7 +296,7 @@ class ProjectFlowIntegrationTests {
                 """;
 
         mockMvc.perform(post("/curso/{cursoId}/materiais/link", curso.getId())
-                        .with(httpBasic(outroProfessor.getEmail().getValor(), "123456"))
+                        .header("Authorization", bearer(outroProfessor.getEmail().getValor()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
                 .andExpect(status().isForbidden())
@@ -315,7 +318,7 @@ class ProjectFlowIntegrationTests {
                 """.formatted(aluno.getId(), curso.getId());
 
         mockMvc.perform(post("/matricula")
-                        .with(httpBasic("aluno.fluxo@teste.com", "123456"))
+                        .header("Authorization", bearer("aluno.fluxo@teste.com"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
                 .andExpect(status().isBadRequest())
@@ -338,14 +341,14 @@ class ProjectFlowIntegrationTests {
                 """.formatted(aluno.getId(), curso.getId());
 
         mockMvc.perform(post("/matricula")
-                        .with(httpBasic("aluno.fluxo@teste.com", "123456"))
+                        .header("Authorization", bearer("aluno.fluxo@teste.com"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.cursoId").value(curso.getId()));
 
         mockMvc.perform(post("/matricula")
-                        .with(httpBasic("aluno.fluxo@teste.com", "123456"))
+                        .header("Authorization", bearer("aluno.fluxo@teste.com"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
                 .andExpect(status().isBadRequest())
@@ -382,9 +385,13 @@ class ProjectFlowIntegrationTests {
         ));
 
         mockMvc.perform(patch("/assinatura/{id}/plano", assinatura.getId())
-                        .with(httpBasic(curador.getEmail().getValor(), "123456"))
+                        .header("Authorization", bearer(curador.getEmail().getValor()))
                         .param("novoPlano", "PREMIUM"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.assinatura").value("PREMIUM"));
+    }
+
+    private String bearer(String email) {
+        return "Bearer " + jwtService.emitir(email).token();
     }
 }

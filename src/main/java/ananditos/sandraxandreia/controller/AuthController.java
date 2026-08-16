@@ -6,6 +6,7 @@ import ananditos.sandraxandreia.domain.usuario.Usuario;
 import ananditos.sandraxandreia.dto.request.LoginRequestDTO;
 import ananditos.sandraxandreia.dto.response.LoginResponseDTO;
 import ananditos.sandraxandreia.repository.UsuarioRepository;
+import ananditos.sandraxandreia.security.JwtService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -22,10 +23,12 @@ import org.springframework.web.server.ResponseStatusException;
 public class AuthController {
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
-    public AuthController(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
+    public AuthController(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
     }
 
     @PostMapping("/login")
@@ -40,12 +43,15 @@ public class AuthController {
         }
 
         String perfil = toPerfil(usuario);
+        JwtService.TokenEmitido token = jwtService.emitir(usuario.getEmail().getValor());
         return new LoginResponseDTO(
                 usuario.getId(),
                 usuario.getNome(),
                 usuario.getEmail().getValor(),
                 perfil,
-                perfil
+                perfil,
+                token.token(),
+                token.expiraEm()
         );
     }
 
