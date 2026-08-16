@@ -3,22 +3,20 @@ document.addEventListener('DOMContentLoaded', async function() {
   const state = { user: null, cursos: [], matriculas: [], alunos: [] };
 
   const api = async (path, options = {}) => {
-    const sessionStr = sessionStorage.getItem('session') || sessionStorage.getItem('user');
-    let token = null;
-    if (sessionStr) {
-      try {
-        const session = JSON.parse(sessionStr);
-        token = session.token;
-      } catch (e) {}
-    }
-    const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
-    if (token) {
-      headers['Authorization'] = `Basic ${token}`;
-    }
+    const session = window.jwtSession.requireSession(['professor'], '../index.html');
+    if (!session) throw new Error('Sessao expirada. Faca login novamente.');
+    const headers = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${session.token}`,
+      ...(options.headers || {})
+    };
     const response = await fetch(`${API_BASE_URL}${path}`, {
-      headers,
-      ...options
+      ...options,
+      headers
     });
+    if (await window.jwtSession.handleUnauthorized(response, '../index.html')) {
+      throw new Error('Sessao expirada. Faca login novamente.');
+    }
     if (!response.ok) {
       const errorData = await response.json().catch(() => null);
       throw new Error(errorData?.message || errorData?.error || 'Nao foi possivel concluir a operacao.');
@@ -31,12 +29,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     .replaceAll('_', ' ')
     .replace(/\b\w/g, letter => letter.toUpperCase());
 
-  const userStr = sessionStorage.getItem('user') || sessionStorage.getItem('session');
-  try {
-    state.user = userStr ? JSON.parse(userStr) : null;
-  } catch {
-    state.user = null;
-  }
+  state.user = window.jwtSession.requireSession(['professor'], '../index.html');
 
   const perfil = String(state.user?.perfil || state.user?.cargo || '').trim().toLowerCase();
   if (!state.user?.id || perfil !== 'professor') {
@@ -44,7 +37,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     return;
   }
   state.user.perfil = perfil;
-  sessionStorage.setItem('user', JSON.stringify(state.user));
   sessionStorage.setItem('session', JSON.stringify(state.user));
 
   const ownCourses = () => state.cursos.filter(curso => Number(curso.professorId) === Number(state.user.id));
@@ -271,8 +263,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   };
 
   function logout() {
-    sessionStorage.clear();
-    window.location.href = '../index.html';
+    window.jwtSession.logout('../index.html');
   }
 
   document.addEventListener('click', function(e) {
