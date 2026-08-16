@@ -2,6 +2,10 @@ package ananditos.sandraxandreia.security;
 
 import org.junit.jupiter.api.Test;
 
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
+
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class JwtServiceTests {
@@ -9,13 +13,14 @@ class JwtServiceTests {
     private static final String SECRET = "test-secret-with-more-than-thirty-two-characters";
 
     @Test
-    void deveRejeitarTokenExpirado() throws InterruptedException {
-        JwtService service = new JwtService(SECRET, 1);
-        String token = service.emitir("aluno@teste.com").token();
+    void deveRejeitarTokenExpirado() {
+        Instant issuedAt = Instant.parse("2026-01-01T00:00:00Z");
+        JwtService issuer = new JwtService(SECRET, 1, Clock.fixed(issuedAt, ZoneOffset.UTC));
+        String token = issuer.emitir("aluno@teste.com").token();
+        JwtService validator = new JwtService(SECRET, 1,
+                Clock.fixed(issuedAt.plusSeconds(2), ZoneOffset.UTC));
 
-        Thread.sleep(1100);
-
-        assertThatThrownBy(() -> service.validarEObterSubject(token))
+        assertThatThrownBy(() -> validator.validarEObterSubject(token))
                 .isInstanceOf(JwtInvalidoException.class)
                 .hasMessageContaining("expirado")
                 .extracting("codigo")

@@ -86,6 +86,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         const usuario = await resposta.json();
         const sessao = montarSessao(usuario, perfilFallback);
+        sessionStorage.removeItem('user');
         sessionStorage.setItem('session', JSON.stringify(sessao));
         return sessao;
     }

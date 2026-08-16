@@ -2,7 +2,11 @@
   'use strict';
 
   const SESSION_KEY = 'session';
+  const LEGACY_USER_KEY = 'user';
   const ISO_INSTANT = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?Z$/;
+
+  // Remove credenciais Base64 que possam ter sido gravadas por versoes anteriores.
+  sessionStorage.removeItem(LEGACY_USER_KEY);
 
   const read = () => {
     try {
@@ -22,6 +26,7 @@
 
   const clearAndRedirect = (loginPath, reason = 'invalid') => {
     sessionStorage.removeItem(SESSION_KEY);
+    sessionStorage.removeItem(LEGACY_USER_KEY);
     window.location.href = `${loginPath}?auth=${encodeURIComponent(reason)}`;
   };
 
