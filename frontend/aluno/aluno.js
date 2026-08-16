@@ -10,22 +10,20 @@ const appState = {
 };
 
 const api = async (path, options = {}) => {
-  const sessionStr = sessionStorage.getItem('session') || sessionStorage.getItem('user');
-  let token = null;
-  if (sessionStr) {
-    try {
-      const session = JSON.parse(sessionStr);
-      token = session.token;
-    } catch (e) {}
-  }
-  const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
-  if (token) {
-    headers['Authorization'] = `Basic ${token}`;
-  }
+  const session = getSession();
+  if (!session) throw new Error('Sessao expirada. Faca login novamente.');
+  const headers = {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${session.token}`,
+    ...(options.headers || {})
+  };
   const response = await fetch(`${API_BASE_URL}${path}`, {
-    headers,
-    ...options
+    ...options,
+    headers
   });
+  if (await window.jwtSession.handleUnauthorized(response, '../index.html')) {
+    throw new Error('Sessao expirada. Faca login novamente.');
+  }
   if (!response.ok) {
     const error = await response.json().catch(() => null);
     throw new Error(error?.message || error?.error || 'Nao foi possivel concluir a operacao.');
@@ -39,24 +37,11 @@ const formatEnum = value => String(value || '')
   .replace(/\b\w/g, letter => letter.toUpperCase());
 
 const getSession = () => {
-  const sessionStr = sessionStorage.getItem('session') || sessionStorage.getItem('user');
-  if (!sessionStr) return null;
-  try {
-    const session = JSON.parse(sessionStr);
-    const perfil = String(session.perfil || session.cargo || '').trim().toLowerCase();
-    if (perfil !== 'aluno') return null;
-    session.perfil = perfil;
-    sessionStorage.setItem('session', JSON.stringify(session));
-    sessionStorage.setItem('user', JSON.stringify(session));
-    return session;
-  } catch {
-    return null;
-  }
+  return window.jwtSession.requireSession(['aluno'], '../index.html');
 };
 
 const logout = () => {
-  sessionStorage.clear();
-  window.location.href = '../index.html';
+  window.jwtSession.logout('../index.html');
 };
 
 const matriculaDoCurso = cursoId => appState.matriculas.find(m => Number(m.cursoId) === Number(cursoId));

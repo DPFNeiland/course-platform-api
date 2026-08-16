@@ -3,6 +3,10 @@ target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+decisoes/
+!decisoes/
+decisoes/*
+!decisoes/code-review-SXA10-JWT.md
 
 ### STS ###
 .apt_generated

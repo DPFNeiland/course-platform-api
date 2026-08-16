@@ -54,13 +54,41 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function montarSessao(usuario, perfilFallback) {
         const perfil = normalizarPerfil(usuario?.perfil || usuario?.cargo || perfilFallback);
-        return {
+        const sessao = {
             id: usuario?.id,
             nome: usuario?.nome,
             email: usuario?.email,
-            cargo: perfil,
-            perfil
+            cargo: usuario?.cargo,
+            perfil,
+            token: usuario?.token,
+            expiraEm: usuario?.expiraEm
         };
+        if (!window.jwtSession.isValid(sessao)) {
+            throw new Error('O servidor retornou uma sessao invalida. Faca login novamente.');
+        }
+        return sessao;
+    }
+
+    const authReason = new URLSearchParams(window.location.search).get('auth');
+    if (authReason === 'expired') showError('Sua sessao expirou. Faca login novamente.');
+    if (authReason === 'invalid') showError('Sua sessao e invalida. Faca login novamente.');
+    if (authReason) window.history.replaceState({}, document.title, window.location.pathname);
+
+    async function autenticar(email, senha, perfilFallback) {
+        const resposta = await fetch(`${API_BASE_URL}/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, senha })
+        });
+        if (!resposta.ok) {
+            const erroData = await resposta.json().catch(() => null);
+            throw new Error(extrairMensagemErro(erroData, resposta.status));
+        }
+        const usuario = await resposta.json();
+        const sessao = montarSessao(usuario, perfilFallback);
+        sessionStorage.removeItem('user');
+        sessionStorage.setItem('session', JSON.stringify(sessao));
+        return sessao;
     }
 
     function getSelectedPerfil() {
@@ -186,11 +214,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(async (resposta) => {
             if (resposta.status === 201) {
-                const usuario = await resposta.json();
-                const sessao = montarSessao(usuario, perfil);
-                sessao.token = btoa(`${usuarioDTO.email}:${usuarioDTO.senha}`);
-                sessionStorage.setItem('user', JSON.stringify(sessao));
-                sessionStorage.setItem('session', JSON.stringify(sessao));
+                const sessao = await autenticar(usuarioDTO.email, usuarioDTO.senha, perfil);
                 redirectByPerfil(sessao.perfil);
             } else {
                 const erroData = await resposta.json().catch(() => null);
@@ -199,7 +223,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(erro => {
             console.error('Erro no cadastro:', erro);
-            showError('Servidor indisponivel. O Backend esta rodando?');
+            showError(erro?.message || 'Servidor indisponivel. O Backend esta rodando?');
         });
     });
 
@@ -211,30 +235,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const email = document.getElementById('email').value;
         const senha = document.getElementById('senha').value;
 
-        fetch(`${API_BASE_URL}/login`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ email, senha })
-        })
-        .then(async (resposta) => {
-            if (!resposta.ok) {
-                const erroData = await resposta.json().catch(() => null);
-                showError(extrairMensagemErro(erroData, resposta.status));
-                return;
-            }
-
-            const usuario = await resposta.json();
-            const sessao = montarSessao(usuario);
-            sessao.token = btoa(`${email}:${senha}`);
-            sessionStorage.setItem('user', JSON.stringify(sessao));
-            sessionStorage.setItem('session', JSON.stringify(sessao));
+        autenticar(email, senha)
+        .then((sessao) => {
             redirectByPerfil(sessao.perfil);
         })
         .catch(erro => {
             console.error('Erro no login:', erro);
-            showError('Servidor indisponivel. O Backend esta rodando?');
+            showError(erro?.message || 'Servidor indisponivel. O Backend esta rodando?');
         });
     });
 });
