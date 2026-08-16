@@ -20,14 +20,11 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
-import jakarta.servlet.http.Cookie;
-import org.springframework.http.HttpHeaders;
 
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
@@ -173,12 +170,12 @@ class SecurityIntegrationTests {
     }
 
     @Test
-    void cookieRetornadoNoLoginDeveAutorizarOsTresPerfis() throws Exception {
-        mockMvc.perform(get("/aluno").cookie(cookieObtidoNoLogin("aluno@teste.com")))
+    void tokenRetornadoNoLoginDeveAutorizarOsTresPerfis() throws Exception {
+        mockMvc.perform(get("/aluno").header("Authorization", tokenObtidoNoLogin("aluno@teste.com")))
                 .andExpect(status().isOk());
-        mockMvc.perform(get("/curso").cookie(cookieObtidoNoLogin("professor@teste.com")))
+        mockMvc.perform(get("/curso").header("Authorization", tokenObtidoNoLogin("professor@teste.com")))
                 .andExpect(status().isOk());
-        mockMvc.perform(get("/curador").cookie(cookieObtidoNoLogin("curador@teste.com")))
+        mockMvc.perform(get("/curador").header("Authorization", tokenObtidoNoLogin("curador@teste.com")))
                 .andExpect(status().isOk());
     }
 
@@ -190,22 +187,13 @@ class SecurityIntegrationTests {
     }
 
     @Test
-    void loginDeveGravarJwtSomenteEmCookieHttpOnly() throws Exception {
+    void loginDeveRetornarTokenEExpiracao() throws Exception {
         mockMvc.perform(post("/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"email\":\"aluno@teste.com\",\"senha\":\"123456\"}"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token").doesNotExist())
-                .andExpect(header().string(HttpHeaders.SET_COOKIE, org.hamcrest.Matchers.containsString("HttpOnly")))
-                .andExpect(header().string(HttpHeaders.SET_COOKIE, org.hamcrest.Matchers.containsString("SameSite=Strict")));
-    }
-
-    @Test
-    void logoutDeveRemoverCookieDeSessao() throws Exception {
-        mockMvc.perform(post("/logout").cookie(cookieObtidoNoLogin("aluno@teste.com")))
-                .andExpect(status().isNoContent())
-                .andExpect(header().string(HttpHeaders.SET_COOKIE, org.hamcrest.Matchers.containsString("Max-Age=0")))
-                .andExpect(header().string(HttpHeaders.SET_COOKIE, org.hamcrest.Matchers.containsString("HttpOnly")));
+                .andExpect(jsonPath("$.token").isNotEmpty())
+                .andExpect(jsonPath("$.expiraEm").isNotEmpty());
     }
 
     private void validarLogin(String email, String perfil) throws Exception {
@@ -215,8 +203,7 @@ class SecurityIntegrationTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.perfil").value(perfil))
                 .andExpect(jsonPath("$.cargo").value(perfil.toUpperCase()))
-                .andExpect(jsonPath("$.token").doesNotExist())
-                .andExpect(header().exists(HttpHeaders.SET_COOKIE))
+                .andExpect(jsonPath("$.token").isNotEmpty())
                 .andExpect(jsonPath("$.expiraEm").isNotEmpty());
     }
 
@@ -224,16 +211,16 @@ class SecurityIntegrationTests {
         return "Bearer " + jwtService.emitir(email).token();
     }
 
-    private Cookie cookieObtidoNoLogin(String email) throws Exception {
-        Cookie cookie = mockMvc.perform(post("/login")
+    private String tokenObtidoNoLogin(String email) throws Exception {
+        String token = com.jayway.jsonpath.JsonPath.read(mockMvc.perform(post("/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"email\":\"" + email + "\",\"senha\":\"123456\"}"))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
-                .getCookie("SXA_SESSION");
-        org.assertj.core.api.Assertions.assertThat(cookie).isNotNull();
-        return cookie;
+                .getContentAsString(), "$.token");
+        org.assertj.core.api.Assertions.assertThat(token).isNotBlank();
+        return "Bearer " + token;
     }
 
     private void validarLoginInvalido(String email, String senha) throws Exception {

@@ -57,7 +57,6 @@ services:
       SPRING_DATASOURCE_PASSWORD: postgres
       JWT_SECRET: ${JWT_SECRET:?Defina JWT_SECRET com pelo menos 32 caracteres}
       JWT_EXPIRATION_SECONDS: ${JWT_EXPIRATION_SECONDS:-3600}
-      JWT_COOKIE_SECURE: ${JWT_COOKIE_SECURE:-false}
     ports:
       - "8080:8080"
     networks:
