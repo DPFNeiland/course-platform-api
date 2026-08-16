@@ -55,6 +55,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/SandraXAndreiaDB
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
+      JWT_SECRET: ${JWT_SECRET:?Defina JWT_SECRET com pelo menos 32 caracteres}
+      JWT_EXPIRATION_SECONDS: ${JWT_EXPIRATION_SECONDS:-3600}
     ports:
       - "8080:8080"
     networks:

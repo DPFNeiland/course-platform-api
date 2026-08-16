@@ -10,18 +10,13 @@ const appState = {
 };
 
 const api = async (path, options = {}) => {
-  const sessionStr = sessionStorage.getItem('session') || sessionStorage.getItem('user');
-  let token = null;
-  if (sessionStr) {
-    try {
-      const session = JSON.parse(sessionStr);
-      token = session.token;
-    } catch (e) {}
+  const session = getSession();
+  if (!session || !session.token || !Number.isFinite(Date.parse(session.expiraEm)) || Date.parse(session.expiraEm) <= Date.now()) {
+    logout();
+    throw new Error('Sessao expirada. Faca login novamente.');
   }
   const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
+  headers['Authorization'] = `Bearer ${session.token}`;
   const response = await fetch(`${API_BASE_URL}${path}`, {
     headers,
     ...options
@@ -44,7 +39,7 @@ const formatEnum = value => String(value || '')
   .replace(/\b\w/g, letter => letter.toUpperCase());
 
 const getSession = () => {
-  const sessionStr = sessionStorage.getItem('session') || sessionStorage.getItem('user');
+  const sessionStr = sessionStorage.getItem('session');
   if (!sessionStr) return null;
   try {
     const session = JSON.parse(sessionStr);
@@ -52,7 +47,6 @@ const getSession = () => {
     if (perfil !== 'aluno') return null;
     session.perfil = perfil;
     sessionStorage.setItem('session', JSON.stringify(session));
-    sessionStorage.setItem('user', JSON.stringify(session));
     return session;
   } catch {
     return null;

@@ -148,6 +148,7 @@ class SecurityIntegrationTests {
                         .content("{\"email\":\"" + email + "\",\"senha\":\"123456\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.perfil").value(perfil))
+                .andExpect(jsonPath("$.cargo").value(perfil.toUpperCase()))
                 .andExpect(jsonPath("$.token").isNotEmpty())
                 .andExpect(jsonPath("$.expiraEm").isNotEmpty());
     }

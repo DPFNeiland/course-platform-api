@@ -54,11 +54,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function montarSessao(usuario, perfilFallback) {
         const perfil = normalizarPerfil(usuario?.perfil || usuario?.cargo || perfilFallback);
+        const tokenValido = typeof usuario?.token === 'string' && usuario.token.split('.').length === 3;
+        const expiracaoValida = Number.isFinite(Date.parse(usuario?.expiraEm))
+            && Date.parse(usuario.expiraEm) > Date.now();
+        if (!tokenValido || !expiracaoValida) {
+            throw new Error('O servidor retornou uma sessao invalida. Faca login novamente.');
+        }
         return {
             id: usuario?.id,
             nome: usuario?.nome,
             email: usuario?.email,
-            cargo: perfil,
+            cargo: usuario?.cargo,
             perfil,
             token: usuario?.token,
             expiraEm: usuario?.expiraEm
@@ -77,7 +83,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         const usuario = await resposta.json();
         const sessao = montarSessao(usuario, perfilFallback);
-        sessionStorage.setItem('user', JSON.stringify(sessao));
         sessionStorage.setItem('session', JSON.stringify(sessao));
         return sessao;
     }
