@@ -22,6 +22,7 @@ decisoes/*
 *.iws
 *.iml
 *.ipr
+decisoes/
 
 ### NetBeans ###
 /nbproject/private/
