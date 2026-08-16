@@ -19,23 +19,26 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final AuthorizationService authorizationService;
+    private final JwtCookieService jwtCookieService;
 
-    public JwtAuthenticationFilter(JwtService jwtService, AuthorizationService authorizationService) {
+    public JwtAuthenticationFilter(JwtService jwtService, AuthorizationService authorizationService,
+                                   JwtCookieService jwtCookieService) {
         this.jwtService = jwtService;
         this.authorizationService = authorizationService;
+        this.jwtCookieService = jwtCookieService;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (authorization == null || !authorization.startsWith("Bearer ")) {
+        String token = jwtCookieService.obterToken(request).orElseGet(() -> obterBearer(request));
+        if (token == null) {
             filterChain.doFilter(request, response);
             return;
         }
 
         try {
-            String subject = jwtService.validarEObterSubject(authorization.substring(7).trim());
+            String subject = jwtService.validarEObterSubject(token);
             UserDetails usuario = authorizationService.loadUserByUsername(subject);
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                     usuario, null, usuario.getAuthorities());
@@ -50,6 +53,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
         filterChain.doFilter(request, response);
+    }
+
+    private String obterBearer(HttpServletRequest request) {
+        String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
+        return authorization != null && authorization.startsWith("Bearer ")
+                ? authorization.substring(7).trim()
+                : null;
     }
 
     private void escreverNaoAutorizado(HttpServletResponse response, String codigo) throws IOException {
