@@ -144,31 +144,6 @@ const renderDashboardStats = () => {
   })));
 };
 
-const renderBoletim = () => {
-  const select = document.querySelector('#select-curso');
-  const tableBody = document.querySelector('.notas-section tbody');
-  if (!select || !tableBody) return;
-
-  const matriculasComCurso = appState.matriculas.map(m => ({ matricula: m, curso: cursoPorId(m.cursoId) })).filter(item => item.curso);
-  select.innerHTML = matriculasComCurso.length
-    ? matriculasComCurso.map(({ curso }) => `<option value="${curso.id}">${curso.nome}</option>`).join('')
-    : '<option>Nenhum curso matriculado</option>';
-
-  const renderSelected = () => {
-    const cursoId = Number(select.value || matriculasComCurso[0]?.curso.id);
-    const item = matriculasComCurso.find(entry => Number(entry.curso.id) === cursoId);
-    const status = item?.matricula.status || 'SEM_MATRICULA';
-    document.querySelector('.midia-final .numero')?.replaceChildren(document.createTextNode('-'));
-    document.querySelector('.status-label')?.replaceChildren(document.createTextNode(formatEnum(status)));
-    tableBody.innerHTML = item
-      ? `<tr><td>${item.curso.nome}</td><td class="nota">-</td><td>${formatEnum(status)}</td><td>${item.matricula.dataMatricula || '-'}</td></tr>`
-      : '<tr><td colspan="4">Nenhuma matricula encontrada.</td></tr>';
-  };
-
-  select.addEventListener('change', renderSelected);
-  renderSelected();
-};
-
 const renderAchievements = () => {
   const grid = document.querySelector('.achievements-grid');
   if (!grid) return;
@@ -286,7 +261,6 @@ const refreshData = async () => {
   renderCatalog();
   renderStudentProgress();
   renderDashboardStats();
-  renderBoletim();
   renderAchievements();
   renderSalaAula();
   renderCertificates();
