@@ -17,6 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.http.MediaType;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
@@ -132,9 +135,11 @@ class SecurityIntegrationTests {
 
     @Test
     void deveIdentificarTokenExpirado() throws Exception {
-        JwtService shortLived = new JwtService("test-only-jwt-secret-with-at-least-32-characters", 1);
+        JwtService shortLived = new JwtService(
+                "test-only-jwt-secret-with-at-least-32-characters",
+                1,
+                Clock.fixed(Instant.now().minusSeconds(2), ZoneOffset.UTC));
         String token = shortLived.emitir("aluno@teste.com").token();
-        Thread.sleep(1100);
 
         mockMvc.perform(get("/aluno").header("Authorization", "Bearer " + token))
                 .andExpect(status().isUnauthorized())

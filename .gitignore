@@ -6,7 +6,7 @@ target/
 decisoes/
 !decisoes/
 decisoes/*
-!decisoes/SXA-validacao-armazenamento-token.md
+!decisoes/code-review-SXA10-JWT.md
 
 ### STS ###
 .apt_generated

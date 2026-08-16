@@ -1,6 +1,7 @@
 package ananditos.sandraxandreia.security;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import io.jsonwebtoken.ExpiredJwtException;
@@ -10,6 +11,7 @@ import io.jsonwebtoken.security.Keys;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.time.Clock;
 import java.time.Instant;
 import java.util.Date;
 
@@ -17,9 +19,15 @@ import java.util.Date;
 public class JwtService {
     private final SecretKey secret;
     private final long expirationSeconds;
+    private final Clock clock;
 
+    @Autowired
     public JwtService(@Value("${security.jwt.secret}") String secret,
                       @Value("${security.jwt.expiration-seconds:3600}") long expirationSeconds) {
+        this(secret, expirationSeconds, Clock.systemUTC());
+    }
+
+    public JwtService(String secret, long expirationSeconds, Clock clock) {
         if (secret == null || secret.length() < 32) {
             throw new IllegalStateException("security.jwt.secret deve possuir pelo menos 32 caracteres");
         }
@@ -28,10 +36,11 @@ public class JwtService {
         }
         this.secret = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         this.expirationSeconds = expirationSeconds;
+        this.clock = clock;
     }
 
     public TokenEmitido emitir(String subject) {
-        Instant emitidoEm = Instant.now();
+        Instant emitidoEm = clock.instant();
         Instant expiraEm = emitidoEm.plusSeconds(expirationSeconds);
         String token = Jwts.builder()
                 .subject(subject)
@@ -49,6 +58,7 @@ public class JwtService {
         try {
             String subject = Jwts.parser()
                     .verifyWith(secret)
+                    .clock(() -> Date.from(clock.instant()))
                     .build()
                     .parseSignedClaims(token)
                     .getPayload()
