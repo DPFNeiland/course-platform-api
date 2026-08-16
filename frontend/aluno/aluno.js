@@ -20,12 +20,17 @@ const api = async (path, options = {}) => {
   }
   const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
   if (token) {
-    headers['Authorization'] = `Basic ${token}`;
+    headers['Authorization'] = `Bearer ${token}`;
   }
   const response = await fetch(`${API_BASE_URL}${path}`, {
     headers,
     ...options
   });
+  if (response.status === 401) {
+    sessionStorage.clear();
+    window.location.href = '../index.html';
+    throw new Error('Sessao expirada. Faca login novamente.');
+  }
   if (!response.ok) {
     const error = await response.json().catch(() => null);
     throw new Error(error?.message || error?.error || 'Nao foi possivel concluir a operacao.');

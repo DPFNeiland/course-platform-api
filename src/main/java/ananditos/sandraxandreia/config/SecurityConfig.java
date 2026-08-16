@@ -1,17 +1,17 @@
 package ananditos.sandraxandreia.config;
 
+import ananditos.sandraxandreia.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -25,7 +25,7 @@ public class SecurityConfig {
     // SecurityFilterChain e a cadeia de filtros do Spring Security.
     // Pense nela como um "porteiro" que intercepta as requisicoes HTTP.
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http
                 // csrf() configura protecao CSRF.
                 // Para APIs REST didaticas/testes, costuma-se desabilitar.
@@ -45,8 +45,7 @@ public class SecurityConfig {
                                 "/h2-console/**"
                         ).permitAll()
 
-                        // Cadastro inicial para que alunos e professores possam criar
-                        // credenciais e depois autenticar com HTTP Basic.
+                        // Cadastro inicial e login permanecem publicos.
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/login", "/aluno", "/professor", "/curador").permitAll()
 
@@ -56,9 +55,19 @@ public class SecurityConfig {
                 // frameOptions() foi liberado para o console H2 funcionar no navegador.
                 .headers(headers -> headers.frameOptions(frame -> frame.disable()))
 
-                // httpBasic() ativa autenticacao HTTP Basic.
-                // E um modo simples e bem didatico para testes com Postman, Insomnia e Swagger.
-                .httpBasic(Customizer.withDefaults());
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(errors -> errors
+                        .authenticationEntryPoint((request, response, exception) -> {
+                            response.setStatus(401);
+                            response.setContentType("application/json");
+                            response.getWriter().write("{\"status\":401,\"erro\":\"Autenticacao necessaria\"}");
+                        })
+                        .accessDeniedHandler((request, response, exception) -> {
+                            response.setStatus(403);
+                            response.setContentType("application/json");
+                            response.getWriter().write("{\"status\":403,\"erro\":\"Acesso negado\"}");
+                        }))
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         // build() monta o objeto final da configuracao de seguranca.
         return http.build();
