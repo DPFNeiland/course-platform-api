@@ -14,7 +14,7 @@
   };
 
   const isValid = session => {
-    if (!session) return false;
+    if (!session || typeof session.token !== 'string' || !session.token.trim()) return false;
     if (typeof session.expiraEm !== 'string' || !ISO_INSTANT.test(session.expiraEm)) return false;
     const expiration = Date.parse(session.expiraEm);
     return Number.isFinite(expiration) && expiration > Date.now();
@@ -25,12 +25,8 @@
     window.location.href = `${loginPath}?auth=${encodeURIComponent(reason)}`;
   };
 
-  const logout = async (apiBaseUrl, loginPath) => {
-    try {
-      await fetch(`${apiBaseUrl}/logout`, { method: 'POST', credentials: 'include' });
-    } finally {
-      clearAndRedirect(loginPath, 'logout');
-    }
+  const logout = (loginPath) => {
+    clearAndRedirect(loginPath, 'logout');
   };
 
   const requireSession = (profiles, loginPath) => {

@@ -60,6 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
             email: usuario?.email,
             cargo: usuario?.cargo,
             perfil,
+            token: usuario?.token,
             expiraEm: usuario?.expiraEm
         };
         if (!window.jwtSession.isValid(sessao)) {
@@ -76,7 +77,6 @@ document.addEventListener('DOMContentLoaded', function() {
     async function autenticar(email, senha, perfilFallback) {
         const resposta = await fetch(`${API_BASE_URL}/login`, {
             method: 'POST',
-            credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, senha })
         });
@@ -206,7 +206,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         fetch(`${API_BASE_URL}${endpoint}`, {
             method: 'POST',
-            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -223,7 +222,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(erro => {
             console.error('Erro no cadastro:', erro);
-            showError('Servidor indisponivel. O Backend esta rodando?');
+            showError(erro?.message || 'Servidor indisponivel. O Backend esta rodando?');
         });
     });
 
@@ -241,7 +240,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(erro => {
             console.error('Erro no login:', erro);
-            showError('Servidor indisponivel. O Backend esta rodando?');
+            showError(erro?.message || 'Servidor indisponivel. O Backend esta rodando?');
         });
     });
 });

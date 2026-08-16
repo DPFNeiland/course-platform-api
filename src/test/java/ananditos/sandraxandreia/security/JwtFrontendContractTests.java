@@ -14,7 +14,7 @@ class JwtFrontendContractTests {
     private final Path frontend = Path.of(System.getProperty("user.dir"), "frontend");
 
     @Test
-    void frontendNaoDeveArmazenarOuEnviarTokenViaJavascript() throws IOException {
+    void frontendDeveUsarJwtSemCredenciaisBasic() throws IOException {
         List<Path> scripts = List.of(
                 frontend.resolve("auth.js"),
                 frontend.resolve("aluno/aluno.js"),
@@ -30,19 +30,17 @@ class JwtFrontendContractTests {
                     .doesNotContain("btoa(")
                     .doesNotContain("Authorization'] = `Basic")
                     .doesNotContain("Authorization\"] = `Basic")
-                    .doesNotContain("Authorization'] = `Bearer")
-                    .doesNotContain("session.token");
+                    .doesNotContain("credentials: 'include'");
         }
     }
 
     @Test
-    void clientesAutenticadosDevemEnviarCookieComCredentialsInclude() throws IOException {
+    void clientesAutenticadosDevemEnviarBearerToken() throws IOException {
         for (String relative : List.of("aluno/aluno.js", "curador/curador.js", "professor/professor.js")) {
             String content = Files.readString(frontend.resolve(relative));
             assertThat(content)
-                    .as("cookie HttpOnly de %s", relative)
-                    .contains("credentials: 'include'")
-                    .doesNotContain("Bearer ${session.token}");
+                    .as("JWT Bearer de %s", relative)
+                    .contains("Authorization: `Bearer ${session.token}`");
         }
     }
 }

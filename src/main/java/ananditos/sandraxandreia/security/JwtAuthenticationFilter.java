@@ -19,19 +19,16 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final AuthorizationService authorizationService;
-    private final JwtCookieService jwtCookieService;
 
-    public JwtAuthenticationFilter(JwtService jwtService, AuthorizationService authorizationService,
-                                   JwtCookieService jwtCookieService) {
+    public JwtAuthenticationFilter(JwtService jwtService, AuthorizationService authorizationService) {
         this.jwtService = jwtService;
         this.authorizationService = authorizationService;
-        this.jwtCookieService = jwtCookieService;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        String token = jwtCookieService.obterToken(request).orElseGet(() -> obterBearer(request));
+        String token = obterBearer(request);
         if (token == null) {
             filterChain.doFilter(request, response);
             return;
