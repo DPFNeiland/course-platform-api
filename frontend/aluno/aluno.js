@@ -11,19 +11,14 @@ const appState = {
 
 const api = async (path, options = {}) => {
   const session = getSession();
-  if (!session || !session.token || !Number.isFinite(Date.parse(session.expiraEm)) || Date.parse(session.expiraEm) <= Date.now()) {
-    logout();
-    throw new Error('Sessao expirada. Faca login novamente.');
-  }
+  if (!session) throw new Error('Sessao expirada. Faca login novamente.');
   const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
   headers['Authorization'] = `Bearer ${session.token}`;
   const response = await fetch(`${API_BASE_URL}${path}`, {
     headers,
     ...options
   });
-  if (response.status === 401) {
-    sessionStorage.clear();
-    window.location.href = '../index.html';
+  if (await window.jwtSession.handleUnauthorized(response, '../index.html')) {
     throw new Error('Sessao expirada. Faca login novamente.');
   }
   if (!response.ok) {
@@ -39,23 +34,11 @@ const formatEnum = value => String(value || '')
   .replace(/\b\w/g, letter => letter.toUpperCase());
 
 const getSession = () => {
-  const sessionStr = sessionStorage.getItem('session');
-  if (!sessionStr) return null;
-  try {
-    const session = JSON.parse(sessionStr);
-    const perfil = String(session.perfil || session.cargo || '').trim().toLowerCase();
-    if (perfil !== 'aluno') return null;
-    session.perfil = perfil;
-    sessionStorage.setItem('session', JSON.stringify(session));
-    return session;
-  } catch {
-    return null;
-  }
+  return window.jwtSession.requireSession(['aluno'], '../index.html');
 };
 
 const logout = () => {
-  sessionStorage.clear();
-  window.location.href = '../index.html';
+  window.jwtSession.clearAndRedirect('../index.html', 'logout');
 };
 
 const matriculaDoCurso = cursoId => appState.matriculas.find(m => Number(m.cursoId) === Number(cursoId));

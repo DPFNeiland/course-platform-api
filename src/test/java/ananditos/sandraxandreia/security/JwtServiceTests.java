@@ -15,6 +15,8 @@ class JwtServiceTests {
 
         assertThatThrownBy(() -> service.validarEObterSubject(token))
                 .isInstanceOf(JwtInvalidoException.class)
-                .hasMessageContaining("expirado");
+                .hasMessageContaining("expirado")
+                .extracting("codigo")
+                .isEqualTo("TOKEN_EXPIRED");
     }
 }

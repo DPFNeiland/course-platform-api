@@ -3,20 +3,15 @@ document.addEventListener('DOMContentLoaded', async function() {
   const state = { user: null, cursos: [], matriculas: [], alunos: [], professores: [], usuarios: [] };
 
   const api = async (path, options = {}) => {
-    const session = obterSessao();
-    if (!session?.token || !Number.isFinite(Date.parse(session.expiraEm)) || Date.parse(session.expiraEm) <= Date.now()) {
-      logout();
-      throw new Error('Sessao expirada. Faca login novamente.');
-    }
+    const session = window.jwtSession.requireSession(['curador', 'admin'], '../index.html');
+    if (!session) throw new Error('Sessao expirada. Faca login novamente.');
     const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
     headers['Authorization'] = `Bearer ${session.token}`;
     const response = await fetch(`${API_BASE_URL}${path}`, {
       headers,
       ...options
     });
-    if (response.status === 401) {
-      sessionStorage.clear();
-      window.location.href = '../index.html';
+    if (await window.jwtSession.handleUnauthorized(response, '../index.html')) {
       throw new Error('Sessao expirada. Faca login novamente.');
     }
     if (!response.ok) {
@@ -31,16 +26,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     .replaceAll('_', ' ')
     .replace(/\b\w/g, letter => letter.toUpperCase());
 
-  const obterSessao = () => {
-    try {
-      const value = sessionStorage.getItem('session');
-      return value ? JSON.parse(value) : null;
-    } catch {
-      return null;
-    }
-  };
-
-  state.user = obterSessao();
+  state.user = window.jwtSession.requireSession(['curador', 'admin'], '../index.html');
 
   const perfil = String(state.user?.perfil || state.user?.cargo || '').trim().toLowerCase();
   if (!state.user || !['curador', 'admin'].includes(perfil)) {
@@ -242,8 +228,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   }
 
   function logout() {
-    sessionStorage.clear();
-    window.location.href = '../index.html';
+    window.jwtSession.clearAndRedirect('../index.html', 'logout');
   }
 
   document.addEventListener('click', function(e) {

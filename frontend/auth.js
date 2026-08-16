@@ -54,13 +54,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function montarSessao(usuario, perfilFallback) {
         const perfil = normalizarPerfil(usuario?.perfil || usuario?.cargo || perfilFallback);
-        const tokenValido = typeof usuario?.token === 'string' && usuario.token.split('.').length === 3;
-        const expiracaoValida = Number.isFinite(Date.parse(usuario?.expiraEm))
-            && Date.parse(usuario.expiraEm) > Date.now();
-        if (!tokenValido || !expiracaoValida) {
-            throw new Error('O servidor retornou uma sessao invalida. Faca login novamente.');
-        }
-        return {
+        const sessao = {
             id: usuario?.id,
             nome: usuario?.nome,
             email: usuario?.email,
@@ -69,7 +63,16 @@ document.addEventListener('DOMContentLoaded', function() {
             token: usuario?.token,
             expiraEm: usuario?.expiraEm
         };
+        if (!window.jwtSession.isValid(sessao)) {
+            throw new Error('O servidor retornou uma sessao invalida. Faca login novamente.');
+        }
+        return sessao;
     }
+
+    const authReason = new URLSearchParams(window.location.search).get('auth');
+    if (authReason === 'expired') showError('Sua sessao expirou. Faca login novamente.');
+    if (authReason === 'invalid') showError('Sua sessao e invalida. Faca login novamente.');
+    if (authReason) window.history.replaceState({}, document.title, window.location.pathname);
 
     async function autenticar(email, senha, perfilFallback) {
         const resposta = await fetch(`${API_BASE_URL}/login`, {

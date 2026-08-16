@@ -44,7 +44,7 @@ public class JwtService {
 
     public String validarEObterSubject(String token) {
         if (token == null || token.isBlank()) {
-            throw new JwtInvalidoException("Token JWT ausente");
+            throw new JwtInvalidoException("TOKEN_INVALID", "Token JWT ausente");
         }
         try {
             String subject = Jwts.parser()
@@ -54,13 +54,13 @@ public class JwtService {
                     .getPayload()
                     .getSubject();
             if (subject == null || subject.isBlank()) {
-                throw new JwtInvalidoException("Claim sub obrigatoria ausente");
+                throw new JwtInvalidoException("TOKEN_INVALID", "Claim sub obrigatoria ausente");
             }
             return subject;
         } catch (ExpiredJwtException ex) {
-            throw new JwtInvalidoException("Token JWT expirado");
+            throw new JwtInvalidoException("TOKEN_EXPIRED", "Token JWT expirado");
         } catch (JwtException | IllegalArgumentException ex) {
-            throw new JwtInvalidoException("Token JWT invalido");
+            throw new JwtInvalidoException("TOKEN_INVALID", "Token JWT invalido");
         }
     }
 
