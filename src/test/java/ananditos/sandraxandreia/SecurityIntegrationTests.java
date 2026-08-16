@@ -126,7 +126,19 @@ class SecurityIntegrationTests {
     @Test
     void deveRejeitarTokenInvalido() throws Exception {
         mockMvc.perform(get("/aluno").header("Authorization", "Bearer token.invalido.aqui"))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.codigo").value("TOKEN_INVALID"));
+    }
+
+    @Test
+    void deveIdentificarTokenExpirado() throws Exception {
+        JwtService shortLived = new JwtService("test-only-jwt-secret-with-at-least-32-characters", 1);
+        String token = shortLived.emitir("aluno@teste.com").token();
+        Thread.sleep(1100);
+
+        mockMvc.perform(get("/aluno").header("Authorization", "Bearer " + token))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.codigo").value("TOKEN_EXPIRED"));
     }
 
     @Test
