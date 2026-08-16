@@ -13,9 +13,9 @@ const api = async (path, options = {}) => {
   const session = getSession();
   if (!session) throw new Error('Sessao expirada. Faca login novamente.');
   const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
-  headers['Authorization'] = `Bearer ${session.token}`;
   const response = await fetch(`${API_BASE_URL}${path}`, {
     headers,
+    credentials: 'include',
     ...options
   });
   if (await window.jwtSession.handleUnauthorized(response, '../index.html')) {
@@ -38,7 +38,7 @@ const getSession = () => {
 };
 
 const logout = () => {
-  window.jwtSession.clearAndRedirect('../index.html', 'logout');
+  window.jwtSession.logout(API_BASE_URL, '../index.html');
 };
 
 const matriculaDoCurso = cursoId => appState.matriculas.find(m => Number(m.cursoId) === Number(cursoId));

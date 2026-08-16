@@ -4,6 +4,9 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 decisoes/
+!decisoes/
+decisoes/*
+!decisoes/SXA-validacao-armazenamento-token.md
 
 ### STS ###
 .apt_generated

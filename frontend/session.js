@@ -14,7 +14,7 @@
   };
 
   const isValid = session => {
-    if (!session || typeof session.token !== 'string' || session.token.split('.').length !== 3) return false;
+    if (!session) return false;
     if (typeof session.expiraEm !== 'string' || !ISO_INSTANT.test(session.expiraEm)) return false;
     const expiration = Date.parse(session.expiraEm);
     return Number.isFinite(expiration) && expiration > Date.now();
@@ -23,6 +23,14 @@
   const clearAndRedirect = (loginPath, reason = 'invalid') => {
     sessionStorage.removeItem(SESSION_KEY);
     window.location.href = `${loginPath}?auth=${encodeURIComponent(reason)}`;
+  };
+
+  const logout = async (apiBaseUrl, loginPath) => {
+    try {
+      await fetch(`${apiBaseUrl}/logout`, { method: 'POST', credentials: 'include' });
+    } finally {
+      clearAndRedirect(loginPath, 'logout');
+    }
   };
 
   const requireSession = (profiles, loginPath) => {
@@ -43,5 +51,5 @@
     return true;
   };
 
-  global.jwtSession = Object.freeze({ read, isValid, requireSession, clearAndRedirect, handleUnauthorized });
+  global.jwtSession = Object.freeze({ read, isValid, requireSession, clearAndRedirect, handleUnauthorized, logout });
 })(window);
