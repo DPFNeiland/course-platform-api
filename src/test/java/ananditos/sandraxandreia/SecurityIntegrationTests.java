@@ -220,6 +220,52 @@ class SecurityIntegrationTests {
     }
 
     @Test
+    void cookieComBearerInvalidoSemCsrfDeveSerBloqueado() throws Exception {
+        mockMvc.perform(post("/logout")
+                        .cookie(cookieObtidoNoLogin("aluno@teste.com"))
+                        .header("Authorization", "Bearer token.invalido.aqui"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.codigo").value("CSRF_INVALID"));
+    }
+
+    @Test
+    void cookieComBearerValidoSemCsrfDeveSerBloqueado() throws Exception {
+        mockMvc.perform(post("/logout")
+                        .cookie(cookieObtidoNoLogin("aluno@teste.com"))
+                        .header("Authorization", bearer("aluno@teste.com")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.codigo").value("CSRF_INVALID"));
+    }
+
+    @Test
+    void cookieComBearerECsrfValidosDeveExecutarNormalmente() throws Exception {
+        Cookie sessionCookie = cookieObtidoNoLogin("aluno@teste.com");
+        Cookie csrfCookie = cookieCsrf(sessionCookie);
+
+        mockMvc.perform(post("/logout")
+                        .cookie(sessionCookie, csrfCookie)
+                        .header("Authorization", bearer("aluno@teste.com"))
+                        .header("X-XSRF-TOKEN", csrfCookie.getValue()))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void bearerValidoSemCookieDeveContinuarDispensadoDeCsrf() throws Exception {
+        mockMvc.perform(post("/logout").header("Authorization", bearer("aluno@teste.com")))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void rotaPublicaComCookieDeveContinuarExigindoCsrf() throws Exception {
+        mockMvc.perform(post("/login")
+                        .cookie(cookieObtidoNoLogin("aluno@teste.com"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"email\":\"aluno@teste.com\",\"senha\":\"123456\"}"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.codigo").value("CSRF_INVALID"));
+    }
+
+    @Test
     void logoutDeveRemoverCookieDeSessao() throws Exception {
         Cookie sessionCookie = cookieObtidoNoLogin("aluno@teste.com");
         Cookie csrfCookie = cookieCsrf(sessionCookie);
