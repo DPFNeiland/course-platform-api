@@ -160,7 +160,7 @@ test('logout invalida cookie no backend e limpa dados locais', async () => {
       return { ok: true, status: 204 };
     }
   );
-  await loaded.jwtSession.logout('http://localhost:8080', '../index.html');
+  const completed = await loaded.jwtSession.logout('http://localhost:8080', '../index.html');
 
   assert.equal(calls.length, 2);
   assert.equal(calls[0].url, 'http://localhost:8080/csrf');
@@ -171,6 +171,7 @@ test('logout invalida cookie no backend e limpa dados locais', async () => {
   assert.equal(loaded.storage.has('session'), false);
   assert.equal(loaded.storage.has('user'), false);
   assert.equal(loaded.window.location.href, '../index.html?auth=logout');
+  assert.equal(completed, true);
 });
 
 test('401 ao obter CSRF expira a sessao e redireciona', async () => {
@@ -286,16 +287,80 @@ test('logout com token invalido preserva o motivo invalid', async () => {
   assert.equal(loaded.window.location.href, '../index.html?auth=invalid');
 });
 
-test('falha de rede no logout ainda limpa a sessao local', async () => {
+test('falha de rede no logout limpa dados visuais sem informar sucesso', async () => {
   const loaded = loadSession(
     { session: JSON.stringify(validSession()), user: 'legado' },
     async () => { throw new Error('rede indisponivel'); }
   );
 
-  await loaded.jwtSession.logout('http://localhost:8080', '../index.html');
+  const completed = await loaded.jwtSession.logout('http://localhost:8080', '../index.html');
   assert.equal(loaded.storage.has('session'), false);
   assert.equal(loaded.storage.has('user'), false);
-  assert.equal(loaded.window.location.href, '../index.html?auth=logout');
+  assert.equal(loaded.window.location.href, '../index.html?auth=logout_failed');
+  assert.equal(completed, false);
+});
+
+for (const status of [403, 500]) {
+  test(`logout HTTP ${status} nao e apresentado como concluido`, async () => {
+    const loaded = loadSession(
+      { session: JSON.stringify(validSession()) },
+      async url => url.endsWith('/csrf')
+        ? { ok: true, status: 200, json: async () => ({ token: 'csrf-logout' }) }
+        : { ok: false, status, clone: () => ({ json: async () => ({ codigo: 'ERRO' }) }) }
+    );
+
+    const completed = await loaded.jwtSession.logout('http://localhost:8080', '../index.html');
+    assert.equal(completed, false);
+    assert.equal(loaded.storage.has('session'), false);
+    assert.equal(loaded.window.location.href, '../index.html?auth=logout_failed');
+  });
+}
+
+test('segunda rejeicao CSRF no logout nao informa sucesso nem repete novamente', async () => {
+  let csrfCount = 0;
+  let logoutCount = 0;
+  const loaded = loadSession({ session: JSON.stringify(validSession()) }, async url => {
+    if (url.endsWith('/csrf')) {
+      csrfCount += 1;
+      return { ok: true, status: 200, json: async () => ({ token: `csrf-${csrfCount}` }) };
+    }
+    logoutCount += 1;
+    const body = { codigo: 'CSRF_INVALID' };
+    return {
+      ok: false,
+      status: 403,
+      clone: () => ({ json: async () => body })
+    };
+  });
+
+  const completed = await loaded.jwtSession.logout('http://localhost:8080', '../index.html');
+  assert.equal(completed, false);
+  assert.equal(csrfCount, 2);
+  assert.equal(logoutCount, 2);
+  assert.equal(loaded.window.location.href, '../index.html?auth=logout_failed');
+});
+
+test('requisicao publica de autenticacao busca CSRF e inclui credenciais', async () => {
+  const calls = [];
+  const loaded = loadSession({}, async (url, options) => {
+    calls.push({ url, options });
+    if (url.endsWith('/csrf')) {
+      return { ok: true, status: 200, json: async () => ({ token: 'csrf-login' }) };
+    }
+    return { ok: true, status: 200 };
+  });
+
+  await loaded.jwtSession.csrfFetch('http://localhost:8080', '/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: '{}'
+  });
+
+  assert.equal(calls[0].url, 'http://localhost:8080/csrf');
+  assert.equal(calls[0].options.credentials, 'include');
+  assert.equal(calls[1].url, 'http://localhost:8080/login');
+  assert.equal(calls[1].options.credentials, 'include');
+  assert.equal(calls[1].options.headers['X-XSRF-TOKEN'], 'csrf-login');
 });
 
 test('recupera sessao em nova aba sem JWT', async () => {

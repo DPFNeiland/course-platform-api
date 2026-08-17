@@ -54,7 +54,11 @@ class JwtFrontendContractTests {
                 .contains("X-XSRF-TOKEN");
 
         String auth = Files.readString(frontend.resolve("auth.js"));
-        assertThat(auth).contains("credentials: 'include'");
+        assertThat(auth)
+                .contains("jwtSession.csrfFetch")
+                .contains("endpoint = '/curador'")
+                .doesNotContain("fetch(`${API_BASE_URL}/login`")
+                .doesNotContain("fetch(`${API_BASE_URL}${endpoint}`");
 
         String forum = Files.readString(frontend.resolve("aluno/forum.html"));
         assertThat(forum)

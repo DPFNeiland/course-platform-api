@@ -2,6 +2,7 @@ package ananditos.sandraxandreia.config;
 
 import ananditos.sandraxandreia.security.JwtAuthenticationFilter;
 import ananditos.sandraxandreia.security.JwtCookieService;
+import ananditos.sandraxandreia.security.SecurityRequestPolicy;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,18 +29,18 @@ import java.util.Arrays;
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
-    private static final List<String> PUBLIC_POST_PATHS = List.of("/login", "/aluno", "/professor", "/curador");
     private static final List<String> SAFE_METHODS = List.of("GET", "HEAD", "TRACE", "OPTIONS");
 
     // SecurityFilterChain e a cadeia de filtros do Spring Security.
     // Pense nela como um "porteiro" que intercepta as requisicoes HTTP.
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter,
+                                           JwtCookieService jwtCookieService) throws Exception {
         http
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                         .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
-                        .requireCsrfProtectionMatcher(cookieClientCsrfMatcher()))
+                        .requireCsrfProtectionMatcher(cookieClientCsrfMatcher(jwtCookieService)))
 
                 .cors(Customizer.withDefaults())
 
@@ -49,6 +50,7 @@ public class SecurityConfig {
                         // permitAll() = qualquer pessoa pode acessar, sem login.
                         .requestMatchers(
                                 "/", "/index.html", "/home",
+                                "/csrf",
                                 "/css/**", "/js/**",
                                 "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**",
                                 "/h2-console/**"
@@ -56,7 +58,7 @@ public class SecurityConfig {
 
                         // Cadastro inicial e login permanecem publicos.
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, PUBLIC_POST_PATHS.toArray(String[]::new)).permitAll()
+                        .requestMatchers(HttpMethod.POST, SecurityRequestPolicy.publicPostPaths()).permitAll()
 
                         // anyRequest() pega o que nao foi coberto acima.
                         .anyRequest().authenticated())
@@ -102,24 +104,21 @@ public class SecurityConfig {
         return source;
     }
 
-    private RequestMatcher cookieClientCsrfMatcher() {
+    private RequestMatcher cookieClientCsrfMatcher(JwtCookieService jwtCookieService) {
         return request -> {
             String method = request.getMethod();
             if (SAFE_METHODS.contains(method)) return false;
 
-            if (hasSessionCookie(request)) return true;
+            // Login e cadastro recebem um token por GET /csrf, mesmo sem sessao autenticada.
+            if (SecurityRequestPolicy.isPublicPost(method, request.getRequestURI())) return true;
+
+            if (jwtCookieService.obterToken(request).isPresent()) return true;
 
             String authorization = request.getHeader("Authorization");
             if (authorization != null && authorization.startsWith("Bearer ")) return false;
 
-            return !("POST".equals(method) && PUBLIC_POST_PATHS.contains(request.getRequestURI()));
+            return true;
         };
-    }
-
-    private boolean hasSessionCookie(jakarta.servlet.http.HttpServletRequest request) {
-        if (request.getCookies() == null) return false;
-        return Arrays.stream(request.getCookies())
-                .anyMatch(cookie -> JwtCookieService.COOKIE_NAME.equals(cookie.getName()));
     }
 
     // PasswordEncoder e um bean importante da aplicacao.
