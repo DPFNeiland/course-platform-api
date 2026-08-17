@@ -12,6 +12,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -27,9 +29,23 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http
-                // CSRF pode ser desabilitado porque a API nao usa cookies de sessao:
-                // ela e stateless e recebe o JWT explicitamente no header Authorization.
-                .csrf(csrf -> csrf.disable())
+                .csrf(csrf -> csrf
+                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                        .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
+                        .requireCsrfProtectionMatcher(request -> {
+                            String method = request.getMethod();
+                            if (List.of("GET", "HEAD", "TRACE", "OPTIONS").contains(method)) {
+                                return false;
+                            }
+
+                            String authorization = request.getHeader("Authorization");
+                            if (authorization != null && authorization.startsWith("Bearer ")) {
+                                return false;
+                            }
+
+                            String path = request.getRequestURI();
+                            return !("POST".equals(method) && List.of("/login", "/aluno", "/professor", "/curador").contains(path));
+                        }))
 
                 .cors(Customizer.withDefaults())
 
@@ -82,7 +98,7 @@ public class SecurityConfig {
                 "http://localhost:3000", "http://127.0.0.1:3000"
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "X-XSRF-TOKEN"));
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

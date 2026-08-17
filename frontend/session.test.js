@@ -113,21 +113,49 @@ test('resposta diferente de 401 preserva a sessao', async () => {
   assert.equal(loaded.window.location.href, '');
 });
 
+test('requisicao de escrita inclui credenciais e token CSRF', async () => {
+  const loaded = loadSession({}, async () => ({
+    ok: true,
+    json: async () => ({ token: 'csrf-seguro' })
+  }));
+  const options = await loaded.jwtSession.authenticatedOptions('http://localhost:8080', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' }
+  });
+
+  assert.equal(options.credentials, 'include');
+  assert.equal(options.headers['X-XSRF-TOKEN'], 'csrf-seguro');
+  assert.equal(options.headers['Content-Type'], 'application/json');
+});
+
+test('requisicao GET inclui cookie sem exigir CSRF', async () => {
+  const loaded = loadSession();
+  const options = await loaded.jwtSession.authenticatedOptions('http://localhost:8080');
+
+  assert.equal(options.credentials, 'include');
+  assert.equal('X-XSRF-TOKEN' in options.headers, false);
+});
+
 test('logout invalida cookie no backend e limpa dados locais', async () => {
   const calls = [];
   const loaded = loadSession(
     { session: JSON.stringify(validSession()), user: 'legado' },
     async (url, options) => {
       calls.push({ url, options });
-      return { status: 204 };
+      if (url.endsWith('/csrf')) {
+        return { ok: true, json: async () => ({ token: 'csrf-logout' }) };
+      }
+      return { ok: true, status: 204 };
     }
   );
   await loaded.jwtSession.logout('http://localhost:8080', '../index.html');
 
-  assert.equal(calls.length, 1);
-  assert.equal(calls[0].url, 'http://localhost:8080/logout');
-  assert.equal(calls[0].options.method, 'POST');
-  assert.equal(calls[0].options.credentials, 'include');
+  assert.equal(calls.length, 2);
+  assert.equal(calls[0].url, 'http://localhost:8080/csrf');
+  assert.equal(calls[1].url, 'http://localhost:8080/logout');
+  assert.equal(calls[1].options.method, 'POST');
+  assert.equal(calls[1].options.credentials, 'include');
+  assert.equal(calls[1].options.headers['X-XSRF-TOKEN'], 'csrf-logout');
   assert.equal(loaded.storage.has('session'), false);
   assert.equal(loaded.storage.has('user'), false);
   assert.equal(loaded.window.location.href, '../index.html?auth=logout');
