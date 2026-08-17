@@ -37,7 +37,7 @@
     if (csrfToken) return csrfToken;
 
     const response = await fetch(`${apiBaseUrl}/csrf`, { credentials: 'include' });
-    if (response.status === 401) {
+    if (response.status === 401 && loginPath) {
       await handleUnauthorized(response, loginPath);
       throw new Error('Sessao expirada. Faca login novamente.');
     }
@@ -57,12 +57,12 @@
     return { ...options, headers, credentials: 'include' };
   };
 
-  const authenticatedFetch = async (apiBaseUrl, path, options = {}, loginPath, retryCsrf = true) => {
+  const csrfFetch = async (apiBaseUrl, path, options = {}, loginPath, retryCsrf = true) => {
     const response = await fetch(
       `${apiBaseUrl}${path}`,
       await authenticatedOptions(apiBaseUrl, options, loginPath)
     );
-    if (response.status === 401) {
+    if (response.status === 401 && loginPath) {
       await handleUnauthorized(response, loginPath);
       return response;
     }
@@ -70,11 +70,14 @@
       const body = await response.clone().json().catch(() => null);
       if (body?.codigo === 'CSRF_INVALID') {
         csrfToken = null;
-        return authenticatedFetch(apiBaseUrl, path, options, loginPath, false);
+        return csrfFetch(apiBaseUrl, path, options, loginPath, false);
       }
     }
     return response;
   };
+
+  const authenticatedFetch = async (apiBaseUrl, path, options = {}, loginPath) =>
+    csrfFetch(apiBaseUrl, path, options, loginPath);
 
   const recoverSession = async (apiBaseUrl, profiles, loginPath) => {
     const current = read();
@@ -92,18 +95,30 @@
   };
 
   const logout = async (apiBaseUrl, loginPath) => {
+    let response;
     try {
-      await authenticatedFetch(apiBaseUrl, '/logout', { method: 'POST' }, loginPath);
+      response = await authenticatedFetch(apiBaseUrl, '/logout', { method: 'POST' }, loginPath);
     } catch {
-      // A limpeza local e o redirecionamento devem ocorrer mesmo sem resposta do backend.
-    } finally {
       const authenticationRedirect = /[?&]auth=(expired|invalid)(?:&|$)/.test(window.location.href);
       sessionStorage.removeItem(SESSION_KEY);
       sessionStorage.removeItem(LEGACY_USER_KEY);
       if (!authenticationRedirect) {
-        window.location.href = `${loginPath}?auth=logout`;
+        window.location.href = `${loginPath}?auth=logout_failed`;
       }
+      return false;
     }
+
+    const authenticationRedirect = /[?&]auth=(expired|invalid)(?:&|$)/.test(window.location.href);
+    if (authenticationRedirect) return false;
+
+    sessionStorage.removeItem(SESSION_KEY);
+    sessionStorage.removeItem(LEGACY_USER_KEY);
+    if (response.status !== 204) {
+      window.location.href = `${loginPath}?auth=logout_failed`;
+      return false;
+    }
+    window.location.href = `${loginPath}?auth=logout`;
+    return true;
   };
 
   const requireSession = (profiles, loginPath) => {
@@ -130,6 +145,7 @@
     requireSession,
     clearAndRedirect,
     handleUnauthorized,
+    csrfFetch,
     authenticatedFetch,
     recoverSession,
     logout
