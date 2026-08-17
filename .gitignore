@@ -3,10 +3,7 @@ target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-decisoes/
-!decisoes/
-decisoes/*
-!decisoes/code-review-SXA10-JWT.md
+decisoes/   
 
 ### STS ###
 .apt_generated
@@ -22,7 +19,6 @@ decisoes/*
 *.iws
 *.iml
 *.ipr
-decisoes/
 .env    
 
 ### NetBeans ###
