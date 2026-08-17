@@ -1,6 +1,7 @@
 package ananditos.sandraxandreia.config;
 
 import ananditos.sandraxandreia.security.JwtAuthenticationFilter;
+import ananditos.sandraxandreia.security.JwtCookieService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.beans.factory.annotation.Value;
@@ -55,7 +56,7 @@ public class SecurityConfig {
 
                         // Cadastro inicial e login permanecem publicos.
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/login", "/aluno", "/professor", "/curador").permitAll()
+                        .requestMatchers(HttpMethod.POST, PUBLIC_POST_PATHS.toArray(String[]::new)).permitAll()
 
                         // anyRequest() pega o que nao foi coberto acima.
                         .anyRequest().authenticated())
@@ -106,11 +107,19 @@ public class SecurityConfig {
             String method = request.getMethod();
             if (SAFE_METHODS.contains(method)) return false;
 
+            if (hasSessionCookie(request)) return true;
+
             String authorization = request.getHeader("Authorization");
             if (authorization != null && authorization.startsWith("Bearer ")) return false;
 
             return !("POST".equals(method) && PUBLIC_POST_PATHS.contains(request.getRequestURI()));
         };
+    }
+
+    private boolean hasSessionCookie(jakarta.servlet.http.HttpServletRequest request) {
+        if (request.getCookies() == null) return false;
+        return Arrays.stream(request.getCookies())
+                .anyMatch(cookie -> JwtCookieService.COOKIE_NAME.equals(cookie.getName()));
     }
 
     // PasswordEncoder e um bean importante da aplicacao.

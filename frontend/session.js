@@ -94,8 +94,15 @@
   const logout = async (apiBaseUrl, loginPath) => {
     try {
       await authenticatedFetch(apiBaseUrl, '/logout', { method: 'POST' }, loginPath);
+    } catch {
+      // A limpeza local e o redirecionamento devem ocorrer mesmo sem resposta do backend.
     } finally {
-      clearAndRedirect(loginPath, 'logout');
+      const authenticationRedirect = /[?&]auth=(expired|invalid)(?:&|$)/.test(window.location.href);
+      sessionStorage.removeItem(SESSION_KEY);
+      sessionStorage.removeItem(LEGACY_USER_KEY);
+      if (!authenticationRedirect) {
+        window.location.href = `${loginPath}?auth=logout`;
+      }
     }
   };
 
@@ -123,7 +130,6 @@
     requireSession,
     clearAndRedirect,
     handleUnauthorized,
-    authenticatedOptions,
     authenticatedFetch,
     recoverSession,
     logout

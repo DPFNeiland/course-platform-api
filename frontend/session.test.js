@@ -114,26 +114,38 @@ test('resposta diferente de 401 preserva a sessao', async () => {
 });
 
 test('requisicao de escrita inclui credenciais e token CSRF', async () => {
-  const loaded = loadSession({}, async () => ({
-    ok: true,
-    json: async () => ({ token: 'csrf-seguro' })
-  }));
-  const options = await loaded.jwtSession.authenticatedOptions('http://localhost:8080', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' }
+  const calls = [];
+  const loaded = loadSession({}, async (url, options) => {
+    calls.push({ url, options });
+    if (url.endsWith('/csrf')) {
+      return { ok: true, json: async () => ({ token: 'csrf-seguro' }) };
+    }
+    return { ok: true, status: 204 };
   });
+  await loaded.jwtSession.authenticatedFetch(
+    'http://localhost:8080', '/recurso',
+    { method: 'POST', headers: { 'Content-Type': 'application/json' } },
+    '../index.html'
+  );
 
-  assert.equal(options.credentials, 'include');
-  assert.equal(options.headers['X-XSRF-TOKEN'], 'csrf-seguro');
-  assert.equal(options.headers['Content-Type'], 'application/json');
+  assert.equal(calls[1].options.credentials, 'include');
+  assert.equal(calls[1].options.headers['X-XSRF-TOKEN'], 'csrf-seguro');
+  assert.equal(calls[1].options.headers['Content-Type'], 'application/json');
 });
 
 test('requisicao GET inclui cookie sem exigir CSRF', async () => {
-  const loaded = loadSession();
-  const options = await loaded.jwtSession.authenticatedOptions('http://localhost:8080');
+  const calls = [];
+  const loaded = loadSession({}, async (url, options) => {
+    calls.push({ url, options });
+    return { ok: true, status: 200 };
+  });
+  await loaded.jwtSession.authenticatedFetch(
+    'http://localhost:8080', '/recurso', {}, '../index.html'
+  );
 
-  assert.equal(options.credentials, 'include');
-  assert.equal('X-XSRF-TOKEN' in options.headers, false);
+  assert.equal(calls[0].options.credentials, 'include');
+  assert.equal('X-XSRF-TOKEN' in calls[0].options.headers, false);
+  assert.equal(loaded.jwtSession.authenticatedOptions, undefined);
 });
 
 test('logout invalida cookie no backend e limpa dados locais', async () => {
@@ -172,8 +184,8 @@ test('401 ao obter CSRF expira a sessao e redireciona', async () => {
   );
 
   await assert.rejects(
-    loaded.jwtSession.authenticatedOptions(
-      'http://localhost:8080', { method: 'POST' }, '../index.html'
+    loaded.jwtSession.authenticatedFetch(
+      'http://localhost:8080', '/recurso', { method: 'POST' }, '../index.html'
     ),
     /Sessao expirada/
   );
@@ -213,6 +225,77 @@ test('CSRF rejeitado e renovado com apenas uma repeticao', async () => {
   assert.equal(writeCount, 2);
   assert.equal(calls[1].options.headers['X-XSRF-TOKEN'], 'csrf-1');
   assert.equal(calls[3].options.headers['X-XSRF-TOKEN'], 'csrf-2');
+});
+
+test('segunda rejeicao CSRF encerra sem terceira tentativa', async () => {
+  let csrfCount = 0;
+  let writeCount = 0;
+  const loaded = loadSession({}, async url => {
+    if (url.endsWith('/csrf')) {
+      csrfCount += 1;
+      return { ok: true, status: 200, json: async () => ({ token: `csrf-${csrfCount}` }) };
+    }
+    writeCount += 1;
+    const body = { codigo: 'CSRF_INVALID' };
+    return {
+      ok: false,
+      status: 403,
+      clone: () => ({ json: async () => body }),
+      json: async () => body
+    };
+  });
+
+  const response = await loaded.jwtSession.authenticatedFetch(
+    'http://localhost:8080', '/recurso', { method: 'POST' }, '../index.html'
+  );
+
+  assert.equal(response.status, 403);
+  assert.equal(csrfCount, 2);
+  assert.equal(writeCount, 2);
+});
+
+test('logout expirado preserva o motivo expired', async () => {
+  const loaded = loadSession(
+    { session: JSON.stringify(validSession()) },
+    async () => ({
+      ok: false,
+      status: 401,
+      json: async () => ({ codigo: 'TOKEN_EXPIRED' })
+    })
+  );
+
+  await loaded.jwtSession.logout('http://localhost:8080', '../index.html');
+
+  assert.equal(loaded.storage.has('session'), false);
+  assert.equal(loaded.window.location.href, '../index.html?auth=expired');
+});
+
+test('logout com token invalido preserva o motivo invalid', async () => {
+  const loaded = loadSession(
+    { session: JSON.stringify(validSession()) },
+    async () => ({
+      ok: false,
+      status: 401,
+      json: async () => ({ codigo: 'TOKEN_INVALID' })
+    })
+  );
+
+  await loaded.jwtSession.logout('http://localhost:8080', '../index.html');
+
+  assert.equal(loaded.storage.has('session'), false);
+  assert.equal(loaded.window.location.href, '../index.html?auth=invalid');
+});
+
+test('falha de rede no logout ainda limpa a sessao local', async () => {
+  const loaded = loadSession(
+    { session: JSON.stringify(validSession()), user: 'legado' },
+    async () => { throw new Error('rede indisponivel'); }
+  );
+
+  await loaded.jwtSession.logout('http://localhost:8080', '../index.html');
+  assert.equal(loaded.storage.has('session'), false);
+  assert.equal(loaded.storage.has('user'), false);
+  assert.equal(loaded.window.location.href, '../index.html?auth=logout');
 });
 
 test('recupera sessao em nova aba sem JWT', async () => {
