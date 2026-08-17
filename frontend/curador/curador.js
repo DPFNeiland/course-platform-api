@@ -6,9 +6,10 @@ document.addEventListener('DOMContentLoaded', async function() {
     const session = window.jwtSession.requireSession(['curador', 'admin'], '../index.html');
     if (!session) throw new Error('Sessao expirada. Faca login novamente.');
     const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
-    const requestOptions = await window.jwtSession.authenticatedOptions(API_BASE_URL, { ...options, headers });
-    const response = await fetch(`${API_BASE_URL}${path}`, requestOptions);
-    if (await window.jwtSession.handleUnauthorized(response, '../index.html')) {
+    const response = await window.jwtSession.authenticatedFetch(
+      API_BASE_URL, path, { ...options, headers }, '../index.html'
+    );
+    if (response.status === 401) {
       throw new Error('Sessao expirada. Faca login novamente.');
     }
     if (!response.ok) {
@@ -23,7 +24,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     .replaceAll('_', ' ')
     .replace(/\b\w/g, letter => letter.toUpperCase());
 
-  state.user = window.jwtSession.requireSession(['curador', 'admin'], '../index.html');
+  state.user = await window.jwtSession.recoverSession(API_BASE_URL, ['curador', 'admin'], '../index.html');
 
   const perfil = String(state.user?.perfil || state.user?.cargo || '').trim().toLowerCase();
   if (!state.user || !['curador', 'admin'].includes(perfil)) {

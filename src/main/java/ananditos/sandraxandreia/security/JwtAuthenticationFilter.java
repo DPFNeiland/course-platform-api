@@ -17,6 +17,7 @@ import java.io.IOException;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+    public static final String TOKEN_EXPIRATION_ATTRIBUTE = JwtAuthenticationFilter.class.getName() + ".expiration";
     private final JwtService jwtService;
     private final AuthorizationService authorizationService;
     private final JwtCookieService jwtCookieService;
@@ -38,11 +39,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         try {
-            String subject = jwtService.validarEObterSubject(token);
-            UserDetails usuario = authorizationService.loadUserByUsername(subject);
+            JwtService.TokenValidado validado = jwtService.validar(token);
+            UserDetails usuario = authorizationService.loadUserByUsername(validado.subject());
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                     usuario, null, usuario.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authentication);
+            request.setAttribute(TOKEN_EXPIRATION_ATTRIBUTE, validado.expiraEm());
         } catch (JwtInvalidoException ex) {
             SecurityContextHolder.clearContext();
             escreverNaoAutorizado(response, ex.getCodigo());

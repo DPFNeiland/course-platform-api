@@ -3,6 +3,7 @@ package ananditos.sandraxandreia.config;
 import ananditos.sandraxandreia.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -14,15 +15,20 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfException;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
+import java.util.Arrays;
 
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
+    private static final List<String> PUBLIC_POST_PATHS = List.of("/login", "/aluno", "/professor", "/curador");
+    private static final List<String> SAFE_METHODS = List.of("GET", "HEAD", "TRACE", "OPTIONS");
 
     // SecurityFilterChain e a cadeia de filtros do Spring Security.
     // Pense nela como um "porteiro" que intercepta as requisicoes HTTP.
@@ -32,20 +38,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                         .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
-                        .requireCsrfProtectionMatcher(request -> {
-                            String method = request.getMethod();
-                            if (List.of("GET", "HEAD", "TRACE", "OPTIONS").contains(method)) {
-                                return false;
-                            }
-
-                            String authorization = request.getHeader("Authorization");
-                            if (authorization != null && authorization.startsWith("Bearer ")) {
-                                return false;
-                            }
-
-                            String path = request.getRequestURI();
-                            return !("POST".equals(method) && List.of("/login", "/aluno", "/professor", "/curador").contains(path));
-                        }))
+                        .requireCsrfProtectionMatcher(cookieClientCsrfMatcher()))
 
                 .cors(Customizer.withDefaults())
 
@@ -81,7 +74,9 @@ public class SecurityConfig {
                         .accessDeniedHandler((request, response, exception) -> {
                             response.setStatus(403);
                             response.setContentType("application/json");
-                            response.getWriter().write("{\"status\":403,\"erro\":\"Acesso negado\"}");
+                            String codigo = exception instanceof CsrfException ? "CSRF_INVALID" : "ACCESS_DENIED";
+                            response.getWriter().write("{\"status\":403,\"codigo\":\"" + codigo
+                                    + "\",\"erro\":\"Acesso negado\"}");
                         }))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -90,13 +85,13 @@ public class SecurityConfig {
     }
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
+    public CorsConfigurationSource corsConfigurationSource(
+            @Value("${security.cors.allowed-origins:http://localhost:5173}") String allowedOrigins) {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of(
-                "http://localhost:5173", "http://127.0.0.1:5173",
-                "http://localhost:5500", "http://127.0.0.1:5500",
-                "http://localhost:3000", "http://127.0.0.1:3000"
-        ));
+        configuration.setAllowedOrigins(Arrays.stream(allowedOrigins.split(","))
+                .map(String::trim)
+                .filter(origin -> !origin.isBlank())
+                .toList());
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "X-XSRF-TOKEN"));
         configuration.setAllowCredentials(true);
@@ -104,6 +99,18 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
+    }
+
+    private RequestMatcher cookieClientCsrfMatcher() {
+        return request -> {
+            String method = request.getMethod();
+            if (SAFE_METHODS.contains(method)) return false;
+
+            String authorization = request.getHeader("Authorization");
+            if (authorization != null && authorization.startsWith("Bearer ")) return false;
+
+            return !("POST".equals(method) && PUBLIC_POST_PATHS.contains(request.getRequestURI()));
+        };
     }
 
     // PasswordEncoder e um bean importante da aplicacao.

@@ -160,3 +160,73 @@ test('logout invalida cookie no backend e limpa dados locais', async () => {
   assert.equal(loaded.storage.has('user'), false);
   assert.equal(loaded.window.location.href, '../index.html?auth=logout');
 });
+
+test('401 ao obter CSRF expira a sessao e redireciona', async () => {
+  const loaded = loadSession(
+    { session: JSON.stringify(validSession()) },
+    async () => ({
+      ok: false,
+      status: 401,
+      json: async () => ({ codigo: 'TOKEN_EXPIRED' })
+    })
+  );
+
+  await assert.rejects(
+    loaded.jwtSession.authenticatedOptions(
+      'http://localhost:8080', { method: 'POST' }, '../index.html'
+    ),
+    /Sessao expirada/
+  );
+  assert.equal(loaded.storage.has('session'), false);
+  assert.equal(loaded.window.location.href, '../index.html?auth=expired');
+});
+
+test('CSRF rejeitado e renovado com apenas uma repeticao', async () => {
+  const calls = [];
+  let csrfCount = 0;
+  let writeCount = 0;
+  const loaded = loadSession({}, async (url, options) => {
+    calls.push({ url, options });
+    if (url.endsWith('/csrf')) {
+      csrfCount += 1;
+      return { ok: true, status: 200, json: async () => ({ token: `csrf-${csrfCount}` }) };
+    }
+    writeCount += 1;
+    if (writeCount === 1) {
+      const body = { codigo: 'CSRF_INVALID' };
+      return {
+        ok: false,
+        status: 403,
+        clone: () => ({ json: async () => body }),
+        json: async () => body
+      };
+    }
+    return { ok: true, status: 204 };
+  });
+
+  const response = await loaded.jwtSession.authenticatedFetch(
+    'http://localhost:8080', '/logout', { method: 'POST' }, '../index.html'
+  );
+
+  assert.equal(response.status, 204);
+  assert.equal(csrfCount, 2);
+  assert.equal(writeCount, 2);
+  assert.equal(calls[1].options.headers['X-XSRF-TOKEN'], 'csrf-1');
+  assert.equal(calls[3].options.headers['X-XSRF-TOKEN'], 'csrf-2');
+});
+
+test('recupera sessao em nova aba sem JWT', async () => {
+  const recovered = validSession({ id: 10, nome: 'Aluno Teste' });
+  const loaded = loadSession({}, async url => {
+    assert.equal(url, 'http://localhost:8080/session');
+    return { ok: true, status: 200, json: async () => recovered };
+  });
+
+  const session = await loaded.jwtSession.recoverSession(
+    'http://localhost:8080', ['aluno'], '../index.html'
+  );
+
+  assert.equal(session.id, 10);
+  assert.equal('token' in session, false);
+  assert.equal(JSON.parse(loaded.storage.get('session')).nome, 'Aluno Teste');
+});
