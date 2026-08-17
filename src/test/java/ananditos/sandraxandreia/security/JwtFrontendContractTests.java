@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -15,22 +16,24 @@ class JwtFrontendContractTests {
 
     @Test
     void frontendDeveUsarJwtSemCredenciaisBasic() throws IOException {
-        List<Path> scripts = List.of(
-                frontend.resolve("auth.js"),
-                frontend.resolve("aluno/aluno.js"),
-                frontend.resolve("curador/curador.js"),
-                frontend.resolve("professor/professor.js"),
-                frontend.resolve("session.js")
-        );
+        try (Stream<Path> files = Files.walk(frontend)) {
+            List<Path> scripts = files
+                    .filter(Files::isRegularFile)
+                    .filter(path -> path.toString().endsWith(".js"))
+                    .filter(path -> !path.toString().endsWith(".test.js"))
+                    .toList();
 
-        for (Path script : scripts) {
-            String content = Files.readString(script);
-            assertThat(content)
-                    .as("conteudo de %s", script)
-                    .doesNotContain("btoa(")
-                    .doesNotContain("Authorization'] = `Basic")
-                    .doesNotContain("Authorization\"] = `Basic")
-                    .doesNotContain("credentials: 'include'");
+            assertThat(scripts).isNotEmpty();
+            for (Path script : scripts) {
+                String content = Files.readString(script);
+                assertThat(content)
+                        .as("conteudo de %s", script)
+                        .doesNotContain("btoa(")
+                        .doesNotContain("Authorization'] = `Basic")
+                        .doesNotContain("Authorization\"] = `Basic")
+                        .doesNotContain("Authorization: `Basic")
+                        .doesNotContain("credentials: 'include'");
+            }
         }
     }
 
