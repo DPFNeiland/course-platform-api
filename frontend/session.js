@@ -33,10 +33,14 @@
 
   let csrfToken = null;
 
-  const ensureCsrfToken = async apiBaseUrl => {
+  const ensureCsrfToken = async (apiBaseUrl, loginPath) => {
     if (csrfToken) return csrfToken;
 
     const response = await fetch(`${apiBaseUrl}/csrf`, { credentials: 'include' });
+    if (response.status === 401) {
+      await handleUnauthorized(response, loginPath);
+      throw new Error('Sessao expirada. Faca login novamente.');
+    }
     if (!response.ok) throw new Error('Nao foi possivel iniciar uma requisicao segura.');
     const payload = await response.json().catch(() => null);
     if (!payload?.token) throw new Error('Token CSRF ausente. Recarregue a pagina.');
@@ -44,18 +48,52 @@
     return csrfToken;
   };
 
-  const authenticatedOptions = async (apiBaseUrl, options = {}) => {
+  const authenticatedOptions = async (apiBaseUrl, options = {}, loginPath) => {
     const method = String(options.method || 'GET').toUpperCase();
     const headers = { ...(options.headers || {}) };
     if (!SAFE_METHODS.has(method)) {
-      headers['X-XSRF-TOKEN'] = await ensureCsrfToken(apiBaseUrl);
+      headers['X-XSRF-TOKEN'] = await ensureCsrfToken(apiBaseUrl, loginPath);
     }
     return { ...options, headers, credentials: 'include' };
   };
 
+  const authenticatedFetch = async (apiBaseUrl, path, options = {}, loginPath, retryCsrf = true) => {
+    const response = await fetch(
+      `${apiBaseUrl}${path}`,
+      await authenticatedOptions(apiBaseUrl, options, loginPath)
+    );
+    if (response.status === 401) {
+      await handleUnauthorized(response, loginPath);
+      return response;
+    }
+    if (response.status === 403 && retryCsrf && !SAFE_METHODS.has(String(options.method || 'GET').toUpperCase())) {
+      const body = await response.clone().json().catch(() => null);
+      if (body?.codigo === 'CSRF_INVALID') {
+        csrfToken = null;
+        return authenticatedFetch(apiBaseUrl, path, options, loginPath, false);
+      }
+    }
+    return response;
+  };
+
+  const recoverSession = async (apiBaseUrl, profiles, loginPath) => {
+    const current = read();
+    if (isValid(current)) return requireSession(profiles, loginPath);
+
+    const response = await fetch(`${apiBaseUrl}/session`, { credentials: 'include' });
+    if (response.status === 401) {
+      await handleUnauthorized(response, loginPath);
+      return null;
+    }
+    if (!response.ok) throw new Error('Nao foi possivel recuperar a sessao.');
+    const recovered = await response.json();
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify(recovered));
+    return requireSession(profiles, loginPath);
+  };
+
   const logout = async (apiBaseUrl, loginPath) => {
     try {
-      await fetch(`${apiBaseUrl}/logout`, await authenticatedOptions(apiBaseUrl, { method: 'POST' }));
+      await authenticatedFetch(apiBaseUrl, '/logout', { method: 'POST' }, loginPath);
     } finally {
       clearAndRedirect(loginPath, 'logout');
     }
@@ -86,6 +124,8 @@
     clearAndRedirect,
     handleUnauthorized,
     authenticatedOptions,
+    authenticatedFetch,
+    recoverSession,
     logout
   });
 })(window);

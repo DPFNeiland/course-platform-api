@@ -44,7 +44,7 @@ class JwtFrontendContractTests {
             String content = Files.readString(frontend.resolve(relative));
             assertThat(content)
                     .as("cookie de sessao de %s", relative)
-                    .contains("authenticatedOptions")
+                    .contains("authenticatedFetch")
                     .doesNotContain("Bearer ${session.token}");
         }
 
@@ -55,5 +55,11 @@ class JwtFrontendContractTests {
 
         String auth = Files.readString(frontend.resolve("auth.js"));
         assertThat(auth).contains("credentials: 'include'");
+
+        String forum = Files.readString(frontend.resolve("aluno/forum.html"));
+        assertThat(forum)
+                .contains("<script src=\"../session.js\"></script>")
+                .contains("<script src=\"aluno.js\"></script>")
+                .doesNotContain("forum.js");
     }
 }

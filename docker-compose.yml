@@ -58,6 +58,7 @@ services:
       JWT_SECRET: ${JWT_SECRET:?Defina JWT_SECRET com pelo menos 32 caracteres}
       JWT_EXPIRATION_SECONDS: ${JWT_EXPIRATION_SECONDS:-3600}
       JWT_COOKIE_SECURE: ${JWT_COOKIE_SECURE:-true}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173,http://localhost:5500,http://127.0.0.1:5500}
     ports:
       - "8080:8080"
     networks:

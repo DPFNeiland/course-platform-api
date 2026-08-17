@@ -247,10 +247,30 @@ class SecurityIntegrationTests {
     void endpointCsrfDeveEmitirCookieLegivelSemExporJwt() throws Exception {
         mockMvc.perform(get("/csrf").cookie(cookieObtidoNoLogin("aluno@teste.com")))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.headerName").value("X-XSRF-TOKEN"))
+                .andExpect(jsonPath("$.headerName").doesNotExist())
                 .andExpect(jsonPath("$.token").isNotEmpty())
                 .andExpect(header().string(HttpHeaders.SET_COOKIE,
                         org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("HttpOnly"))));
+    }
+
+    @Test
+    void csrfAusenteDeveRetornarCodigoIdentificavel() throws Exception {
+        mockMvc.perform(post("/logout").cookie(cookieObtidoNoLogin("aluno@teste.com")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.codigo").value("CSRF_INVALID"));
+    }
+
+    @Test
+    void sessaoDeveSerRecuperadaPeloCookieSemExporJwt() throws Exception {
+        mockMvc.perform(get("/session").cookie(cookieObtidoNoLogin("aluno@teste.com")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.perfil").value("aluno"))
+                .andExpect(jsonPath("$.email").value("aluno@teste.com"))
+                .andExpect(jsonPath("$.expiraEm").isNotEmpty())
+                .andExpect(jsonPath("$.token").doesNotExist());
+
+        mockMvc.perform(get("/session"))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
