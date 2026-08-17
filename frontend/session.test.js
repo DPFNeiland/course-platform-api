@@ -33,6 +33,44 @@ test('remove a chave legada user ao inicializar', () => {
   assert.equal(loaded.storage.has('user'), false);
 });
 
+test('caminho feliz retorna a sessao valida com perfil normalizado', () => {
+  const session = validSession({ perfil: ' ALUNO ' });
+  const loaded = loadSession({ session: JSON.stringify(session) });
+
+  const result = loaded.jwtSession.requireSession(['aluno'], '../index.html');
+
+  assert.equal(result.token, 'jwt-valido');
+  assert.equal(result.perfil, 'aluno');
+  assert.equal(loaded.storage.has('session'), true);
+  assert.equal(loaded.window.location.href, '');
+});
+
+test('sessao sem token e considerada invalida', () => {
+  const loaded = loadSession({
+    session: JSON.stringify(validSession({ token: '' }))
+  });
+
+  assert.equal(loaded.jwtSession.requireSession(['aluno'], '../index.html'), null);
+  assert.equal(loaded.storage.has('session'), false);
+  assert.equal(loaded.window.location.href, '../index.html?auth=expired');
+});
+
+test('sessao corrompida e limpa sem propagar erro de JSON', () => {
+  const loaded = loadSession({ session: '{json-invalido' });
+
+  assert.doesNotThrow(() => loaded.jwtSession.requireSession(['aluno'], '../index.html'));
+  assert.equal(loaded.storage.has('session'), false);
+  assert.equal(loaded.window.location.href, '../index.html?auth=expired');
+});
+
+test('perfil sem permissao limpa a sessao e informa bloqueio', () => {
+  const loaded = loadSession({ session: JSON.stringify(validSession()) });
+
+  assert.equal(loaded.jwtSession.requireSession(['professor'], '../index.html'), null);
+  assert.equal(loaded.storage.has('session'), false);
+  assert.equal(loaded.window.location.href, '../index.html?auth=forbidden');
+});
+
 test('sessao expirada limpa dados e redireciona para login', () => {
   const expired = validSession({ expiraEm: new Date(Date.now() - 60_000).toISOString() });
   const loaded = loadSession({ session: JSON.stringify(expired), user: 'legado' });
@@ -67,6 +105,16 @@ test('token invalido limpa a sessao e informa invalidade', async () => {
   assert.equal(loaded.window.location.href, '../index.html?auth=invalid');
 });
 
+test('resposta diferente de 401 preserva a sessao', async () => {
+  const original = JSON.stringify(validSession());
+  const loaded = loadSession({ session: original });
+  const handled = await loaded.jwtSession.handleUnauthorized({ status: 403 }, '../index.html');
+
+  assert.equal(handled, false);
+  assert.equal(loaded.storage.get('session'), original);
+  assert.equal(loaded.window.location.href, '');
+});
+
 test('logout limpa sessao e chave legada', () => {
   const loaded = loadSession({ session: JSON.stringify(validSession()), user: 'legado' });
   loaded.jwtSession.logout('../index.html');
@@ -75,4 +123,3 @@ test('logout limpa sessao e chave legada', () => {
   assert.equal(loaded.storage.has('user'), false);
   assert.equal(loaded.window.location.href, '../index.html?auth=logout');
 });
-
