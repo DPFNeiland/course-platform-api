@@ -23,6 +23,7 @@ decisoes/*
 *.iml
 *.ipr
 decisoes/
+.env    
 
 ### NetBeans ###
 /nbproject/private/
