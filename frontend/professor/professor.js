@@ -6,11 +6,8 @@ document.addEventListener('DOMContentLoaded', async function() {
     const session = window.jwtSession.requireSession(['professor'], '../index.html');
     if (!session) throw new Error('Sessao expirada. Faca login novamente.');
     const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
-    const response = await fetch(`${API_BASE_URL}${path}`, {
-      ...options,
-      headers,
-      credentials: 'include'
-    });
+    const requestOptions = await window.jwtSession.authenticatedOptions(API_BASE_URL, { ...options, headers });
+    const response = await fetch(`${API_BASE_URL}${path}`, requestOptions);
     if (await window.jwtSession.handleUnauthorized(response, '../index.html')) {
       throw new Error('Sessao expirada. Faca login novamente.');
     }

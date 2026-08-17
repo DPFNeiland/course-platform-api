@@ -29,6 +29,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -210,13 +211,62 @@ class SecurityIntegrationTests {
     }
 
     @Test
+    void cookieInvalidoDevePrevalecerSobreBearerValido() throws Exception {
+        mockMvc.perform(get("/aluno")
+                        .cookie(new Cookie(JwtCookieService.COOKIE_NAME, "token.invalido.aqui"))
+                        .header("Authorization", bearer("aluno@teste.com")))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.codigo").value("TOKEN_INVALID"));
+    }
+
+    @Test
     void logoutDeveRemoverCookieDeSessao() throws Exception {
-        mockMvc.perform(post("/logout").cookie(cookieObtidoNoLogin("aluno@teste.com")))
+        Cookie sessionCookie = cookieObtidoNoLogin("aluno@teste.com");
+        Cookie csrfCookie = cookieCsrf(sessionCookie);
+
+        Cookie removedSession = mockMvc.perform(post("/logout")
+                        .cookie(sessionCookie, csrfCookie)
+                        .header("X-XSRF-TOKEN", csrfCookie.getValue()))
                 .andExpect(status().isNoContent())
+                .andReturn()
+                .getResponse()
+                .getCookie(JwtCookieService.COOKIE_NAME);
+
+        org.assertj.core.api.Assertions.assertThat(removedSession).isNotNull();
+        org.assertj.core.api.Assertions.assertThat(removedSession.getMaxAge()).isZero();
+        org.assertj.core.api.Assertions.assertThat(removedSession.isHttpOnly()).isTrue();
+    }
+
+    @Test
+    void operacaoComCookieSemCsrfDeveSerBloqueada() throws Exception {
+        mockMvc.perform(post("/logout").cookie(cookieObtidoNoLogin("aluno@teste.com")))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void endpointCsrfDeveEmitirCookieLegivelSemExporJwt() throws Exception {
+        mockMvc.perform(get("/csrf").cookie(cookieObtidoNoLogin("aluno@teste.com")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.headerName").value("X-XSRF-TOKEN"))
+                .andExpect(jsonPath("$.token").isNotEmpty())
                 .andExpect(header().string(HttpHeaders.SET_COOKIE,
-                        org.hamcrest.Matchers.allOf(
-                                org.hamcrest.Matchers.containsString("Max-Age=0"),
-                                org.hamcrest.Matchers.containsString("HttpOnly"))));
+                        org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("HttpOnly"))));
+    }
+
+    @Test
+    void corsDeveAceitarCredenciaisApenasDeOrigemPermitida() throws Exception {
+        mockMvc.perform(options("/aluno")
+                        .header(HttpHeaders.ORIGIN, "http://localhost:5173")
+                        .header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET"))
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "http://localhost:5173"))
+                .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, "true"));
+
+        mockMvc.perform(options("/aluno")
+                        .header(HttpHeaders.ORIGIN, "https://origem-nao-permitida.example")
+                        .header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET"))
+                .andExpect(status().isForbidden())
+                .andExpect(header().doesNotExist(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
     }
 
     private void validarLogin(String email, String perfil) throws Exception {
@@ -244,6 +294,17 @@ class SecurityIntegrationTests {
                 .getResponse()
                 .getCookie(JwtCookieService.COOKIE_NAME);
         org.assertj.core.api.Assertions.assertThat(cookie).isNotNull();
+        return cookie;
+    }
+
+    private Cookie cookieCsrf(Cookie sessionCookie) throws Exception {
+        Cookie cookie = mockMvc.perform(get("/csrf").cookie(sessionCookie))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getCookie("XSRF-TOKEN");
+        org.assertj.core.api.Assertions.assertThat(cookie).isNotNull();
+        org.assertj.core.api.Assertions.assertThat(cookie.isHttpOnly()).isFalse();
         return cookie;
     }
 

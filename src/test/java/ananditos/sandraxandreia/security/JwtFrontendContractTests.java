@@ -39,14 +39,19 @@ class JwtFrontendContractTests {
     }
 
     @Test
-    void clientesAutenticadosDevemEnviarCookieHttpOnly() throws IOException {
+    void clientesAutenticadosDevemCentralizarCookieECsrf() throws IOException {
         for (String relative : List.of("aluno/aluno.js", "curador/curador.js", "professor/professor.js")) {
             String content = Files.readString(frontend.resolve(relative));
             assertThat(content)
                     .as("cookie de sessao de %s", relative)
-                    .contains("credentials: 'include'")
+                    .contains("authenticatedOptions")
                     .doesNotContain("Bearer ${session.token}");
         }
+
+        String session = Files.readString(frontend.resolve("session.js"));
+        assertThat(session)
+                .contains("credentials: 'include'")
+                .contains("X-XSRF-TOKEN");
 
         String auth = Files.readString(frontend.resolve("auth.js"));
         assertThat(auth).contains("credentials: 'include'");
