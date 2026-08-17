@@ -6,7 +6,7 @@ const vm = require('node:vm');
 
 const source = fs.readFileSync(path.join(__dirname, 'session.js'), 'utf8');
 
-function loadSession(initial = {}) {
+function loadSession(initial = {}, fetchImpl = async () => ({ status: 204 })) {
   const storage = new Map(Object.entries(initial));
   const sessionStorage = {
     getItem: key => storage.has(key) ? storage.get(key) : null,
@@ -14,14 +14,13 @@ function loadSession(initial = {}) {
     removeItem: key => storage.delete(key)
   };
   const window = { location: { href: '' } };
-  const context = { window, sessionStorage, Date, encodeURIComponent };
+  const context = { window, sessionStorage, Date, encodeURIComponent, fetch: fetchImpl };
   vm.runInNewContext(source, context);
   return { storage, window, jwtSession: window.jwtSession };
 }
 
 function validSession(overrides = {}) {
   return {
-    token: 'jwt-valido',
     perfil: 'aluno',
     expiraEm: new Date(Date.now() + 60_000).toISOString(),
     ...overrides
@@ -39,20 +38,19 @@ test('caminho feliz retorna a sessao valida com perfil normalizado', () => {
 
   const result = loaded.jwtSession.requireSession(['aluno'], '../index.html');
 
-  assert.equal(result.token, 'jwt-valido');
+  assert.equal('token' in result, false);
   assert.equal(result.perfil, 'aluno');
   assert.equal(loaded.storage.has('session'), true);
   assert.equal(loaded.window.location.href, '');
 });
 
-test('sessao sem token e considerada invalida', () => {
-  const loaded = loadSession({
-    session: JSON.stringify(validSession({ token: '' }))
-  });
+test('sessao visual valida nao depende do token JWT', () => {
+  const loaded = loadSession({ session: JSON.stringify(validSession()) });
+  const result = loaded.jwtSession.requireSession(['aluno'], '../index.html');
 
-  assert.equal(loaded.jwtSession.requireSession(['aluno'], '../index.html'), null);
-  assert.equal(loaded.storage.has('session'), false);
-  assert.equal(loaded.window.location.href, '../index.html?auth=expired');
+  assert.equal(result.perfil, 'aluno');
+  assert.equal('token' in result, false);
+  assert.equal(loaded.window.location.href, '');
 });
 
 test('sessao corrompida e limpa sem propagar erro de JSON', () => {
@@ -115,10 +113,21 @@ test('resposta diferente de 401 preserva a sessao', async () => {
   assert.equal(loaded.window.location.href, '');
 });
 
-test('logout limpa sessao e chave legada', () => {
-  const loaded = loadSession({ session: JSON.stringify(validSession()), user: 'legado' });
-  loaded.jwtSession.logout('../index.html');
+test('logout invalida cookie no backend e limpa dados locais', async () => {
+  const calls = [];
+  const loaded = loadSession(
+    { session: JSON.stringify(validSession()), user: 'legado' },
+    async (url, options) => {
+      calls.push({ url, options });
+      return { status: 204 };
+    }
+  );
+  await loaded.jwtSession.logout('http://localhost:8080', '../index.html');
 
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].url, 'http://localhost:8080/logout');
+  assert.equal(calls[0].options.method, 'POST');
+  assert.equal(calls[0].options.credentials, 'include');
   assert.equal(loaded.storage.has('session'), false);
   assert.equal(loaded.storage.has('user'), false);
   assert.equal(loaded.window.location.href, '../index.html?auth=logout');
