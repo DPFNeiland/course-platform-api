@@ -181,6 +181,19 @@ test('lista vazia exibe tres indicadores zerados e pontuacao zero', async () => 
   assert.match(treeText(harness.ranking), /0 pts/);
 });
 
+test('considera matricula em andamento como ativa na regra provisoria', async () => {
+  const harness = createHarness(response([
+    { id: 1, alunoId: 7, cursoId: 10, status: 'ATIVA' },
+    { id: 2, alunoId: 7, cursoId: 11, status: 'EM_ANDAMENTO' },
+    { id: 3, alunoId: 7, cursoId: 12, status: 'ENCERRADA' }
+  ]));
+  await harness.start();
+
+  assert.match(treeText(harness.grid), /2 em andamento/);
+  assert.match(treeText(harness.grid), /1 encerrado\(s\)/);
+  assert.match(treeText(harness.ranking), /300 pts/);
+});
+
 test('erro da API encerra o loading e apresenta uma mensagem explicita', async () => {
   const harness = createHarness(response({ message: 'API indisponivel' }, 500));
   await harness.start();
@@ -189,6 +202,18 @@ test('erro da API encerra o loading e apresenta uma mensagem explicita', async (
   assert.match(treeText(harness.ranking), /API indisponivel/);
   assert.equal(harness.grid.attributes.has('aria-busy'), false);
   assert.equal(harness.rankingSection.attributes.has('aria-busy'), false);
+});
+
+test('erro de rede encerra o loading sem exibir dados ficticios', async () => {
+  const harness = createHarness(Promise.reject(new Error('Falha de rede')));
+  await harness.start();
+
+  assert.match(treeText(harness.grid), /Falha de rede/);
+  assert.match(treeText(harness.ranking), /Falha de rede/);
+  assert.equal(harness.grid.attributes.has('aria-busy'), false);
+  assert.equal(harness.rankingSection.attributes.has('aria-busy'), false);
+  assert.equal(harness.grid.children.length, 1);
+  assert.equal(harness.ranking.children.length, 1);
 });
 
 test('payload fora do contrato e tratado como erro sem loading infinito', async () => {
