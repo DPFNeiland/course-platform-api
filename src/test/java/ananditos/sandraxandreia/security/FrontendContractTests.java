@@ -158,6 +158,33 @@ class FrontendContractTests {
                 .contains("prefers-reduced-motion: reduce");
     }
 
+    @Test
+    void monitoramentoDoCuradorNaoDeveExibirDadosFicticiosAntesDaCarga() throws IOException {
+        String html = Files.readString(frontend.resolve("curador/monitoramento.html"));
+        String script = Files.readString(frontend.resolve("curador/curador.js"));
+
+        assertThat(html)
+                .doesNotContain(
+                        ">45<", ">12<", ">567<", ">2.345<",
+                        "Atividade Recente", "Atividade Semanal",
+                        "João Silva", "Maria Santos", "Pedro Oliveira", "Ana Costa", "Carlos Mendes",
+                        "Matemática Básica", "Programação Web", "Inglês Avançado", "Design Gráfico", "Marketing Digital")
+                .doesNotContain("<svg")
+                .containsOnlyOnce("<div class=\"table-header\">Matrículas</div>")
+                .contains("class=\"kpis\" aria-busy=\"true\"")
+                .contains("class=\"graphs\" aria-busy=\"true\"")
+                .contains("class=\"table-section\" aria-busy=\"true\"");
+        assertThat(countOccurrences(html, "<div class=\"kpi-number\">--</div>"))
+                .as("quantidade de placeholders dos KPIs")
+                .isEqualTo(4);
+
+        assertThat(script)
+                .contains("document.querySelectorAll('.kpi-number')")
+                .contains("document.querySelector('.table-section tbody')")
+                .contains("document.querySelector('.graphs')")
+                .contains("renderMonitoringError");
+    }
+
     private long countOccurrences(String content, String fragment) {
         return content.split(java.util.regex.Pattern.quote(fragment), -1).length - 1L;
     }

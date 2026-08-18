@@ -74,25 +74,8 @@
             font-size: 1.3rem;
             font-weight: 600;
         }
-        /* SVG Graphs */
-        svg {
-            width: 100%;
-            height: 300px;
-        }
-        /* Line Graph */
-        .line-path {
-            fill: none;
-            stroke: #3b82f6;
-            stroke-width: 3;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-        }
-        .line-dots {
-            fill: #3b82f6;
-        }
-        /* Bar Graph */
-        .bar {
-            fill: #8b5cf6;
+        .monitoring-placeholder {
+            color: #64748b;
         }
         /* Table */
         .table-section {
@@ -171,111 +154,52 @@
 
     <main class="container">
         <!-- KPIs -->
-        <section class="kpis">
+        <section class="kpis" aria-busy="true" aria-label="Carregando indicadores">
             <div class="kpi-card">
-                <div class="kpi-number">45</div>
+                <div class="kpi-number">--</div>
                 <div class="kpi-label">Cursos ativos</div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-number">12</div>
+                <div class="kpi-number">--</div>
                 <div class="kpi-label">Professores ativos</div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-number">567</div>
+                <div class="kpi-number">--</div>
                 <div class="kpi-label">Alunos ativos</div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-number">2.345</div>
-                <div class="kpi-label">Aulas publicadas</div>
+                <div class="kpi-number">--</div>
+                <div class="kpi-label">Matrículas</div>
             </div>
         </section>
 
-        <!-- Graphs -->
-        <section class="graphs">
+        <!-- SVGs fictícios removidos: curador.js substitui estes placeholders por resumos com dados reais. -->
+        <section class="graphs" aria-busy="true" aria-label="Carregando resumos do monitoramento">
             <div class="graph-card">
-                <h3>Atividade Semanal</h3>
-                <svg viewBox="0 0 400 200">
-                    <!-- Grid -->
-                    <g stroke="#e2e8f0" stroke-width="1">
-                        <line x1="50" y1="20" x2="50" y2="180"/>
-                        <line x1="50" y1="180" x2="350" y2="180"/>
-                        <line x1="100" y1="180" x2="100" y2="170"/>
-                        <line x1="150" y1="180" x2="150" y2="140"/>
-                        <line x1="200" y1="180" x2="200" y2="100"/>
-                        <line x1="250" y1="180" x2="250" y2="120"/>
-                        <line x1="300" y1="180" x2="300" y2="80"/>
-                        <line x1="350" y1="180" x2="350" y2="60"/>
-                    </g>
-                    <!-- Line -->
-                    <path class="line-path" d="M50 170 L100 170 L150 140 L200 100 L250 120 L300 80 L350 60"/>
-                    <!-- Dots -->
-                    <circle class="line-dots" cx="50" cy="170" r="4"/>
-                    <circle class="line-dots" cx="100" cy="170" r="4"/>
-                    <circle class="line-dots" cx="150" cy="140" r="4"/>
-                    <circle class="line-dots" cx="200" cy="100" r="4"/>
-                    <circle class="line-dots" cx="250" cy="120" r="4"/>
-                    <circle class="line-dots" cx="300" cy="80" r="4"/>
-                    <circle class="line-dots" cx="350" cy="60" r="4"/>
-                </svg>
+                <h3>Cursos por status</h3>
+                <p class="monitoring-placeholder">Carregando dados reais...</p>
             </div>
             <div class="graph-card">
-                <h3>Distribuição de Cursos por Categoria</h3>
-                <svg viewBox="0 0 400 200">
-                    <!-- Bars -->
-                    <rect class="bar" x="70" y="120" width="40" height="80" rx="4"/>
-                    <rect class="bar" x="130" y="80" width="40" height="120" rx="4"/>
-                    <rect class="bar" x="190" y="100" width="40" height="100" rx="4"/>
-                    <rect class="bar" x="250" y="60" width="40" height="140" rx="4"/>
-                    <rect class="bar" x="310" y="140" width="40" height="60" rx="4"/>
-                    <!-- Axes -->
-                    <line stroke="#e2e8f0" stroke-width="2" x1="60" y1="20" x2="60" y2="180"/>
-                    <line stroke="#e2e8f0" stroke-width="2" x1="60" y1="180" x2="360" y2="180"/>
-                </svg>
+                <h3>Matrículas</h3>
+                <p class="monitoring-placeholder">Carregando dados reais...</p>
             </div>
         </section>
 
         <!-- Table -->
-        <section class="table-section">
-            <div class="table-header">Atividade Recente</div>
+        <section class="table-section" aria-busy="true" aria-label="Carregando matrículas">
+            <div class="table-header">Matrículas</div>
             <table>
                 <thead>
                     <tr>
-                        <th>Usuário</th>
-                        <th>Ação</th>
                         <th>Curso</th>
+                        <th>Aluno</th>
+                        <th>Status</th>
                         <th>Data</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>João Silva</td>
-                        <td>Publicou aula</td>
-                        <td>Matemática Básica</td>
-                        <td>2024-10-01</td>
-                    </tr>
-                    <tr>
-                        <td>Maria Santos</td>
-                        <td>Matriculou aluno</td>
-                        <td>Programação Web</td>
-                        <td>2024-10-01</td>
-                    </tr>
-                    <tr>
-                        <td>Pedro Oliveira</td>
-                        <td>Atualizou curso</td>
-                        <td>Inglês Avançado</td>
-                        <td>2024-09-30</td>
-                    </tr>
-                    <tr>
-                        <td>Ana Costa</td>
-                        <td>Concluiu aula</td>
-                        <td>Design Gráfico</td>
-                        <td>2024-09-30</td>
-                    </tr>
-                    <tr>
-                        <td>Carlos Mendes</td>
-                        <td>Adicionou material</td>
-                        <td>Marketing Digital</td>
-                        <td>2024-09-29</td>
+                        <td colspan="4" class="monitoring-placeholder">Carregando dados reais...</td>
                     </tr>
                 </tbody>
             </table>
