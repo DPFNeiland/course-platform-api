@@ -38,9 +38,12 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
@@ -212,6 +215,88 @@ class SecurityIntegrationTests {
     void devePermitirCuradorNaConsultaGlobalDeMatriculas() throws Exception {
         mockMvc.perform(get("/matricula").header("Authorization", bearer("curador@teste.com")))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void deveBloquearCriacaoDeMatriculaParaOutroAluno() throws Exception {
+        Aluno outroAluno = novoOutroAluno();
+        Curso curso = novoCursoAprovado("Curso para tentativa indevida", professorRepository.findAll().getFirst());
+
+        mockMvc.perform(post("/matricula")
+                        .header("Authorization", bearer("aluno@teste.com"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(matriculaPayload(outroAluno.getId(), curso.getId(), "ATIVA")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.erro").value("Aluno nao pode alterar matriculas de outro aluno"));
+
+        org.assertj.core.api.Assertions.assertThat(matriculaRepository.findAll()).isEmpty();
+    }
+
+    @Test
+    void devePermitirAlunoAlterarEExcluirAPropriaMatricula() throws Exception {
+        Aluno aluno = alunoAutenticado();
+        Curso curso = novoCursoAprovado("Curso da propria matricula", professorRepository.findAll().getFirst());
+        Matricula matricula = matriculaRepository.save(novaMatricula(aluno, curso));
+
+        mockMvc.perform(put("/matricula/{id}", matricula.getId())
+                        .header("Authorization", bearer("aluno@teste.com"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(matriculaPayload(aluno.getId(), curso.getId(), "ENCERRADA")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("ENCERRADA"));
+
+        mockMvc.perform(patch("/matricula/{id}/status", matricula.getId())
+                        .header("Authorization", bearer("aluno@teste.com"))
+                        .param("novoStatus", "ATIVA"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("ATIVA"));
+
+        mockMvc.perform(delete("/matricula/{id}", matricula.getId())
+                        .header("Authorization", bearer("aluno@teste.com")))
+                .andExpect(status().isNoContent());
+
+        org.assertj.core.api.Assertions.assertThat(matriculaRepository.findById(matricula.getId())).isEmpty();
+    }
+
+    @Test
+    void deveBloquearAlteracaoStatusEExclusaoDeMatriculaDeTerceiro() throws Exception {
+        Aluno alunoAutenticado = alunoAutenticado();
+        Aluno outroAluno = novoOutroAluno();
+        Curso curso = novoCursoAprovado("Curso da matricula de terceiro", professorRepository.findAll().getFirst());
+        Matricula matricula = matriculaRepository.save(novaMatricula(outroAluno, curso));
+
+        mockMvc.perform(put("/matricula/{id}", matricula.getId())
+                        .header("Authorization", bearer("aluno@teste.com"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(matriculaPayload(alunoAutenticado.getId(), curso.getId(), "ENCERRADA")))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(patch("/matricula/{id}/status", matricula.getId())
+                        .header("Authorization", bearer("aluno@teste.com"))
+                        .param("novoStatus", "ENCERRADA"))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(delete("/matricula/{id}", matricula.getId())
+                        .header("Authorization", bearer("aluno@teste.com")))
+                .andExpect(status().isForbidden());
+
+        org.assertj.core.api.Assertions.assertThat(matriculaRepository.findById(matricula.getId()))
+                .get()
+                .extracting(Matricula::getStatus)
+                .isEqualTo(StatusMatricula.ATIVA);
+    }
+
+    @Test
+    void devePermitirCuradorAlterarStatusDeQualquerMatricula() throws Exception {
+        Aluno aluno = alunoAutenticado();
+        Curso curso = novoCursoAprovado("Curso administrado pelo curador", professorRepository.findAll().getFirst());
+        Matricula matricula = matriculaRepository.save(novaMatricula(aluno, curso));
+
+        mockMvc.perform(patch("/matricula/{id}/status", matricula.getId())
+                        .header("Authorization", bearer("curador@teste.com"))
+                        .param("novoStatus", "ENCERRADA"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("ENCERRADA"));
     }
 
     @Test
@@ -516,6 +601,37 @@ class SecurityIntegrationTests {
                 .getCookie(JwtCookieService.COOKIE_NAME);
         org.assertj.core.api.Assertions.assertThat(cookie).isNotNull();
         return cookie;
+    }
+
+    private Aluno alunoAutenticado() {
+        return alunoRepository.findAll().stream()
+                .filter(aluno -> aluno.getEmail().getValor().equals("aluno@teste.com"))
+                .findFirst()
+                .orElseThrow();
+    }
+
+    private Aluno novoOutroAluno() {
+        return alunoRepository.save(new Aluno(
+                null,
+                "Outro Aluno",
+                "outro.aluno@teste.com",
+                passwordEncoder.encode("123456"),
+                "24681357928",
+                GeneroUsuario.NAO_INFORMADO,
+                "1/1/2001",
+                "CD5678",
+                StatusAluno.CURSANDO
+        ));
+    }
+
+    private String matriculaPayload(Long alunoId, Long cursoId, String status) {
+        return """
+                {
+                  "status": "%s",
+                  "alunoId": %d,
+                  "cursoId": %d
+                }
+                """.formatted(status, alunoId, cursoId);
     }
 
     private Curso novoCursoAprovado(String nome, Professor professor) {

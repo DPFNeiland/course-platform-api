@@ -157,7 +157,7 @@ test('mantem o skeleton ate carregar somente as matriculas do aluno autenticado'
 
   assert.deepEqual(harness.calls, ['/matricula/me']);
   assert.equal(harness.grid.children.length, 3);
-  assert.match(treeText(harness.grid), /2 matricula\(s\)/);
+  assert.match(treeText(harness.grid), /2 matrícula\(s\)/);
   assert.match(treeText(harness.grid), /1 em andamento/);
   assert.match(treeText(harness.grid), /1 encerrado\(s\)/);
   assert.match(treeText(harness.ranking), /Aluna Real/);
@@ -175,7 +175,7 @@ test('lista vazia exibe tres indicadores zerados e pontuacao zero', async () => 
   await harness.start();
 
   assert.equal(harness.grid.children.length, 3);
-  assert.match(treeText(harness.grid), /0 matricula\(s\)/);
+  assert.match(treeText(harness.grid), /0 matrícula\(s\)/);
   assert.match(treeText(harness.grid), /0 em andamento/);
   assert.match(treeText(harness.grid), /0 encerrado\(s\)/);
   assert.match(treeText(harness.ranking), /0 pts/);
@@ -195,7 +195,7 @@ test('payload fora do contrato e tratado como erro sem loading infinito', async 
   const harness = createHarness(response({ id: 1, status: 'ATIVA' }));
   await harness.start();
 
-  assert.match(treeText(harness.grid), /Resposta de matriculas invalida/);
+  assert.match(treeText(harness.grid), /Resposta de matrículas inválida/);
   assert.equal(harness.grid.attributes.has('aria-busy'), false);
 });
 
@@ -218,6 +218,8 @@ test('falha ao recuperar a sessao encerra os skeletons com mensagem explicita', 
   assert.match(treeText(harness.ranking), /Nao foi possivel recuperar a sessao/);
   assert.equal(harness.grid.attributes.has('aria-busy'), false);
   assert.equal(harness.rankingSection.attributes.has('aria-busy'), false);
+  assert.equal(harness.avatar.className, 'avatar');
+  assert.equal(harness.avatar.attributes.has('aria-label'), false);
 });
 
 test('sessao ausente redireciona ao login sem consultar matriculas', async () => {
