@@ -54,6 +54,12 @@ document.addEventListener('DOMContentLoaded', async function() {
     return element;
   };
 
+  const finishLoading = element => {
+    if (!element) return;
+    element.removeAttribute('aria-busy');
+    element.removeAttribute('aria-label');
+  };
+
   const updateIdentity = () => {
     document.querySelectorAll('.avatar').forEach(el => {
       el.textContent = (state.user.nome || 'CU').slice(0, 2).toUpperCase();
@@ -210,31 +216,76 @@ document.addEventListener('DOMContentLoaded', async function() {
       kpis[1].textContent = state.professores.length;
       kpis[2].textContent = state.alunos.length;
       kpis[3].textContent = state.matriculas.length;
+      finishLoading(document.querySelector('.kpis'));
     }
     const tbody = document.querySelector('.table-section tbody');
     if (tbody) {
-      tbody.innerHTML = state.matriculas.length
+      const rows = state.matriculas.length
         ? state.matriculas.map(matricula => {
           const curso = cursoPorId(matricula.cursoId);
           const aluno = alunoPorId(matricula.alunoId);
-          return `
-            <tr>
-              <td>${curso?.nome || `Curso #${matricula.cursoId}`}</td>
-              <td>${aluno?.nome || `Aluno #${matricula.alunoId}`}</td>
-              <td>${formatEnum(matricula.status)}</td>
-              <td>${matricula.dataMatricula || '-'}</td>
-            </tr>
-          `;
-        }).join('')
-        : '<tr><td colspan="4">Nenhuma matricula registrada.</td></tr>';
+          const row = createElement('tr');
+          row.appendChild(createElement('td', '', curso?.nome || `Curso #${matricula.cursoId}`));
+          row.appendChild(createElement('td', '', aluno?.nome || `Aluno #${matricula.alunoId}`));
+          row.appendChild(createElement('td', '', formatEnum(matricula.status)));
+          row.appendChild(createElement('td', '', matricula.dataMatricula || '-'));
+          return row;
+        })
+        : [createElement('tr')];
+
+      if (!state.matriculas.length) {
+        const empty = createElement('td', '', 'Nenhuma matricula registrada.');
+        empty.colSpan = 4;
+        rows[0].appendChild(empty);
+      }
+      tbody.replaceChildren(...rows);
+      finishLoading(document.querySelector('.table-section'));
     }
     const graphs = document.querySelector('.graphs');
     if (graphs) {
-      graphs.innerHTML = `
-        <div class="graph-card"><h3>Cursos por status</h3><p>Aprovados: ${state.cursos.filter(c => c.status === 'APROVADO').length}</p><p>Em avaliacao: ${state.cursos.filter(c => c.status === 'EM_AVALIACAO').length}</p><p>Reavaliar: ${state.cursos.filter(c => c.status === 'REAVALIAR').length}</p></div>
-        <div class="graph-card"><h3>Matriculas</h3><p>${state.matriculas.length} registro(s) reais no banco.</p></div>
-      `;
+      const coursesCard = createElement('div', 'graph-card');
+      coursesCard.appendChild(createElement('h3', '', 'Cursos por status'));
+      coursesCard.appendChild(createElement('p', '', `Aprovados: ${state.cursos.filter(c => c.status === 'APROVADO').length}`));
+      coursesCard.appendChild(createElement('p', '', `Em avaliacao: ${state.cursos.filter(c => c.status === 'EM_AVALIACAO').length}`));
+      coursesCard.appendChild(createElement('p', '', `Reavaliar: ${state.cursos.filter(c => c.status === 'REAVALIAR').length}`));
+
+      const enrollmentsCard = createElement('div', 'graph-card');
+      enrollmentsCard.appendChild(createElement('h3', '', 'Matriculas'));
+      enrollmentsCard.appendChild(createElement('p', '', `${state.matriculas.length} registro(s) reais no banco.`));
+
+      graphs.replaceChildren(coursesCard, enrollmentsCard);
+      finishLoading(graphs);
     }
+  };
+
+  const renderMonitoringError = () => {
+    const kpis = document.querySelectorAll('.kpi-number');
+    if (!kpis.length) return false;
+
+    kpis.forEach(kpi => {
+      kpi.textContent = '--';
+    });
+    finishLoading(document.querySelector('.kpis'));
+
+    const tbody = document.querySelector('.table-section tbody');
+    if (tbody) {
+      const row = createElement('tr');
+      const message = createElement('td', 'monitoring-placeholder', 'Dados de monitoramento indisponiveis.');
+      message.colSpan = 4;
+      row.appendChild(message);
+      tbody.replaceChildren(row);
+      finishLoading(document.querySelector('.table-section'));
+    }
+
+    const graphs = document.querySelector('.graphs');
+    if (graphs) {
+      const card = createElement('div', 'graph-card');
+      card.appendChild(createElement('h3', '', 'Monitoramento indisponivel'));
+      card.appendChild(createElement('p', 'monitoring-placeholder', 'Nao foi possivel carregar os dados reais.'));
+      graphs.replaceChildren(card);
+      finishLoading(graphs);
+    }
+    return true;
   };
 
   const renderGamification = () => {
@@ -324,6 +375,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   updateIdentity();
   await refreshData().catch(err => {
     if (renderCatalogError(err)) return;
+    if (renderMonitoringError()) return;
 
     const target = document.querySelector('main, .container');
     if (!target) return;
