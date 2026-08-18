@@ -1,6 +1,8 @@
 document.addEventListener('DOMContentLoaded', async function() {
   const API_BASE_URL = window.APP_CONFIG.API_BASE_URL;
   const state = { user: null, cursos: [], matriculas: [], alunos: [] };
+  let agendaMonth = new Date();
+  agendaMonth = new Date(agendaMonth.getFullYear(), agendaMonth.getMonth(), 1);
 
   const api = async (path, options = {}) => {
     const session = window.jwtSession.requireSession(['professor'], '../index.html');
@@ -38,6 +40,13 @@ document.addEventListener('DOMContentLoaded', async function() {
   const matriculasDoProfessor = () => state.matriculas.filter(matricula => ownCourses().some(curso => Number(curso.id) === Number(matricula.cursoId)));
   const alunoPorId = id => state.alunos.find(aluno => Number(aluno.id) === Number(id));
   const cursoPorId = id => state.cursos.find(curso => Number(curso.id) === Number(id));
+  const isAgendaPage = () => Boolean(document.querySelector('.calendar-grid'));
+
+  const finishLoading = element => {
+    if (!element) return;
+    element.removeAttribute('aria-busy');
+    element.removeAttribute('aria-label');
+  };
 
   const setAvatarAndName = () => {
     document.querySelectorAll('[data-field="nomeProfessor"]').forEach(el => {
@@ -89,21 +98,105 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
   };
 
-  const renderAgenda = () => {
+  const dateKey = date => [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, '0'),
+    String(date.getDate()).padStart(2, '0')
+  ].join('-');
+
+  const renderCalendar = () => {
+    const grid = document.querySelector('.calendar-grid');
+    const title = document.querySelector('.month-title');
+    if (!grid || !title) return;
+
+    const year = agendaMonth.getFullYear();
+    const month = agendaMonth.getMonth();
+    const firstWeekday = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const cellCount = Math.ceil((firstWeekday + daysInMonth) / 7) * 7;
+    const today = new Date();
+    const days = [];
+
+    for (let index = 0; index < cellCount; index += 1) {
+      const date = new Date(year, month, index - firstWeekday + 1);
+      const day = document.createElement('div');
+      const isCurrentMonth = date.getMonth() === month;
+      const isToday = dateKey(date) === dateKey(today);
+      day.className = ['day', !isCurrentMonth && 'other-month', isToday && 'today']
+        .filter(Boolean)
+        .join(' ');
+      day.dataset.date = dateKey(date);
+      day.setAttribute('aria-label', date.toLocaleDateString('pt-BR', {
+        day: 'numeric', month: 'long', year: 'numeric'
+      }));
+
+      const number = document.createElement('span');
+      number.className = 'date';
+      number.textContent = date.getDate();
+      day.appendChild(number);
+      days.push(day);
+    }
+
+    const monthLabel = agendaMonth.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+    title.textContent = monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1);
+    grid.replaceChildren(...days);
+    document.querySelectorAll('[data-month-direction]').forEach(button => {
+      button.disabled = false;
+    });
+    finishLoading(document.querySelector('.calendar-section'));
+  };
+
+  const renderAgendaCourses = () => {
     const events = document.querySelector('.events-list');
     if (!events) return;
-    const cursos = ownCourses();
-    events.innerHTML = cursos.length
-      ? cursos.map(curso => `
-        <div class="event-card">
-          <div class="event-time">Curso cadastrado</div>
-          <div class="event-title">${curso.nome}</div>
-          <span class="badge aula event-badge">${formatEnum(curso.status)}</span>
-        </div>
-      `).join('')
-      : '<p class="empty-state">Nao ha eventos reais no backend. Cadastre cursos para acompanha-los aqui.</p>';
-    const month = document.querySelector('.month-title');
-    if (month) month.textContent = new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+    const cards = ownCourses().map(curso => {
+      const card = document.createElement('article');
+      card.className = 'event-card';
+
+      const type = document.createElement('div');
+      type.className = 'event-time';
+      type.textContent = 'Curso vinculado';
+
+      const title = document.createElement('div');
+      title.className = 'event-title';
+      title.textContent = curso.nome || `Curso #${curso.id}`;
+
+      const status = document.createElement('span');
+      status.className = 'badge aula event-badge';
+      status.textContent = formatEnum(curso.status) || 'Status indisponível';
+
+      card.append(type, title, status);
+      return card;
+    });
+
+    if (!cards.length) {
+      const empty = document.createElement('p');
+      empty.className = 'empty-state';
+      empty.textContent = 'Nenhum curso vinculado ao seu perfil.';
+      cards.push(empty);
+    }
+    events.replaceChildren(...cards);
+    finishLoading(document.querySelector('.events-section'));
+  };
+
+  const renderAgenda = () => {
+    if (!isAgendaPage()) return;
+    renderCalendar();
+    renderAgendaCourses();
+  };
+
+  const renderAgendaError = error => {
+    if (!isAgendaPage()) return false;
+    renderCalendar();
+    const events = document.querySelector('.events-list');
+    if (events) {
+      const message = document.createElement('p');
+      message.className = 'empty-state';
+      message.textContent = error?.message || 'Não foi possível carregar os cursos.';
+      events.replaceChildren(message);
+    }
+    finishLoading(document.querySelector('.events-section'));
+    return true;
   };
 
   const renderAvaliacoes = () => {
@@ -204,6 +297,14 @@ document.addEventListener('DOMContentLoaded', async function() {
   };
 
   const refreshData = async () => {
+    if (isAgendaPage()) {
+      const cursos = await api('/curso');
+      if (!Array.isArray(cursos)) throw new Error('Resposta de cursos inválida.');
+      state.cursos = cursos;
+      renderAgenda();
+      return;
+    }
+
     const [cursos, matriculas, alunos] = await Promise.all([
       api('/curso'),
       api('/matricula'),
@@ -262,6 +363,12 @@ document.addEventListener('DOMContentLoaded', async function() {
   }
 
   document.addEventListener('click', function(e) {
+    const monthButton = e.target.closest('[data-month-direction]');
+    if (monthButton && !monthButton.disabled) {
+      const direction = Number(monthButton.dataset.monthDirection);
+      agendaMonth = new Date(agendaMonth.getFullYear(), agendaMonth.getMonth() + direction, 1);
+      renderCalendar();
+    }
     const tabBtn = e.target.closest('.tab-btn');
     if (tabBtn && tabBtn.dataset.tab) {
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -278,6 +385,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   setAvatarAndName();
   await refreshData().catch(err => {
+    if (renderAgendaError(err)) return;
     document.querySelector('main, .section, .container')?.insertAdjacentHTML('afterbegin', `<p class="empty-state">${err.message}</p>`);
   });
 });

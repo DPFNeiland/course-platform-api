@@ -95,6 +95,13 @@ h1 {
     box-shadow: var(--shadow-hover);
 }
 
+.nav-btn:disabled {
+    cursor: wait;
+    opacity: 0.55;
+    transform: none;
+    box-shadow: none;
+}
+
 .calendar-header {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
@@ -116,24 +123,25 @@ h1 {
     gap: 6px;
 }
 
+.calendar-loading {
+    grid-column: 1 / -1;
+    min-height: 420px;
+    display: grid;
+    place-items: center;
+    color: var(--text-muted);
+}
+
 .day {
     background: var(--bg-card);
     border-radius: var(--radius-md);
     padding: 1rem 0.5rem;
     text-align: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
     border: 2px solid transparent;
     min-height: 80px;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
-}
-
-.day:hover {
-    box-shadow: var(--shadow-soft);
-    transform: translateY(-2px);
 }
 
 .day.today {
@@ -284,4 +292,14 @@ h1 {
     .nav-container {
         padding: 0 1rem;
     }
+}
+
+.agenda-notice,
+.events-loading,
+.empty-state {
+    color: var(--text-muted);
+}
+
+.agenda-notice {
+    margin-bottom: 1.25rem;
 }
