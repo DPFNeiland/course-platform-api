@@ -47,6 +47,13 @@ document.addEventListener('DOMContentLoaded', async function() {
     container.removeAttribute('aria-label');
   };
 
+  const createElement = (tagName, className, text) => {
+    const element = document.createElement(tagName);
+    if (className) element.className = className;
+    if (text !== undefined) element.textContent = text;
+    return element;
+  };
+
   const updateIdentity = () => {
     document.querySelectorAll('.avatar').forEach(el => {
       el.textContent = (state.user.nome || 'CU').slice(0, 2).toUpperCase();
@@ -93,23 +100,44 @@ document.addEventListener('DOMContentLoaded', async function() {
     const container = catalogContainer();
     if (!container) return;
     finishCatalogLoading(container);
-    container.innerHTML = state.cursos.length
-      ? state.cursos.map(curso => `
-        <article class="course-card">
-          <div class="course-thumb"></div>
-          <h3 class="course-title">${curso.nome}</h3>
-          <p class="course-desc">${formatEnum(curso.tipoCurso)} - ${formatEnum(curso.tipoAssinatura)}</p>
-          <div class="course-badges">
-            <span class="badge-pill">${formatEnum(curso.status)}</span>
-            <span class="badge-pill">${professorPorId(curso.professorId)?.nome || `Professor #${curso.professorId}`}</span>
-          </div>
-          <div class="actions">
-            <button class="btn approve-course" data-id="${curso.id}">Aprovar</button>
-            <button class="btn reject-course" data-id="${curso.id}">Reavaliar</button>
-          </div>
-        </article>
-      `).join('')
-      : '<p class="empty-state">Nenhum curso cadastrado.</p>';
+
+    if (!state.cursos.length) {
+      container.replaceChildren(createElement('p', 'empty-state', 'Nenhum curso cadastrado.'));
+      return;
+    }
+
+    const cards = state.cursos.map(curso => {
+      const card = createElement('article', 'course-card');
+      card.appendChild(createElement('div', 'course-thumb'));
+      card.appendChild(createElement('h3', 'course-title', curso.nome));
+      card.appendChild(createElement(
+        'p',
+        'course-desc',
+        `${formatEnum(curso.tipoCurso)} - ${formatEnum(curso.tipoAssinatura)}`
+      ));
+
+      const badges = createElement('div', 'course-badges');
+      badges.appendChild(createElement('span', 'badge-pill', formatEnum(curso.status)));
+      badges.appendChild(createElement(
+        'span',
+        'badge-pill',
+        professorPorId(curso.professorId)?.nome || `Professor #${curso.professorId}`
+      ));
+      card.appendChild(badges);
+
+      const actions = createElement('div', 'actions');
+      const approveButton = createElement('button', 'btn approve-course', 'Aprovar');
+      approveButton.dataset.id = curso.id;
+      actions.appendChild(approveButton);
+      const rejectButton = createElement('button', 'btn reject-course', 'Reavaliar');
+      rejectButton.dataset.id = curso.id;
+      actions.appendChild(rejectButton);
+      card.appendChild(actions);
+
+      return card;
+    });
+
+    container.replaceChildren(...cards);
   };
 
   const renderCatalogError = error => {
@@ -227,13 +255,14 @@ document.addEventListener('DOMContentLoaded', async function() {
   };
 
   async function refreshCatalog() {
-    const [cursos, professores] = await Promise.all([
-      api('/curso'),
-      api('/professor').catch(() => [])
-    ]);
-    state.cursos = cursos;
-    state.professores = professores;
+    const professoresPromise = api('/professor').catch(() => []);
+    state.cursos = await api('/curso');
     renderCatalog();
+
+    professoresPromise.then(professores => {
+      state.professores = professores;
+      renderCatalog();
+    });
   }
 
   async function refreshData() {
