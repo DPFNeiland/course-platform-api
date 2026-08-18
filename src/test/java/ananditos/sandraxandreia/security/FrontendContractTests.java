@@ -79,8 +79,14 @@ class FrontendContractTests {
                     .doesNotContain(localApiHardcode);
         }
 
-        try (Stream<Path> files = Files.walk(frontend)) {
-            for (Path file : files.filter(Files::isRegularFile).toList()) {
+        try (Stream<Path> files = Files.walk(project)) {
+            for (Path file : files
+                    .filter(Files::isRegularFile)
+                    .filter(this::isProjectTextFile)
+                    .filter(path -> !path.startsWith(project.resolve(".git")))
+                    .filter(path -> !path.startsWith(project.resolve("decisoes")))
+                    .filter(path -> !path.startsWith(project.resolve("target")))
+                    .toList()) {
                 if (file.equals(frontend.resolve("config.js"))) continue;
                 assertThat(Files.readString(file))
                         .as("hardcode de API fora de config.js em %s", file)
@@ -115,5 +121,16 @@ class FrontendContractTests {
                 .contains("APP_ENV=production")
                 .contains("CORS_ALLOWED_ORIGINS")
                 .contains("HTTPS");
+    }
+
+    private boolean isProjectTextFile(Path path) {
+        String name = path.getFileName().toString();
+        if (name.equals("Dockerfile") || name.equals(".gitignore") || name.startsWith("README")) {
+            return true;
+        }
+        return Stream.of(
+                        ".css", ".example", ".html", ".java", ".js", ".json", ".md",
+                        ".properties", ".sh", ".sql", ".txt", ".xml", ".yaml", ".yml")
+                .anyMatch(name::endsWith);
     }
 }
