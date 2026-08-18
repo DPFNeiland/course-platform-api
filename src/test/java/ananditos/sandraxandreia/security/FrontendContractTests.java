@@ -170,7 +170,10 @@ class FrontendContractTests {
                         "João Silva", "Maria Santos", "Pedro Oliveira", "Ana Costa", "Carlos Mendes",
                         "Matemática Básica", "Programação Web", "Inglês Avançado", "Design Gráfico", "Marketing Digital")
                 .doesNotContain("<svg")
+                .doesNotContain("Professores ativos", "Alunos ativos")
                 .containsOnlyOnce("<div class=\"table-header\">Matrículas</div>")
+                .contains("<div class=\"kpi-label\">Professores</div>")
+                .contains("<div class=\"kpi-label\">Alunos</div>")
                 .contains("class=\"kpis\" aria-busy=\"true\"")
                 .contains("class=\"graphs\" aria-busy=\"true\"")
                 .contains("class=\"table-section\" aria-busy=\"true\"");
@@ -182,6 +185,8 @@ class FrontendContractTests {
                 .contains("document.querySelectorAll('.kpi-number')")
                 .contains("document.querySelector('.table-section tbody')")
                 .contains("document.querySelector('.graphs')")
+                .contains("async function refreshMonitoring()")
+                .contains("Promise.allSettled")
                 .contains("renderMonitoringError");
     }
 
