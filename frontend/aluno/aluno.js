@@ -12,16 +12,11 @@ const appState = {
 const api = async (path, options = {}) => {
   const session = getSession();
   if (!session) throw new Error('Sessao expirada. Faca login novamente.');
-  const headers = {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${session.token}`,
-    ...(options.headers || {})
-  };
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers
-  });
-  if (await window.jwtSession.handleUnauthorized(response, '../index.html')) {
+  const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+  const response = await window.jwtSession.authenticatedFetch(
+    API_BASE_URL, path, { ...options, headers }, '../index.html'
+  );
+  if (response.status === 401) {
     throw new Error('Sessao expirada. Faca login novamente.');
   }
   if (!response.ok) {
@@ -41,7 +36,7 @@ const getSession = () => {
 };
 
 const logout = () => {
-  window.jwtSession.logout('../index.html');
+  window.jwtSession.logout(API_BASE_URL, '../index.html');
 };
 
 const matriculaDoCurso = cursoId => appState.matriculas.find(m => Number(m.cursoId) === Number(cursoId));
@@ -314,7 +309,7 @@ const handleClick = async event => {
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
-  appState.session = getSession();
+  appState.session = await window.jwtSession.recoverSession(API_BASE_URL, ['aluno'], '../index.html');
   if (!appState.session) {
     window.location.href = '../index.html';
     return;
