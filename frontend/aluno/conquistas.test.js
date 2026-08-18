@@ -30,6 +30,15 @@ function element(tagName, textContent = '') {
     dataset: {},
     children: [],
     attributes: new Map(),
+    classList: {
+      remove(className) {
+        this.owner.className = this.owner.className
+          .split(/\s+/)
+          .filter(current => current && current !== className)
+          .join(' ');
+      },
+      owner: null
+    },
     appendChild(child) {
       this.children.push(child);
       return child;
@@ -58,7 +67,7 @@ function treeTags(node) {
   return [node.tagName, ...(node.children || []).flatMap(treeTags)].filter(Boolean);
 }
 
-function createHarness(matriculaResponse = response([]), studentName = 'Aluna Real') {
+function createHarness(matriculaResponse = response([]), studentName = 'Aluna Real', recoverSession) {
   const listeners = {};
   const calls = [];
   const grid = element('section', 'skeleton');
@@ -68,6 +77,10 @@ function createHarness(matriculaResponse = response([]), studentName = 'Aluna Re
   rankingSection.attributes.set('aria-busy', 'true');
   rankingSection.attributes.set('aria-label', 'Carregando pontuacao do aluno');
   const ranking = element('div', 'skeleton');
+  const avatar = element('div');
+  avatar.className = 'avatar avatar-skeleton';
+  avatar.attributes.set('aria-label', 'Carregando perfil');
+  avatar.classList.owner = avatar;
 
   const document = {
     addEventListener(type, listener) {
@@ -82,7 +95,7 @@ function createHarness(matriculaResponse = response([]), studentName = 'Aluna Re
       }[selector] || null;
     },
     querySelectorAll() {
-      return [];
+      return arguments[0] === '.avatar' ? [avatar] : [];
     },
     createElement(tagName) {
       return element(tagName);
@@ -95,7 +108,7 @@ function createHarness(matriculaResponse = response([]), studentName = 'Aluna Re
     APP_CONFIG: { API_BASE_URL: 'https://api.test' },
     location: { href: '', search: '' },
     jwtSession: {
-      recoverSession: async () => ({ id: 7, perfil: 'aluno', nome: studentName }),
+      recoverSession: recoverSession || (async () => ({ id: 7, perfil: 'aluno', nome: studentName })),
       requireSession: () => ({ id: 7, perfil: 'aluno', nome: studentName }),
       authenticatedFetch: async (_baseUrl, requestPath) => {
         calls.push(requestPath);
@@ -115,10 +128,12 @@ function createHarness(matriculaResponse = response([]), studentName = 'Aluna Re
   });
 
   return {
+    avatar,
     calls,
     grid,
     ranking,
     rankingSection,
+    window,
     start: () => listeners.DOMContentLoaded[0]()
   };
 }
@@ -140,7 +155,7 @@ test('mantem o skeleton ate carregar somente as matriculas do aluno autenticado'
   ]));
   await loading;
 
-  assert.deepEqual(harness.calls, ['/matricula']);
+  assert.deepEqual(harness.calls, ['/matricula/me']);
   assert.equal(harness.grid.children.length, 3);
   assert.match(treeText(harness.grid), /2 matricula\(s\)/);
   assert.match(treeText(harness.grid), /1 em andamento/);
@@ -150,6 +165,9 @@ test('mantem o skeleton ate carregar somente as matriculas do aluno autenticado'
   assert.match(treeText(harness.ranking), /—/);
   assert.equal(harness.grid.attributes.has('aria-busy'), false);
   assert.equal(harness.rankingSection.attributes.has('aria-busy'), false);
+  assert.equal(harness.avatar.textContent, 'AL');
+  assert.equal(harness.avatar.className, 'avatar');
+  assert.equal(harness.avatar.attributes.has('aria-label'), false);
 });
 
 test('lista vazia exibe tres indicadores zerados e pontuacao zero', async () => {
@@ -187,4 +205,26 @@ test('nome recebido da sessao e exibido como texto sem criar HTML', async () => 
 
   assert.match(treeText(harness.ranking), /<script>alert\(1\)<\/script>/);
   assert.equal(treeTags(harness.ranking).includes('SCRIPT'), false);
+});
+
+test('falha ao recuperar a sessao encerra os skeletons com mensagem explicita', async () => {
+  const harness = createHarness(response([]), 'Aluna Real', async () => {
+    throw new Error('Nao foi possivel recuperar a sessao.');
+  });
+  await harness.start();
+
+  assert.deepEqual(harness.calls, []);
+  assert.match(treeText(harness.grid), /Nao foi possivel recuperar a sessao/);
+  assert.match(treeText(harness.ranking), /Nao foi possivel recuperar a sessao/);
+  assert.equal(harness.grid.attributes.has('aria-busy'), false);
+  assert.equal(harness.rankingSection.attributes.has('aria-busy'), false);
+});
+
+test('sessao ausente redireciona ao login sem consultar matriculas', async () => {
+  const harness = createHarness(response([]), 'Aluna Real', async () => null);
+  await harness.start();
+
+  assert.deepEqual(harness.calls, []);
+  assert.equal(harness.avatar.textContent, '');
+  assert.equal(harness.window.location.href, '../index.html');
 });
