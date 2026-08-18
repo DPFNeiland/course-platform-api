@@ -2,6 +2,7 @@ package ananditos.sandraxandreia.controller;
 
 import ananditos.sandraxandreia.domain.matricula.StatusMatricula;
 import ananditos.sandraxandreia.domain.usuario.Usuario;
+import ananditos.sandraxandreia.domain.usuario.UsuarioCargo;
 import ananditos.sandraxandreia.dto.request.MatriculaRequestDTO;
 import ananditos.sandraxandreia.dto.response.MatriculaResponseDTO;
 import ananditos.sandraxandreia.service.MatriculaService;
@@ -29,8 +30,9 @@ public class MatriculaController {
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('ALUNO')")
     @Operation(summary = "Cadastra uma nova matricula")
-    public MatriculaResponseDTO criar(@Valid @RequestBody MatriculaRequestDTO matricula) {
-        return service.criar(matricula);
+    public MatriculaResponseDTO criar(@Valid @RequestBody MatriculaRequestDTO matricula,
+                                      @AuthenticationPrincipal Usuario usuario) {
+        return service.criar(matricula, usuario.getId());
     }
 
     @GetMapping
@@ -71,14 +73,19 @@ public class MatriculaController {
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ALUNO')")
     @Operation(summary = "Atualiza uma matricula existente")
-    public MatriculaResponseDTO atualizar(@PathVariable Long id, @Valid @RequestBody MatriculaRequestDTO matricula) {
-        return service.atualizar(id, matricula);
+    public MatriculaResponseDTO atualizar(@PathVariable Long id, @Valid @RequestBody MatriculaRequestDTO matricula,
+                                          @AuthenticationPrincipal Usuario usuario) {
+        return service.atualizar(id, matricula, usuario.getId());
     }
 
     @PatchMapping("/{id}/status")
     @PreAuthorize("hasAnyRole('ALUNO','CURADOR','ADMIN')")
     @Operation(summary = "Atualiza apenas o status de uma matricula")
-    public MatriculaResponseDTO atualizarStatus(@PathVariable Long id, @RequestParam StatusMatricula novoStatus) {
+    public MatriculaResponseDTO atualizarStatus(@PathVariable Long id, @RequestParam StatusMatricula novoStatus,
+                                                @AuthenticationPrincipal Usuario usuario) {
+        if (usuario.getPerfil() == UsuarioCargo.ALUNO) {
+            return service.atualizarStatusDoAluno(id, novoStatus, usuario.getId());
+        }
         return service.atualizarStatus(id, novoStatus);
     }
 
@@ -86,7 +93,7 @@ public class MatriculaController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ALUNO')")
     @Operation(summary = "Remove uma matricula pelo id")
-    public void deletar(@PathVariable Long id) {
-        service.deletar(id);
+    public void deletar(@PathVariable Long id, @AuthenticationPrincipal Usuario usuario) {
+        service.deletar(id, usuario.getId());
     }
 }

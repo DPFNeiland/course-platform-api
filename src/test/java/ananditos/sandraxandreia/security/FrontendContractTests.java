@@ -244,7 +244,7 @@ class FrontendContractTests {
 
         assertThat(script)
                 .contains("const provisionalGamificationPoints = () =>")
-                .contains("TODO: Validar com Produto a regra definitiva de gamificacao")
+                .contains("TODO: Validar com Produto a regra definitiva de gamificação")
                 .contains("const renderAchievementsError = error =>")
                 .contains("const matriculas = await api('/matricula/me')")
                 .doesNotContain("const matriculas = await api('/matricula')")

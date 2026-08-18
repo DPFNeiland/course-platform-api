@@ -110,7 +110,7 @@ const renderStudentProgress = () => {
 };
 
 const provisionalGamificationPoints = () => {
-  // TODO: Validar com Produto a regra definitiva de gamificacao; 100 pontos por matricula e provisório.
+  // TODO: Validar com Produto a regra definitiva de gamificação; 100 pontos por matrícula é uma regra provisória.
   return appState.matriculas.length * 100;
 };
 
@@ -133,6 +133,13 @@ const finishLoading = element => {
   if (!element) return;
   element.removeAttribute('aria-busy');
   element.removeAttribute('aria-label');
+};
+
+const finishAvatarLoading = () => {
+  document.querySelectorAll('.avatar').forEach(element => {
+    element.classList.remove('avatar-skeleton');
+    element.removeAttribute('aria-label');
+  });
 };
 
 const createTextElement = (tagName, className, text) => {
@@ -160,9 +167,9 @@ const renderAchievements = () => {
   const finished = appState.matriculas.filter(m => m.status === 'ENCERRADA').length;
   const active = appState.matriculas.filter(m => m.status !== 'ENCERRADA').length;
   grid.replaceChildren(
-    createAchievementCard('Cursos', `${appState.matriculas.length} matricula(s)`, 'Total vindo do banco.', 'Matriculas', 'badge-aprendizado'),
-    createAchievementCard('Ativos', `${active} em andamento`, 'Cursos que voce iniciou.', 'Progresso', 'badge-progresso'),
-    createAchievementCard('Concluidos', `${finished} encerrado(s)`, 'Cursos marcados como concluidos.', 'Certificados', 'badge-especial')
+    createAchievementCard('Cursos', `${appState.matriculas.length} matrícula(s)`, 'Total vindo do banco.', 'Matrículas', 'badge-aprendizado'),
+    createAchievementCard('Ativos', `${active} em andamento`, 'Cursos que você iniciou.', 'Progresso', 'badge-progresso'),
+    createAchievementCard('Concluídos', `${finished} encerrado(s)`, 'Cursos marcados como concluídos.', 'Certificados', 'badge-especial')
   );
   finishLoading(grid);
 
@@ -291,7 +298,7 @@ const renderForum = () => {
 const refreshData = async () => {
   if (isAchievementsPage()) {
     const matriculas = await api('/matricula/me');
-    if (!Array.isArray(matriculas)) throw new Error('Resposta de matriculas invalida.');
+    if (!Array.isArray(matriculas)) throw new Error('Resposta de matrículas inválida.');
     appState.matriculas = matriculas.filter(m => Number(m.alunoId) === Number(appState.session.id));
     renderAchievements();
     return;
@@ -387,9 +394,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     document.querySelectorAll('.avatar').forEach(el => {
       el.textContent = (appState.session.nome || 'AL').slice(0, 2).toUpperCase();
-      el.classList.remove('avatar-skeleton');
-      el.removeAttribute('aria-label');
     });
+    finishAvatarLoading();
 
     document.addEventListener('click', handleClick);
     document.addEventListener('input', event => {
@@ -401,6 +407,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     await refreshData();
   } catch (err) {
+    finishAvatarLoading();
     if (renderAchievementsError(err)) return;
     document.querySelectorAll('[data-approved-courses], [data-student-progress]').forEach(container => {
       container.innerHTML = `<p class="empty-state">${err.message}</p>`;
