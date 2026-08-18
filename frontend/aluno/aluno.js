@@ -109,10 +109,15 @@ const renderStudentProgress = () => {
     : '<p class="empty-state">Nenhum curso iniciado ainda.</p>';
 };
 
+const provisionalGamificationPoints = () => {
+  // TODO: Validar com Produto a regra definitiva de gamificação; 100 pontos por matrícula é uma regra provisória.
+  return appState.matriculas.length * 100;
+};
+
 const renderDashboardStats = () => {
   const active = appState.matriculas.filter(m => m.status !== 'ENCERRADA').length;
   const finished = appState.matriculas.filter(m => m.status === 'ENCERRADA').length;
-  document.querySelector('.points-current')?.replaceChildren(document.createTextNode(String((active + finished) * 100)));
+  document.querySelector('.points-current')?.replaceChildren(document.createTextNode(String(provisionalGamificationPoints())));
   document.querySelector('.points-total')?.replaceChildren(document.createTextNode('/ pontos reais'));
   document.querySelectorAll('.achievements .badge').forEach((badge, index) => {
     badge.textContent = index === 0 ? `${finished} concluidos` : `${active} ativos`;
@@ -124,20 +129,80 @@ const renderDashboardStats = () => {
   })));
 };
 
+const finishLoading = element => {
+  if (!element) return;
+  element.removeAttribute('aria-busy');
+  element.removeAttribute('aria-label');
+};
+
+const finishAvatarLoading = () => {
+  document.querySelectorAll('.avatar').forEach(element => {
+    element.classList.remove('avatar-skeleton');
+    element.removeAttribute('aria-label');
+  });
+};
+
+const createTextElement = (tagName, className, text) => {
+  const element = document.createElement(tagName);
+  element.className = className;
+  element.textContent = text;
+  return element;
+};
+
+const createAchievementCard = (icon, title, description, badgeText, badgeClass) => {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.append(
+    createTextElement('div', 'icon', icon),
+    createTextElement('h3', '', title),
+    createTextElement('p', '', description),
+    createTextElement('span', `badge ${badgeClass}`, badgeText)
+  );
+  return card;
+};
+
 const renderAchievements = () => {
   const grid = document.querySelector('.achievements-grid');
   if (!grid) return;
   const finished = appState.matriculas.filter(m => m.status === 'ENCERRADA').length;
   const active = appState.matriculas.filter(m => m.status !== 'ENCERRADA').length;
-  grid.innerHTML = `
-    <div class="card"><div class="icon">Cursos</div><h3>${appState.matriculas.length} matricula(s)</h3><p>Total vindo do banco.</p><span class="badge badge-aprendizado">Matriculas</span></div>
-    <div class="card"><div class="icon">Ativos</div><h3>${active} em andamento</h3><p>Cursos que voce iniciou.</p><span class="badge badge-progresso">Progresso</span></div>
-    <div class="card"><div class="icon">Concluídos</div><h3>${finished} encerrado(s)</h3><p>Cursos marcados como concluidos.</p><span class="badge badge-especial">Certificados</span></div>
-  `;
+  grid.replaceChildren(
+    createAchievementCard('Cursos', `${appState.matriculas.length} matrícula(s)`, 'Total vindo do banco.', 'Matrículas', 'badge-aprendizado'),
+    createAchievementCard('Ativos', `${active} em andamento`, 'Cursos que você iniciou.', 'Progresso', 'badge-progresso'),
+    createAchievementCard('Concluídos', `${finished} encerrado(s)`, 'Cursos marcados como concluídos.', 'Certificados', 'badge-especial')
+  );
+  finishLoading(grid);
+
   const ranking = document.querySelector('.ranking');
   if (ranking) {
-    ranking.innerHTML = `<div class="rank-item"><div class="rank-position">1</div><div class="rank-avatar">${appState.session.nome?.slice(0, 2).toUpperCase() || 'AL'}</div><div class="rank-name">${appState.session.nome}</div><div class="rank-score">${appState.matriculas.length * 100} pts</div></div>`;
+    const studentName = appState.session.nome || 'Aluno';
+    const item = document.createElement('div');
+    item.className = 'rank-item';
+    item.append(
+      createTextElement('div', 'rank-position', '—'),
+      createTextElement('div', 'rank-avatar', studentName.slice(0, 2).toUpperCase()),
+      createTextElement('div', 'rank-name', studentName),
+      createTextElement('div', 'rank-score', `${provisionalGamificationPoints()} pts`)
+    );
+    ranking.replaceChildren(item);
   }
+  finishLoading(document.querySelector('.ranking-section'));
+};
+
+const isAchievementsPage = () => Boolean(
+  document.querySelector('.achievements-grid') && document.querySelector('.ranking')
+);
+
+const renderAchievementsError = error => {
+  if (!isAchievementsPage()) return false;
+  const message = error?.message || 'Nao foi possivel carregar suas conquistas.';
+  const grid = document.querySelector('.achievements-grid');
+  const ranking = document.querySelector('.ranking');
+  grid.replaceChildren(createTextElement('p', 'empty-state', message));
+  ranking.replaceChildren(createTextElement('p', 'empty-state', message));
+  finishLoading(grid);
+  finishLoading(document.querySelector('.ranking-section'));
+  return true;
 };
 
 const renderSalaAula = () => {
@@ -231,9 +296,17 @@ const renderForum = () => {
 };
 
 const refreshData = async () => {
+  if (isAchievementsPage()) {
+    const matriculas = await api('/matricula/me');
+    if (!Array.isArray(matriculas)) throw new Error('Resposta de matrículas inválida.');
+    appState.matriculas = matriculas.filter(m => Number(m.alunoId) === Number(appState.session.id));
+    renderAchievements();
+    return;
+  }
+
   const [cursos, matriculas] = await Promise.all([
     api('/curso'),
-    api('/matricula')
+    api('/matricula/me')
   ]);
   appState.cursos = cursos;
   appState.cursosAprovados = cursos.filter(c => c.status === 'APROVADO');
@@ -309,30 +382,33 @@ const handleClick = async event => {
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
-  appState.session = await window.jwtSession.recoverSession(API_BASE_URL, ['aluno'], '../index.html');
-  if (!appState.session) {
-    window.location.href = '../index.html';
-    return;
-  }
-
-  document.querySelectorAll('[data-field="nomeAluno"]').forEach(el => {
-    el.textContent = appState.session.nome || 'Aluno';
-  });
-  document.querySelectorAll('.avatar').forEach(el => {
-    el.textContent = (appState.session.nome || 'AL').slice(0, 2).toUpperCase();
-  });
-
-  document.addEventListener('click', handleClick);
-  document.addEventListener('input', event => {
-    if (event.target.matches('.search-bar')) {
-      appState.searchQuery = event.target.value;
-      renderCatalog();
-    }
-  });
-
   try {
+    appState.session = await window.jwtSession.recoverSession(API_BASE_URL, ['aluno'], '../index.html');
+    if (!appState.session) {
+      window.location.href = '../index.html';
+      return;
+    }
+
+    document.querySelectorAll('[data-field="nomeAluno"]').forEach(el => {
+      el.textContent = appState.session.nome || 'Aluno';
+    });
+    document.querySelectorAll('.avatar').forEach(el => {
+      el.textContent = (appState.session.nome || 'AL').slice(0, 2).toUpperCase();
+    });
+    finishAvatarLoading();
+
+    document.addEventListener('click', handleClick);
+    document.addEventListener('input', event => {
+      if (event.target.matches('.search-bar')) {
+        appState.searchQuery = event.target.value;
+        renderCatalog();
+      }
+    });
+
     await refreshData();
   } catch (err) {
+    finishAvatarLoading();
+    if (renderAchievementsError(err)) return;
     document.querySelectorAll('[data-approved-courses], [data-student-progress]').forEach(container => {
       container.innerHTML = `<p class="empty-state">${err.message}</p>`;
     });

@@ -219,6 +219,51 @@ class FrontendContractTests {
                 .contains("renderAgendaError");
     }
 
+    @Test
+    void conquistasDoAlunoDevemExibirLoadingSemDadosFicticios() throws IOException {
+        String html = Files.readString(frontend.resolve("aluno/conquistas.html"));
+        String script = Files.readString(frontend.resolve("aluno/aluno.js"));
+        String styles = Files.readString(frontend.resolve("aluno/style/conquistas.css"));
+
+        assertThat(html)
+                .doesNotContain(
+                        "Primeiro Curso Concluído",
+                        "Maratona de Estudos",
+                        "Primeiro Curso",
+                        "Top da Turma",
+                        "Master Legendário",
+                        "João Silva", "Maria Santos", "Pedro Costa", "Ana Souza", "Roberto Lima")
+                .doesNotContain(">JD<")
+                .contains("class=\"avatar avatar-skeleton\"")
+                .contains("class=\"achievements-grid\" aria-busy=\"true\"")
+                .contains("class=\"ranking-section\" aria-busy=\"true\"")
+                .contains("class=\"rank-item ranking-skeleton\"");
+        assertThat(countOccurrences(html, "class=\"card achievement-skeleton\""))
+                .as("quantidade de skeletons das conquistas")
+                .isEqualTo(3);
+
+        assertThat(script)
+                .contains("const provisionalGamificationPoints = () =>")
+                .contains("TODO: Validar com Produto a regra definitiva de gamificação")
+                .contains("const renderAchievementsError = error =>")
+                .contains("const matriculas = await api('/matricula/me')")
+                .doesNotContain("const matriculas = await api('/matricula')")
+                .contains("grid.replaceChildren(")
+                .contains("createTextElement('div', 'rank-position', '—')");
+        assertThat(styles)
+                .contains(".achievement-skeleton")
+                .contains(".ranking-skeleton")
+                .contains("@keyframes achievement-loading")
+                .contains("prefers-reduced-motion: reduce")
+                .doesNotContain(
+                        ".badge-consistencia",
+                        ".progress-bar",
+                        ".progress-fill",
+                        ".medal-gold",
+                        ".medal-silver",
+                        ".medal-bronze");
+    }
+
     private long countOccurrences(String content, String fragment) {
         return content.split(java.util.regex.Pattern.quote(fragment), -1).length - 1L;
     }
