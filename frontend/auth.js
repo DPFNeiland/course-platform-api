@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const API_BASE_URL = 'http://localhost:8080';
+    const API_BASE_URL = window.APP_CONFIG.API_BASE_URL;
 
     const loginSection = document.getElementById('login-section');
     const registerSection = document.getElementById('register-section');
