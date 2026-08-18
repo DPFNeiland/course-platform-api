@@ -319,6 +319,51 @@ class FrontendContractTests {
         }
     }
 
+    @Test
+    void salaDeAulaDeveUsarCursoEMateriaisReaisSemMocks() throws IOException {
+        String html = Files.readString(frontend.resolve("aluno/sala-aula.html"));
+        String script = Files.readString(frontend.resolve("aluno/aluno.js"));
+        String styles = Files.readString(frontend.resolve("aluno/style/sala-aula.css"));
+
+        assertThat(html)
+                .doesNotContain(
+                        "Desenvolvimento Web Completo",
+                        "Módulo 1: Introdução",
+                        "Módulo 2: HTML/CSS",
+                        "Módulo 3: JavaScript",
+                        "Módulo 4: React",
+                        "Módulo 5: Deploy",
+                        "Fundamentos de CSS",
+                        "45% concluído",
+                        "width: 45%",
+                        "Guia PDF",
+                        "Quiz Interativo",
+                        "João Silva",
+                        "Maria Santos",
+                        "comment-form")
+                .contains(
+                        "data-room-course-title",
+                        "Módulos em breve.",
+                        "Conteúdo das aulas em breve",
+                        "class=\"card material-skeleton\"",
+                        "Comentários em breve.");
+
+        assertThat(script)
+                .contains(
+                        "const renderSalaAula = async () =>",
+                        "const courseMaterials = await api(`/curso/${curso.id}/materiais`)",
+                        "if (!Array.isArray(courseMaterials))",
+                        "createMaterialCard(material, curso.id)",
+                        "fill.style.width = finished ? '100%' : '0%'",
+                        "await renderSalaAula();");
+
+        assertThat(styles)
+                .contains(
+                        ".material-skeleton",
+                        "@keyframes sala-loading",
+                        "prefers-reduced-motion: reduce");
+    }
+
     private long countOccurrences(String content, String fragment) {
         return content.split(java.util.regex.Pattern.quote(fragment), -1).length - 1L;
     }

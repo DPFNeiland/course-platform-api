@@ -25,109 +25,50 @@
           <li><a href="forum.html">Fórum</a></li>
           </ul>
           <div class="nav-right">
-          <div class="avatar">JD</div>
+          <div class="avatar avatar-skeleton" aria-label="Carregando perfil"></div>
           </div>
       </nav>
     </header>
 
   <header class="page-header">
-    <h1>Sala de Aula — <span>Desenvolvimento Web Completo</span></h1>
+    <h1>Sala de Aula — <span data-room-course-title aria-busy="true">Carregando curso...</span></h1>
   </header>
 
   <main class="main-container">
     <aside class="timeline-sidebar">
       <h2>Módulos</h2>
-      <div class="timeline">
-        <div class="timeline-item completed">
-          <div class="circle"></div>
-          <h3>Módulo 1: Introdução</h3>
-        </div>
-        <div class="timeline-item current">
-          <div class="circle"></div>
-          <h3>Módulo 2: HTML/CSS</h3>
-        </div>
-        <div class="timeline-item locked">
-          <div class="circle"></div>
-          <h3>Módulo 3: JavaScript</h3>
-        </div>
-        <div class="timeline-item locked">
-          <div class="circle"></div>
-          <h3>Módulo 4: React</h3>
-        </div>
-        <div class="timeline-item locked">
-          <div class="circle"></div>
-          <h3>Módulo 5: Deploy</h3>
-        </div>
-      </div>
+      <p class="empty-state modules-state">Módulos em breve.</p>
     </aside>
 
     <section class="lesson-content">
-      <div class="video-player">
-        <div class="play-overlay">
-          <button class="play-btn">
-            <svg viewBox="0 0 24 24">
-              <path fill="currentColor" d="M8 5v14l11-7z"/>
-            </svg>
-          </button>
-        </div>
+      <div class="integration-notice lesson-state">
+        <strong>Conteúdo das aulas em breve</strong>
+        <p>A plataforma ainda não possui aulas e módulos integrados ao backend.</p>
       </div>
 
-      <h2 class="lesson-title">Fundamentos de CSS</h2>
+      <h2 class="lesson-title" aria-busy="true">Carregando curso...</h2>
 
       <div class="progress-bar">
-        <div class="progress-fill" style="width: 45%;"></div>
+        <div class="progress-fill" style="width: 0%;"></div>
       </div>
-      <p class="progress-text">45% concluído</p>
+      <p class="progress-text" aria-busy="true">Carregando progresso...</p>
 
-      <div class="lesson-description">
-        <p>Aprenda os conceitos básicos de CSS, incluindo seletores, propriedades e box model.</p>
-      </div>
+      <div class="lesson-description" aria-busy="true">Carregando informações do curso...</div>
 
-      <button class="btn-pill btn-primary">Marcar como Concluída</button>
+      <button class="btn-pill btn-primary complete-course-btn" disabled>Carregando...</button>
 
       <section class="support-materials">
         <h3>Materiais de Apoio</h3>
-        <div class="cards-grid">
-          <div class="card">
-            <h4>Guia PDF</h4>
-            <p>Download do guia completo.</p>
-            <a href="#" class="btn-pill btn-secondary">Baixar</a>
-          </div>
-          <div class="card">
-            <h4>Quiz Interativo</h4>
-            <p>Teste seus conhecimentos.</p>
-            <a href="#" class="btn-pill btn-secondary">Fazer Quiz</a>
-          </div>
+        <div class="cards-grid" aria-busy="true" aria-label="Carregando materiais">
+          <div class="card material-skeleton" aria-hidden="true"></div>
+          <div class="card material-skeleton" aria-hidden="true"></div>
         </div>
       </section>
 
       <section class="comments-section">
         <h3>Comentários</h3>
-        <form class="comment-form">
-          <textarea placeholder="Deixe seu comentário..."></textarea>
-          <button type="submit" class="btn-pill btn-primary">Enviar</button>
-        </form>
         <div class="comments-list">
-          <div class="comment-card">
-            <div class="comment-header">
-              <div class="avatar">JS</div>
-              <div>
-                <strong>João Silva</strong>
-                <span>2 dias atrás</span>
-              </div>
-            </div>
-            <p>Aula excelente! Muito clara.</p>
-          </div>
-          <div class="comment-card">
-            <div class="comment-header">
-              <div class="avatar">MS</div>
-              <div>
-                <strong>Maria Santos</strong>
-                <span>1 dia atrás</span>
-              </div>
-            </div>
-            <p>Dúvida sobre flexbox, mas o exemplo ajudou.</p>
-          </div>
+          <p class="empty-state">Comentários em breve.</p>
         </div>
       </section>
     </section>
