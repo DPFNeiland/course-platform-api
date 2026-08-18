@@ -190,6 +190,35 @@ class FrontendContractTests {
                 .contains("renderMonitoringError");
     }
 
+    @Test
+    void agendaDoProfessorDeveCarregarCalendarioAtualSemEventosFicticios() throws IOException {
+        String html = Files.readString(frontend.resolve("professor/agenda.html"));
+        String script = Files.readString(frontend.resolve("professor/professor.js"));
+
+        assertThat(html)
+                .doesNotContain(
+                        "Novembro 2024",
+                        "Reunião com pais do 3º ano",
+                        "Atendimento individual - João S.",
+                        "Aula ao vivo de Matemática",
+                        "Avaliação de Ciências 2º ano")
+                .doesNotContain("Hoje, 10:00", "Amanhã, 14:00", "Dia 20, 15:00", "Dia 23, 09:00")
+                .contains("class=\"calendar-section\" aria-busy=\"true\"")
+                .contains("class=\"events-section\" aria-busy=\"true\"")
+                .contains("Carregando calendário atual...")
+                .contains("Carregando cursos reais...")
+                .contains("data-month-direction=\"-1\"")
+                .contains("data-month-direction=\"1\"");
+
+        assertThat(script)
+                .contains("const renderCalendar = () =>")
+                .contains("const renderAgendaCourses = () =>")
+                .contains("agendaMonth.toLocaleDateString('pt-BR'")
+                .contains("Number(curso.professorId) === Number(state.user.id)")
+                .contains("api(`/curso/professor/${state.user.id}`)")
+                .contains("renderAgendaError");
+    }
+
     private long countOccurrences(String content, String fragment) {
         return content.split(java.util.regex.Pattern.quote(fragment), -1).length - 1L;
     }

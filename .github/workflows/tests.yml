@@ -19,5 +19,5 @@ jobs:
         with:
           node-version: '22'
       - run: mvn test
-      - run: node --test frontend/config.test.js frontend/session.test.js frontend/curador/curador.test.js frontend/curador/monitoramento.test.js
+      - run: node --test frontend/config.test.js frontend/session.test.js frontend/curador/curador.test.js frontend/curador/monitoramento.test.js frontend/professor/agenda.test.js
       - run: sh frontend/config-docker.test.sh
