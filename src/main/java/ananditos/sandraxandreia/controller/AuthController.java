@@ -7,12 +7,19 @@ import ananditos.sandraxandreia.dto.request.LoginRequestDTO;
 import ananditos.sandraxandreia.dto.response.LoginResponseDTO;
 import ananditos.sandraxandreia.repository.UsuarioRepository;
 import ananditos.sandraxandreia.security.JwtService;
+import ananditos.sandraxandreia.security.JwtCookieService;
+import ananditos.sandraxandreia.security.JwtAuthenticationFilter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpHeaders;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,18 +31,20 @@ public class AuthController {
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final JwtCookieService jwtCookieService;
 
     public AuthController(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder,
-                          JwtService jwtService) {
+                          JwtService jwtService, JwtCookieService jwtCookieService) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.jwtCookieService = jwtCookieService;
     }
 
     @PostMapping("/login")
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Autentica um usuario por e-mail e senha")
-    public LoginResponseDTO login(@Valid @RequestBody LoginRequestDTO request) {
+    public LoginResponseDTO login(@Valid @RequestBody LoginRequestDTO request, HttpServletResponse response) {
         Usuario usuario = usuarioRepository.findByEmailValor(normalizarEmail(request.getEmail()))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "E-mail ou senha invalidos"));
 
@@ -46,15 +55,37 @@ public class AuthController {
         String perfil = toPerfil(usuario);
         String cargo = usuario.getPerfil() == null ? perfil.toUpperCase() : usuario.getPerfil().name();
         JwtService.TokenEmitido token = jwtService.emitir(usuario.getEmail().getValor());
+        response.addHeader(HttpHeaders.SET_COOKIE, jwtCookieService.criar(token.token()).toString());
         return new LoginResponseDTO(
                 usuario.getId(),
                 usuario.getNome(),
                 usuario.getEmail().getValor(),
                 cargo,
                 perfil,
-                token.token(),
                 token.expiraEm()
         );
+    }
+
+    @PostMapping("/logout")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "Encerra a sessao removendo o cookie JWT")
+    public void logout(HttpServletResponse response) {
+        response.addHeader(HttpHeaders.SET_COOKIE, jwtCookieService.remover().toString());
+    }
+
+    @GetMapping("/session")
+    @Operation(summary = "Recupera os dados visuais da sessao autenticada")
+    public LoginResponseDTO session(Authentication authentication, HttpServletRequest request) {
+        Usuario usuario = usuarioRepository.findByEmailValor(authentication.getName())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Sessao invalida"));
+        Object expiration = request.getAttribute(JwtAuthenticationFilter.TOKEN_EXPIRATION_ATTRIBUTE);
+        if (!(expiration instanceof java.time.Instant expiraEm)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Sessao invalida");
+        }
+        String perfil = toPerfil(usuario);
+        String cargo = usuario.getPerfil() == null ? perfil.toUpperCase() : usuario.getPerfil().name();
+        return new LoginResponseDTO(usuario.getId(), usuario.getNome(), usuario.getEmail().getValor(),
+                cargo, perfil, expiraEm);
     }
 
     private String normalizarEmail(String email) {

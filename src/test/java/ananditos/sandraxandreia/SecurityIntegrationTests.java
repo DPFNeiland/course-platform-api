@@ -11,28 +11,37 @@ import ananditos.sandraxandreia.repository.ProfessorRepository;
 import ananditos.sandraxandreia.repository.CuradorRepository;
 import ananditos.sandraxandreia.repository.UsuarioRepository;
 import ananditos.sandraxandreia.security.JwtService;
+import ananditos.sandraxandreia.security.JwtCookieService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.http.MediaType;
+import org.springframework.http.HttpHeaders;
+import jakarta.servlet.http.Cookie;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 @SpringBootTest
 @WebAppConfiguration
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 class SecurityIntegrationTests {
 
     private MockMvc mockMvc;
@@ -175,63 +184,269 @@ class SecurityIntegrationTests {
     }
 
     @Test
-    void tokenRetornadoNoLoginDeveAutorizarOsTresPerfis() throws Exception {
-        mockMvc.perform(get("/aluno").header("Authorization", tokenObtidoNoLogin("aluno@teste.com")))
+    void cookieRetornadoNoLoginDeveAutorizarOsTresPerfis() throws Exception {
+        mockMvc.perform(get("/aluno").cookie(cookieObtidoNoLogin("aluno@teste.com")))
                 .andExpect(status().isOk());
-        mockMvc.perform(get("/curso").header("Authorization", tokenObtidoNoLogin("professor@teste.com")))
+        mockMvc.perform(get("/curso").cookie(cookieObtidoNoLogin("professor@teste.com")))
                 .andExpect(status().isOk());
-        mockMvc.perform(get("/curador").header("Authorization", tokenObtidoNoLogin("curador@teste.com")))
+        mockMvc.perform(get("/curador").cookie(cookieObtidoNoLogin("curador@teste.com")))
                 .andExpect(status().isOk());
     }
 
     @Test
-    void loginDeveEmitirJwtParaAlunoProfessorECurador() throws Exception {
+    void loginDeveCriarSessaoParaAlunoProfessorECurador() throws Exception {
         validarLogin("aluno@teste.com", "aluno");
         validarLogin("professor@teste.com", "professor");
         validarLogin("curador@teste.com", "curador");
     }
 
     @Test
-    void loginDeveRetornarTokenEExpiracao() throws Exception {
+    void loginDeveRetornarExpiracaoEJwtSomenteNoCookie() throws Exception {
+        mockMvc.perform(loginRequest("aluno@teste.com", "123456"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.token").doesNotExist())
+                .andExpect(jsonPath("$.expiraEm").isNotEmpty())
+                .andExpect(header().string(HttpHeaders.SET_COOKIE,
+                        org.hamcrest.Matchers.allOf(
+                                org.hamcrest.Matchers.containsString("HttpOnly"),
+                                org.hamcrest.Matchers.containsString("SameSite=Strict"))));
+    }
+
+    @Test
+    void cookieInvalidoDevePrevalecerSobreBearerValido() throws Exception {
+        mockMvc.perform(get("/aluno")
+                        .cookie(new Cookie(JwtCookieService.COOKIE_NAME, "token.invalido.aqui"))
+                        .header("Authorization", bearer("aluno@teste.com")))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.codigo").value("TOKEN_INVALID"));
+    }
+
+    @Test
+    void cookieComBearerInvalidoSemCsrfDeveSerBloqueado() throws Exception {
+        mockMvc.perform(post("/logout")
+                        .cookie(cookieObtidoNoLogin("aluno@teste.com"))
+                        .header("Authorization", "Bearer token.invalido.aqui"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.codigo").value("CSRF_INVALID"));
+    }
+
+    @Test
+    void cookieComBearerValidoSemCsrfDeveSerBloqueado() throws Exception {
+        mockMvc.perform(post("/logout")
+                        .cookie(cookieObtidoNoLogin("aluno@teste.com"))
+                        .header("Authorization", bearer("aluno@teste.com")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.codigo").value("CSRF_INVALID"));
+    }
+
+    @Test
+    void cookieComBearerECsrfValidosDeveExecutarNormalmente() throws Exception {
+        Cookie sessionCookie = cookieObtidoNoLogin("aluno@teste.com");
+        Cookie csrfCookie = cookieCsrf(sessionCookie);
+
+        mockMvc.perform(post("/logout")
+                        .cookie(sessionCookie, csrfCookie)
+                        .header("Authorization", bearer("aluno@teste.com"))
+                        .header("X-XSRF-TOKEN", csrfCookie.getValue()))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void bearerValidoSemCookieDeveContinuarDispensadoDeCsrf() throws Exception {
+        mockMvc.perform(post("/logout").header("Authorization", bearer("aluno@teste.com")))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void rotaPublicaComCookieSemCsrfDeveSerBloqueada() throws Exception {
         mockMvc.perform(post("/login")
+                        .cookie(cookieObtidoNoLogin("aluno@teste.com"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"email\":\"aluno@teste.com\",\"senha\":\"123456\"}"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.codigo").value("CSRF_INVALID"));
+    }
+
+    @Test
+    void loginComCookieValidoDeveTrocarSessaoQuandoCsrfForValido() throws Exception {
+        mockMvc.perform(loginRequest("professor@teste.com", "123456",
+                        cookieObtidoNoLogin("aluno@teste.com")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.perfil").value("professor"))
+                .andExpect(cookie().exists(JwtCookieService.COOKIE_NAME));
+    }
+
+    @Test
+    void loginComCookieInvalidoVazioOuExpiradoNaoDeveFicarBloqueado() throws Exception {
+        JwtService expiredIssuer = new JwtService(
+                "test-only-jwt-secret-with-at-least-32-characters",
+                1,
+                Clock.fixed(Instant.now().minusSeconds(2), ZoneOffset.UTC));
+
+        for (Cookie previousCookie : java.util.List.of(
+                new Cookie(JwtCookieService.COOKIE_NAME, "token.invalido.aqui"),
+                new Cookie(JwtCookieService.COOKIE_NAME, ""),
+                new Cookie(JwtCookieService.COOKIE_NAME, expiredIssuer.emitir("aluno@teste.com").token()))) {
+            mockMvc.perform(loginRequest("aluno@teste.com", "123456", previousCookie))
+                    .andExpect(status().isOk())
+                    .andExpect(cookie().exists(JwtCookieService.COOKIE_NAME));
+        }
+    }
+
+    @Test
+    void cadastroComCookieAnteriorDeveAceitarCsrfValido() throws Exception {
+        Cookie previousSession = cookieObtidoNoLogin("aluno@teste.com");
+        Cookie csrfCookie = cookieCsrf(previousSession);
+
+        mockMvc.perform(post("/aluno")
+                        .cookie(previousSession, csrfCookie)
+                        .header("X-XSRF-TOKEN", csrfCookie.getValue())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "nome":"Novo Aluno",
+                                  "email":"novo.aluno@teste.com",
+                                  "cpf":"24681357928",
+                                  "senha":"123456",
+                                  "genero":"NAO_INFORMADO",
+                                  "dataNascimento":"1/1/2000",
+                                  "ra":"CD5678",
+                                  "status":"A_CURSAR"
+                                }
+                                """))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    void logoutDeveRemoverCookieDeSessao() throws Exception {
+        Cookie sessionCookie = cookieObtidoNoLogin("aluno@teste.com");
+        Cookie csrfCookie = cookieCsrf(sessionCookie);
+
+        Cookie removedSession = mockMvc.perform(post("/logout")
+                        .cookie(sessionCookie, csrfCookie)
+                        .header("X-XSRF-TOKEN", csrfCookie.getValue()))
+                .andExpect(status().isNoContent())
+                .andReturn()
+                .getResponse()
+                .getCookie(JwtCookieService.COOKIE_NAME);
+
+        org.assertj.core.api.Assertions.assertThat(removedSession).isNotNull();
+        org.assertj.core.api.Assertions.assertThat(removedSession.getMaxAge()).isZero();
+        org.assertj.core.api.Assertions.assertThat(removedSession.isHttpOnly()).isTrue();
+    }
+
+    @Test
+    void operacaoComCookieSemCsrfDeveSerBloqueada() throws Exception {
+        mockMvc.perform(post("/logout").cookie(cookieObtidoNoLogin("aluno@teste.com")))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void endpointCsrfDeveEmitirCookieLegivelSemExporJwt() throws Exception {
+        mockMvc.perform(get("/csrf").cookie(cookieObtidoNoLogin("aluno@teste.com")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.headerName").doesNotExist())
+                .andExpect(jsonPath("$.token").isNotEmpty())
+                .andExpect(header().string(HttpHeaders.SET_COOKIE,
+                        org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("HttpOnly"))));
+    }
+
+    @Test
+    void endpointCsrfDeveEstarDisponivelAntesDoLogin() throws Exception {
+        mockMvc.perform(get("/csrf"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token").isNotEmpty())
-                .andExpect(jsonPath("$.expiraEm").isNotEmpty());
+                .andExpect(header().string(HttpHeaders.SET_COOKIE,
+                        org.hamcrest.Matchers.containsString("XSRF-TOKEN")));
+    }
+
+    @Test
+    void csrfAusenteDeveRetornarCodigoIdentificavel() throws Exception {
+        mockMvc.perform(post("/logout").cookie(cookieObtidoNoLogin("aluno@teste.com")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.codigo").value("CSRF_INVALID"));
+    }
+
+    @Test
+    void sessaoDeveSerRecuperadaPeloCookieSemExporJwt() throws Exception {
+        mockMvc.perform(get("/session").cookie(cookieObtidoNoLogin("aluno@teste.com")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.perfil").value("aluno"))
+                .andExpect(jsonPath("$.email").value("aluno@teste.com"))
+                .andExpect(jsonPath("$.expiraEm").isNotEmpty())
+                .andExpect(jsonPath("$.token").doesNotExist());
+
+        mockMvc.perform(get("/session"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void corsDeveAceitarCredenciaisApenasDeOrigemPermitida() throws Exception {
+        mockMvc.perform(options("/aluno")
+                        .header(HttpHeaders.ORIGIN, "http://localhost:5173")
+                        .header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET"))
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "http://localhost:5173"))
+                .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, "true"));
+
+        mockMvc.perform(options("/aluno")
+                        .header(HttpHeaders.ORIGIN, "https://origem-nao-permitida.example")
+                        .header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET"))
+                .andExpect(status().isForbidden())
+                .andExpect(header().doesNotExist(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
     }
 
     private void validarLogin(String email, String perfil) throws Exception {
-        mockMvc.perform(post("/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"email\":\"" + email + "\",\"senha\":\"123456\"}"))
+        mockMvc.perform(loginRequest(email, "123456"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.perfil").value(perfil))
                 .andExpect(jsonPath("$.cargo").value(perfil.toUpperCase()))
-                .andExpect(jsonPath("$.token").isNotEmpty())
-                .andExpect(jsonPath("$.expiraEm").isNotEmpty());
+                .andExpect(jsonPath("$.token").doesNotExist())
+                .andExpect(jsonPath("$.expiraEm").isNotEmpty())
+                .andExpect(header().exists(HttpHeaders.SET_COOKIE));
     }
 
     private String bearer(String email) {
         return "Bearer " + jwtService.emitir(email).token();
     }
 
-    private String tokenObtidoNoLogin(String email) throws Exception {
-        String token = com.jayway.jsonpath.JsonPath.read(mockMvc.perform(post("/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"email\":\"" + email + "\",\"senha\":\"123456\"}"))
+    private Cookie cookieObtidoNoLogin(String email) throws Exception {
+        Cookie cookie = mockMvc.perform(loginRequest(email, "123456"))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
-                .getContentAsString(), "$.token");
-        org.assertj.core.api.Assertions.assertThat(token).isNotBlank();
-        return "Bearer " + token;
+                .getCookie(JwtCookieService.COOKIE_NAME);
+        org.assertj.core.api.Assertions.assertThat(cookie).isNotNull();
+        return cookie;
+    }
+
+    private Cookie cookieCsrf(Cookie... existingCookies) throws Exception {
+        MockHttpServletRequestBuilder request = get("/csrf");
+        if (existingCookies.length > 0) request.cookie(existingCookies);
+        Cookie cookie = mockMvc.perform(request)
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getCookie("XSRF-TOKEN");
+        org.assertj.core.api.Assertions.assertThat(cookie).isNotNull();
+        org.assertj.core.api.Assertions.assertThat(cookie.isHttpOnly()).isFalse();
+        return cookie;
     }
 
     private void validarLoginInvalido(String email, String senha) throws Exception {
-        mockMvc.perform(post("/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"email\":\"" + email + "\",\"senha\":\"" + senha + "\"}"))
+        mockMvc.perform(loginRequest(email, senha))
                 .andExpect(status().isUnauthorized());
+    }
+
+    private MockHttpServletRequestBuilder loginRequest(String email, String senha,
+                                                       Cookie... existingCookies) throws Exception {
+        Cookie csrfCookie = cookieCsrf(existingCookies);
+        MockHttpServletRequestBuilder request = post("/login")
+                .cookie(csrfCookie)
+                .header("X-XSRF-TOKEN", csrfCookie.getValue())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"email\":\"" + email + "\",\"senha\":\"" + senha + "\"}");
+        if (existingCookies.length > 0) request.cookie(existingCookies);
+        return request;
     }
 }

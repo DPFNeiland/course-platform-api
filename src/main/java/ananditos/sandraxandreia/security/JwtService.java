@@ -52,21 +52,25 @@ public class JwtService {
     }
 
     public String validarEObterSubject(String token) {
+        return validar(token).subject();
+    }
+
+    public TokenValidado validar(String token) {
         if (token == null || token.isBlank()) {
             throw new JwtInvalidoException("TOKEN_INVALID", "Token JWT ausente");
         }
         try {
-            String subject = Jwts.parser()
+            var claims = Jwts.parser()
                     .verifyWith(secret)
                     .clock(() -> Date.from(clock.instant()))
                     .build()
                     .parseSignedClaims(token)
-                    .getPayload()
-                    .getSubject();
+                    .getPayload();
+            String subject = claims.getSubject();
             if (subject == null || subject.isBlank()) {
                 throw new JwtInvalidoException("TOKEN_INVALID", "Claim sub obrigatoria ausente");
             }
-            return subject;
+            return new TokenValidado(subject, claims.getExpiration().toInstant());
         } catch (ExpiredJwtException ex) {
             throw new JwtInvalidoException("TOKEN_EXPIRED", "Token JWT expirado");
         } catch (JwtException | IllegalArgumentException ex) {
@@ -75,5 +79,8 @@ public class JwtService {
     }
 
     public record TokenEmitido(String token, Instant expiraEm) {
+    }
+
+    public record TokenValidado(String subject, Instant expiraEm) {
     }
 }
