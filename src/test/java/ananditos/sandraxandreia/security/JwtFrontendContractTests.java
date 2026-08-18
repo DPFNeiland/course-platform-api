@@ -66,4 +66,39 @@ class JwtFrontendContractTests {
                 .contains("<script src=\"aluno.js\"></script>")
                 .doesNotContain("forum.js");
     }
+
+    @Test
+    void frontendDeveCentralizarApiBaseUrlECarregarConfiguracaoAntesDosModulos() throws IOException {
+        String localApiHardcode = "localhost:" + "8080";
+        for (String relative : List.of(
+                "auth.js", "aluno/aluno.js", "curador/curador.js", "professor/professor.js")) {
+            assertThat(Files.readString(frontend.resolve(relative)))
+                    .as("configuracao de API em %s", relative)
+                    .contains("window.APP_CONFIG.API_BASE_URL")
+                    .doesNotContain(localApiHardcode);
+        }
+
+        try (Stream<Path> files = Files.walk(frontend)) {
+            for (Path file : files.filter(Files::isRegularFile).toList()) {
+                if (file.equals(frontend.resolve("config.js"))) continue;
+                assertThat(Files.readString(file))
+                        .as("hardcode de API fora de config.js em %s", file)
+                        .doesNotContain(localApiHardcode);
+            }
+        }
+
+        try (Stream<Path> pages = Files.walk(frontend)) {
+            for (Path page : pages
+                    .filter(Files::isRegularFile)
+                    .filter(path -> path.toString().endsWith(".html"))
+                    .toList()) {
+                String html = Files.readString(page);
+                if (!html.contains("session.js")) continue;
+                assertThat(html.indexOf("config.js"))
+                        .as("ordem de configuracao em %s", page)
+                        .isGreaterThanOrEqualTo(0)
+                        .isLessThan(html.indexOf("session.js"));
+            }
+        }
+    }
 }

@@ -123,7 +123,7 @@ test('requisicao de escrita inclui credenciais e token CSRF', async () => {
     return { ok: true, status: 204 };
   });
   await loaded.jwtSession.authenticatedFetch(
-    'http://localhost:8080', '/recurso',
+    'https://api.test', '/recurso',
     { method: 'POST', headers: { 'Content-Type': 'application/json' } },
     '../index.html'
   );
@@ -140,7 +140,7 @@ test('requisicao GET inclui cookie sem exigir CSRF', async () => {
     return { ok: true, status: 200 };
   });
   await loaded.jwtSession.authenticatedFetch(
-    'http://localhost:8080', '/recurso', {}, '../index.html'
+    'https://api.test', '/recurso', {}, '../index.html'
   );
 
   assert.equal(calls[0].options.credentials, 'include');
@@ -160,11 +160,11 @@ test('logout invalida cookie no backend e limpa dados locais', async () => {
       return { ok: true, status: 204 };
     }
   );
-  const completed = await loaded.jwtSession.logout('http://localhost:8080', '../index.html');
+  const completed = await loaded.jwtSession.logout('https://api.test', '../index.html');
 
   assert.equal(calls.length, 2);
-  assert.equal(calls[0].url, 'http://localhost:8080/csrf');
-  assert.equal(calls[1].url, 'http://localhost:8080/logout');
+  assert.equal(calls[0].url, 'https://api.test/csrf');
+  assert.equal(calls[1].url, 'https://api.test/logout');
   assert.equal(calls[1].options.method, 'POST');
   assert.equal(calls[1].options.credentials, 'include');
   assert.equal(calls[1].options.headers['X-XSRF-TOKEN'], 'csrf-logout');
@@ -186,7 +186,7 @@ test('401 ao obter CSRF expira a sessao e redireciona', async () => {
 
   await assert.rejects(
     loaded.jwtSession.authenticatedFetch(
-      'http://localhost:8080', '/recurso', { method: 'POST' }, '../index.html'
+      'https://api.test', '/recurso', { method: 'POST' }, '../index.html'
     ),
     /Sessao expirada/
   );
@@ -218,7 +218,7 @@ test('CSRF rejeitado e renovado com apenas uma repeticao', async () => {
   });
 
   const response = await loaded.jwtSession.authenticatedFetch(
-    'http://localhost:8080', '/logout', { method: 'POST' }, '../index.html'
+    'https://api.test', '/logout', { method: 'POST' }, '../index.html'
   );
 
   assert.equal(response.status, 204);
@@ -247,7 +247,7 @@ test('segunda rejeicao CSRF encerra sem terceira tentativa', async () => {
   });
 
   const response = await loaded.jwtSession.authenticatedFetch(
-    'http://localhost:8080', '/recurso', { method: 'POST' }, '../index.html'
+    'https://api.test', '/recurso', { method: 'POST' }, '../index.html'
   );
 
   assert.equal(response.status, 403);
@@ -265,7 +265,7 @@ test('logout expirado preserva o motivo expired', async () => {
     })
   );
 
-  await loaded.jwtSession.logout('http://localhost:8080', '../index.html');
+  await loaded.jwtSession.logout('https://api.test', '../index.html');
 
   assert.equal(loaded.storage.has('session'), false);
   assert.equal(loaded.window.location.href, '../index.html?auth=expired');
@@ -281,7 +281,7 @@ test('logout com token invalido preserva o motivo invalid', async () => {
     })
   );
 
-  await loaded.jwtSession.logout('http://localhost:8080', '../index.html');
+  await loaded.jwtSession.logout('https://api.test', '../index.html');
 
   assert.equal(loaded.storage.has('session'), false);
   assert.equal(loaded.window.location.href, '../index.html?auth=invalid');
@@ -293,7 +293,7 @@ test('falha de rede no logout limpa dados visuais sem informar sucesso', async (
     async () => { throw new Error('rede indisponivel'); }
   );
 
-  const completed = await loaded.jwtSession.logout('http://localhost:8080', '../index.html');
+  const completed = await loaded.jwtSession.logout('https://api.test', '../index.html');
   assert.equal(loaded.storage.has('session'), false);
   assert.equal(loaded.storage.has('user'), false);
   assert.equal(loaded.window.location.href, '../index.html?auth=logout_failed');
@@ -309,7 +309,7 @@ for (const status of [403, 500]) {
         : { ok: false, status, clone: () => ({ json: async () => ({ codigo: 'ERRO' }) }) }
     );
 
-    const completed = await loaded.jwtSession.logout('http://localhost:8080', '../index.html');
+    const completed = await loaded.jwtSession.logout('https://api.test', '../index.html');
     assert.equal(completed, false);
     assert.equal(loaded.storage.has('session'), false);
     assert.equal(loaded.window.location.href, '../index.html?auth=logout_failed');
@@ -333,7 +333,7 @@ test('segunda rejeicao CSRF no logout nao informa sucesso nem repete novamente',
     };
   });
 
-  const completed = await loaded.jwtSession.logout('http://localhost:8080', '../index.html');
+  const completed = await loaded.jwtSession.logout('https://api.test', '../index.html');
   assert.equal(completed, false);
   assert.equal(csrfCount, 2);
   assert.equal(logoutCount, 2);
@@ -350,15 +350,15 @@ test('requisicao publica de autenticacao busca CSRF e inclui credenciais', async
     return { ok: true, status: 200 };
   });
 
-  await loaded.jwtSession.csrfFetch('http://localhost:8080', '/login', {
+  await loaded.jwtSession.csrfFetch('https://api.test', '/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: '{}'
   });
 
-  assert.equal(calls[0].url, 'http://localhost:8080/csrf');
+  assert.equal(calls[0].url, 'https://api.test/csrf');
   assert.equal(calls[0].options.credentials, 'include');
-  assert.equal(calls[1].url, 'http://localhost:8080/login');
+  assert.equal(calls[1].url, 'https://api.test/login');
   assert.equal(calls[1].options.credentials, 'include');
   assert.equal(calls[1].options.headers['X-XSRF-TOKEN'], 'csrf-login');
 });
@@ -366,12 +366,12 @@ test('requisicao publica de autenticacao busca CSRF e inclui credenciais', async
 test('recupera sessao em nova aba sem JWT', async () => {
   const recovered = validSession({ id: 10, nome: 'Aluno Teste' });
   const loaded = loadSession({}, async url => {
-    assert.equal(url, 'http://localhost:8080/session');
+    assert.equal(url, 'https://api.test/session');
     return { ok: true, status: 200, json: async () => recovered };
   });
 
   const session = await loaded.jwtSession.recoverSession(
-    'http://localhost:8080', ['aluno'], '../index.html'
+    'https://api.test', ['aluno'], '../index.html'
   );
 
   assert.equal(session.id, 10);
@@ -387,7 +387,7 @@ test('recuperacao em nova aba exige login quando o cookie expirou', async () => 
   }));
 
   const session = await loaded.jwtSession.recoverSession(
-    'http://localhost:8080', ['aluno'], '../index.html'
+    'https://api.test', ['aluno'], '../index.html'
   );
 
   assert.equal(session, null);
@@ -400,7 +400,7 @@ test('erro do servidor ao recuperar sessao nao e tratado como token expirado', a
 
   await assert.rejects(
     loaded.jwtSession.recoverSession(
-      'http://localhost:8080', ['aluno'], '../index.html'
+      'https://api.test', ['aluno'], '../index.html'
     ),
     /Nao foi possivel recuperar a sessao/
   );
