@@ -72,6 +72,9 @@ services:
     restart: always
     depends_on:
       - app
+    environment:
+      APP_ENV: ${APP_ENV:-development}
+      API_BASE_URL: ${API_BASE_URL:-}
     ports:
       - "5173:80"
     networks:

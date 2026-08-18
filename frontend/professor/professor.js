@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', async function() {
-  const API_BASE_URL = 'http://localhost:8080';
+  const API_BASE_URL = window.APP_CONFIG.API_BASE_URL;
   const state = { user: null, cursos: [], matriculas: [], alunos: [] };
 
   const api = async (path, options = {}) => {
