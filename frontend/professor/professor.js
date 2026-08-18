@@ -179,12 +179,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     finishLoading(document.querySelector('.events-section'));
   };
 
-  const renderAgenda = () => {
-    if (!isAgendaPage()) return;
-    renderCalendar();
-    renderAgendaCourses();
-  };
-
   const renderAgendaError = error => {
     if (!isAgendaPage()) return false;
     renderCalendar();
@@ -298,10 +292,11 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   const refreshData = async () => {
     if (isAgendaPage()) {
-      const cursos = await api('/curso');
+      renderCalendar();
+      const cursos = await api(`/curso/professor/${state.user.id}`);
       if (!Array.isArray(cursos)) throw new Error('Resposta de cursos inválida.');
       state.cursos = cursos;
-      renderAgenda();
+      renderAgendaCourses();
       return;
     }
 
@@ -314,7 +309,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     state.matriculas = matriculas;
     state.alunos = alunos;
     renderDashboard();
-    renderAgenda();
     renderAvaliacoes();
     renderMateriais();
     renderDesempenho();
