@@ -270,6 +270,28 @@ class FrontendContractTests {
         assertThat(frontend.resolve("aluno/style/boletim.css")).doesNotExist();
 
         try (Stream<Path> files = Files.walk(frontend)) {
+            List<Path> pages = files
+                    .filter(Files::isRegularFile)
+                    .filter(path -> path.getFileName().toString().endsWith(".html"))
+                    .toList();
+
+            assertThat(pages).isNotEmpty();
+            for (Path page : pages) {
+                assertThat(Files.readString(page))
+                        .as("navegacao de %s", frontend.relativize(page))
+                        .doesNotContain("boletim.html");
+            }
+        }
+
+        String alunoScript = Files.readString(frontend.resolve("aluno/aluno.js"));
+        assertThat(alunoScript)
+                .doesNotContain(
+                        "renderBoletim",
+                        "select-curso",
+                        "notas-section",
+                        "midia-final");
+
+        try (Stream<Path> files = Files.walk(frontend.resolve("aluno"))) {
             List<Path> sources = files
                     .filter(Files::isRegularFile)
                     .filter(path -> Stream.of(".html", ".js", ".css")
@@ -280,13 +302,19 @@ class FrontendContractTests {
             assertThat(sources).isNotEmpty();
             for (Path source : sources) {
                 assertThat(Files.readString(source))
-                        .as("conteudo de %s", frontend.relativize(source))
+                        .as("dados de boletim em %s", frontend.relativize(source))
                         .doesNotContain(
-                                "boletim.html",
-                                "renderBoletim",
-                                "select-curso",
-                                "notas-section",
-                                "midia-final");
+                                "React Avançado",
+                                "Python para Data Science",
+                                "Design de Interfaces",
+                                "Node.js e Express",
+                                "Média Final",
+                                ">8.7<",
+                                ">9.2<",
+                                ">8.1<",
+                                ">7.9<",
+                                ">9.5<",
+                                "class=\"nota\">-");
             }
         }
     }
