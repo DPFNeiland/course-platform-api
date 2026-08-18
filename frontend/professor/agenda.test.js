@@ -64,15 +64,28 @@ function treeTags(node) {
   return [node.tagName, ...(node.children || []).flatMap(treeTags)].filter(Boolean);
 }
 
-function expectedMonth(offset = 0) {
-  const date = new Date();
+function fixedDate(now) {
+  const timestamp = new Date(now).getTime();
+  return class extends Date {
+    constructor(...args) {
+      super(...(args.length ? args : [timestamp]));
+    }
+
+    static now() {
+      return timestamp;
+    }
+  };
+}
+
+function expectedMonth(now, offset = 0) {
+  const date = new Date(now);
   date.setDate(1);
   date.setMonth(date.getMonth() + offset);
   const label = date.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
   return label.charAt(0).toUpperCase() + label.slice(1);
 }
 
-function createHarness(courseResponse = response([])) {
+function createHarness(courseResponse = response([]), now = '2026-08-18T12:00:00Z') {
   const listeners = {};
   const calls = [];
   const calendarSection = element('section');
@@ -131,6 +144,7 @@ function createHarness(courseResponse = response([])) {
   const context = {
     window,
     document,
+    Date: fixedDate(now),
     sessionStorage: { setItem() {} },
     alert() {},
     console
@@ -152,16 +166,17 @@ function createHarness(courseResponse = response([])) {
   };
 }
 
-test('mantem loading ate os cursos chegarem e renderiza o mes atual com dados do professor', async () => {
+test('renderiza o mes atual enquanto mantem loading apenas nos cursos do professor', async () => {
   const courses = deferred();
   const harness = createHarness(courses.promise);
 
   const loading = harness.start();
   await new Promise(resolve => setImmediate(resolve));
 
-  assert.equal(harness.monthTitle.textContent, 'Carregando mês atual...');
-  assert.equal(harness.calendarSection.attributes.get('aria-busy'), 'true');
-  assert.equal(harness.nextButton.disabled, true);
+  assert.equal(harness.monthTitle.textContent, expectedMonth('2026-08-18T12:00:00Z'));
+  assert.equal(harness.calendarSection.attributes.has('aria-busy'), false);
+  assert.equal(harness.eventsSection.attributes.get('aria-busy'), 'true');
+  assert.equal(harness.nextButton.disabled, false);
 
   courses.resolve(response([
     { id: 10, professorId: 7, nome: 'Curso Real', status: 'APROVADO' },
@@ -169,26 +184,36 @@ test('mantem loading ate os cursos chegarem e renderiza o mes atual com dados do
   ]));
   await loading;
 
-  assert.equal(harness.monthTitle.textContent, expectedMonth());
+  assert.equal(harness.monthTitle.textContent, expectedMonth('2026-08-18T12:00:00Z'));
   assert.ok([28, 35, 42].includes(harness.calendarGrid.children.length));
   assert.equal(harness.calendarGrid.children.filter(day => day.className.includes('today')).length, 1);
   assert.match(treeText(harness.eventsList), /Curso Real/);
   assert.doesNotMatch(treeText(harness.eventsList), /Curso de Outro Professor/);
-  assert.deepEqual(harness.calls, ['/curso']);
+  assert.deepEqual(harness.calls, ['/curso/professor/7']);
   assert.equal(harness.calendarSection.attributes.has('aria-busy'), false);
   assert.equal(harness.eventsSection.attributes.has('aria-busy'), false);
 });
 
-test('navegacao altera o mes exibido e recalcula os dias', async () => {
-  const harness = createHarness();
+test('navegacao atravessa a virada do ano e recalcula os dias', async () => {
+  const now = '2026-12-15T12:00:00Z';
+  const harness = createHarness(response([]), now);
   await harness.start();
 
   harness.navigate(harness.nextButton);
-  assert.equal(harness.monthTitle.textContent, expectedMonth(1));
+  assert.equal(harness.monthTitle.textContent, expectedMonth(now, 1));
   assert.ok([28, 35, 42].includes(harness.calendarGrid.children.length));
 
   harness.navigate(harness.previousButton);
-  assert.equal(harness.monthTitle.textContent, expectedMonth());
+  assert.equal(harness.monthTitle.textContent, expectedMonth(now));
+});
+
+test('fevereiro bissexto inclui o dia 29 no calendario', async () => {
+  const harness = createHarness(response([]), '2024-02-15T12:00:00Z');
+  await harness.start();
+
+  const leapDay = harness.calendarGrid.children.find(day => day.dataset.date === '2024-02-29');
+  assert.ok(leapDay);
+  assert.equal(leapDay.className.includes('other-month'), false);
 });
 
 test('lista vazia apresenta estado real sem inventar eventos', async () => {
@@ -203,7 +228,7 @@ test('erro ao carregar cursos encerra o loading e preserva o calendario atual', 
   const harness = createHarness(response({ message: 'API indisponível' }, 500));
   await harness.start();
 
-  assert.equal(harness.monthTitle.textContent, expectedMonth());
+  assert.equal(harness.monthTitle.textContent, expectedMonth('2026-08-18T12:00:00Z'));
   assert.match(treeText(harness.eventsList), /API indisponível/);
   assert.equal(harness.calendarSection.attributes.has('aria-busy'), false);
   assert.equal(harness.eventsSection.attributes.has('aria-busy'), false);

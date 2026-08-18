@@ -1,6 +1,8 @@
 package ananditos.sandraxandreia.controller;
 
 import ananditos.sandraxandreia.domain.curso.Curso;
+import ananditos.sandraxandreia.domain.curso.CursoAssinatura;
+import ananditos.sandraxandreia.domain.curso.TipoCurso;
 import ananditos.sandraxandreia.domain.professor.Professor;
 import ananditos.sandraxandreia.domain.professor.TipoEnsinoProfessor;
 import ananditos.sandraxandreia.domain.usuario.GeneroUsuario;
@@ -19,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -127,6 +130,37 @@ class CursoControllerIntegrationTests {
 
         assertThat(cursoRepository.findAll())
                 .noneMatch(curso -> curso.getNome().equals("Curso Sem Professor"));
+    }
+
+    @Test
+    void getCursosPorProfessorRetornaSomenteCursosDoProfessorInformado() throws Exception {
+        Professor outroProfessor = professorRepository.save(new Professor(
+                null,
+                "Outro Professor",
+                "outro-professor@teste.com",
+                "123456",
+                "98765432100",
+                GeneroUsuario.MASCULINO,
+                "11/09/1990",
+                "Matematica",
+                45.0,
+                TipoEnsinoProfessor.ASSINCRONO
+        ));
+
+        Curso cursoProprio = new Curso(null, "Curso da Agenda", CursoAssinatura.COMUM, TipoCurso.SINCRONO);
+        cursoProprio.setProfessor(professor);
+        cursoRepository.save(cursoProprio);
+
+        Curso cursoDeOutroProfessor = new Curso(null, "Curso de Outro Professor", CursoAssinatura.PREMIUM, TipoCurso.ASSINCRONO);
+        cursoDeOutroProfessor.setProfessor(outroProfessor);
+        cursoRepository.save(cursoDeOutroProfessor);
+
+        mockMvc.perform(get("/curso/professor/{professorId}", professor.getId())
+                        .header("Authorization", bearer()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].nome").value("Curso da Agenda"))
+                .andExpect(jsonPath("$[0].professorId").value(professor.getId()))
+                .andExpect(jsonPath("$[1]").doesNotExist());
     }
 
     private String bearer() {

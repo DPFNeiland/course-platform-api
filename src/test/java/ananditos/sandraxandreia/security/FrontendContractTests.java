@@ -215,7 +215,7 @@ class FrontendContractTests {
                 .contains("const renderAgendaCourses = () =>")
                 .contains("agendaMonth.toLocaleDateString('pt-BR'")
                 .contains("Number(curso.professorId) === Number(state.user.id)")
-                .contains("api('/curso')")
+                .contains("api(`/curso/professor/${state.user.id}`)")
                 .contains("renderAgendaError");
     }
 
