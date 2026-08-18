@@ -205,30 +205,113 @@ const renderAchievementsError = error => {
   return true;
 };
 
-const renderSalaAula = () => {
+const createMaterialCard = (material, cursoId) => {
+  const card = document.createElement('article');
+  card.className = 'card material-card';
+  const title = material.titulo || material.nomeArquivo || 'Material do curso';
+  card.append(
+    createTextElement('h4', '', title),
+    createTextElement('p', '', formatEnum(material.tipo))
+  );
+
+  const link = createTextElement('a', 'btn-pill btn-secondary', material.tipo === 'ARQUIVO' ? 'Baixar' : 'Acessar');
+  if (material.tipo === 'ARQUIVO' && material.id != null) {
+    link.href = `${API_BASE_URL}/curso/${cursoId}/materiais/${material.id}/arquivo`;
+  } else if (material.tipo === 'LINK' && /^https?:\/\//i.test(material.url || '')) {
+    link.href = material.url;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+  } else {
+    link.removeAttribute('href');
+    link.className += ' disabled';
+    link.textContent = 'Indisponível';
+  }
+  card.append(link);
+  return card;
+};
+
+const renderMaterialsState = (container, message) => {
+  container.replaceChildren(createTextElement('p', 'empty-state', message));
+  finishLoading(container);
+};
+
+const renderSalaAula = async () => {
   const lessonTitle = document.querySelector('.lesson-title');
   if (!lessonTitle) return;
   const params = new URLSearchParams(window.location.search);
-  const curso = cursoPorId(params.get('cursoId')) || cursoPorId(appState.matriculas[0]?.cursoId);
-  const matricula = curso ? matriculaDoCurso(curso.id) : null;
-  lessonTitle.textContent = curso?.nome || 'Nenhum curso selecionado';
-  document.querySelector('.lesson-description')?.replaceChildren(document.createTextNode(curso
-    ? `Curso ${formatEnum(curso.tipoCurso)} no plano ${formatEnum(curso.tipoAssinatura)}.`
-    : 'Matricule-se em um curso aprovado para acessar a sala de aula.'));
-  document.querySelector('.progress-text')?.replaceChildren(document.createTextNode(matricula?.status === 'ENCERRADA' ? '100% concluido' : 'Em andamento'));
+  const cursoIdSolicitado = Number(params.get('cursoId'));
+  const matricula = cursoIdSolicitado
+    ? matriculaDoCurso(cursoIdSolicitado)
+    : appState.matriculas[0];
+  const curso = matricula ? cursoPorId(matricula.cursoId) : null;
+  const courseName = curso?.nome || 'Nenhum curso selecionado';
+
+  document.querySelectorAll('[data-room-course-title]').forEach(element => {
+    element.textContent = courseName;
+    finishLoading(element);
+  });
+  lessonTitle.textContent = courseName;
+  finishLoading(lessonTitle);
+
+  const description = document.querySelector('.lesson-description');
+  if (description) {
+    description.replaceChildren(document.createTextNode(curso
+      ? `Curso ${formatEnum(curso.tipoCurso)} no plano ${formatEnum(curso.tipoAssinatura)}.`
+      : 'Matricule-se em um curso aprovado para acessar a sala de aula.'));
+    finishLoading(description);
+  }
+
+  const finished = matricula?.status === 'ENCERRADA';
+  const progressText = document.querySelector('.progress-text');
+  if (progressText) {
+    progressText.textContent = finished
+      ? '100% concluído'
+      : matricula
+        ? `Progresso detalhado em breve — ${formatEnum(matricula.status)}`
+        : 'Progresso indisponível';
+    finishLoading(progressText);
+  }
   const fill = document.querySelector('.lesson-content .progress-fill');
-  if (fill) fill.style.width = matricula?.status === 'ENCERRADA' ? '100%' : '25%';
-  const button = document.querySelector('.lesson-content .btn-primary');
+  if (fill) fill.style.width = finished ? '100%' : '0%';
+
+  const button = document.querySelector('.complete-course-btn');
+  if (button) {
+    button.textContent = finished
+      ? 'Curso concluído'
+      : matricula
+        ? 'Marcar curso como concluído'
+        : 'Matrícula necessária';
+    button.disabled = !matricula || finished;
+    delete button.dataset.completeMatricula;
+    delete button.dataset.courseId;
+  }
   if (button && matricula) {
-    button.textContent = matricula.status === 'ENCERRADA' ? 'Curso concluido' : 'Marcar como Concluido';
     button.dataset.completeMatricula = matricula.id;
     button.dataset.courseId = matricula.cursoId;
-    button.disabled = matricula.status === 'ENCERRADA';
   }
+
   const comments = document.querySelector('.comments-list');
-  if (comments) comments.innerHTML = '<p class="empty-state">Forum e comentarios ainda nao possuem endpoint no backend.</p>';
+  if (comments) comments.replaceChildren(createTextElement('p', 'empty-state', 'Comentários em breve.'));
+
   const materials = document.querySelector('.support-materials .cards-grid');
-  if (materials) materials.innerHTML = '<p class="empty-state">Materiais ainda nao possuem endpoint no backend.</p>';
+  if (!materials) return;
+  if (!curso || !matricula) {
+    renderMaterialsState(materials, 'Matricule-se em um curso para acessar os materiais.');
+    return;
+  }
+
+  try {
+    const courseMaterials = await api(`/curso/${curso.id}/materiais`);
+    if (!Array.isArray(courseMaterials)) throw new Error('Resposta de materiais inválida.');
+    if (!courseMaterials.length) {
+      renderMaterialsState(materials, 'Nenhum material disponível para este curso.');
+      return;
+    }
+    materials.replaceChildren(...courseMaterials.map(material => createMaterialCard(material, curso.id)));
+    finishLoading(materials);
+  } catch (error) {
+    renderMaterialsState(materials, error?.message || 'Não foi possível carregar os materiais.');
+  }
 };
 
 const renderCertificates = () => {
@@ -315,7 +398,7 @@ const refreshData = async () => {
   renderStudentProgress();
   renderDashboardStats();
   renderAchievements();
-  renderSalaAula();
+  await renderSalaAula();
   renderCertificates();
   renderCertificateDetail();
   renderForum();
