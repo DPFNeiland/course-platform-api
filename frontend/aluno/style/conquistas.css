@@ -113,6 +113,26 @@ body {
   box-shadow: var(--shadow-hover);
 }
 
+.achievement-skeleton,
+.ranking-skeleton {
+  background: linear-gradient(90deg, #eef2f7 25%, #f8fafc 50%, #eef2f7 75%);
+  background-size: 200% 100%;
+  animation: achievement-loading 1.4s ease-in-out infinite;
+}
+
+.achievement-skeleton {
+  min-height: 230px;
+}
+
+.ranking-skeleton {
+  min-height: 96px;
+}
+
+@keyframes achievement-loading {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
 .icon {
   font-size: 4rem;
   margin-bottom: 1rem;
@@ -174,21 +194,6 @@ body {
   border-radius: 9999px;
   background: linear-gradient(90deg, var(--success-green), var(--warning-yellow));
   transition: width .4s ease;
-}
-
-/* CONQUISTAS ESPECIAIS --------------------------------- */
-
-.special-section {
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-  padding: 3rem;
-  border-radius: var(--radius-lg);
-  color: white;
-  margin-bottom: 4rem;
-}
-
-.special-section h2 {
-  text-align: center;
-  margin-bottom: 2rem;
 }
 
 /* RANKING ----------------------------------------------- */
@@ -291,5 +296,12 @@ body {
     flex-wrap: wrap;
     text-align: center;
     justify-content: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .achievement-skeleton,
+  .ranking-skeleton {
+    animation: none;
   }
 }
