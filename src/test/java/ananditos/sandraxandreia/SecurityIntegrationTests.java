@@ -381,6 +381,25 @@ class SecurityIntegrationTests {
     }
 
     @Test
+    void sessaoDeveRejeitarCookiesInvalidosEExpiradosComCodigoAdequado() throws Exception {
+        JwtService expiredIssuer = new JwtService(
+                "test-only-jwt-secret-with-at-least-32-characters",
+                1,
+                Clock.fixed(Instant.now().minusSeconds(2), ZoneOffset.UTC));
+
+        mockMvc.perform(get("/session")
+                        .cookie(new Cookie(JwtCookieService.COOKIE_NAME, "token.invalido.aqui")))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.codigo").value("TOKEN_INVALID"));
+
+        mockMvc.perform(get("/session")
+                        .cookie(new Cookie(JwtCookieService.COOKIE_NAME,
+                                expiredIssuer.emitir("aluno@teste.com").token())))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.codigo").value("TOKEN_EXPIRED"));
+    }
+
+    @Test
     void corsDeveAceitarCredenciaisApenasDeOrigemPermitida() throws Exception {
         mockMvc.perform(options("/aluno")
                         .header(HttpHeaders.ORIGIN, "http://localhost:5173")

@@ -25,4 +25,16 @@ class JwtCookieServiceTests {
         assertThat(cookie.isSecure()).isFalse();
         assertThat(cookie.isHttpOnly()).isTrue();
     }
+
+    @Test
+    void remocaoDeveExpirarCookieMantendoOsAtributosDeSeguranca() {
+        ResponseCookie cookie = new JwtCookieService(true, 3600).remover();
+
+        assertThat(cookie.getValue()).isEmpty();
+        assertThat(cookie.getMaxAge()).isZero();
+        assertThat(cookie.isHttpOnly()).isTrue();
+        assertThat(cookie.isSecure()).isTrue();
+        assertThat(cookie.getSameSite()).isEqualTo("Strict");
+        assertThat(cookie.getPath()).isEqualTo("/");
+    }
 }

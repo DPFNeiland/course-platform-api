@@ -378,3 +378,32 @@ test('recupera sessao em nova aba sem JWT', async () => {
   assert.equal('token' in session, false);
   assert.equal(JSON.parse(loaded.storage.get('session')).nome, 'Aluno Teste');
 });
+
+test('recuperacao em nova aba exige login quando o cookie expirou', async () => {
+  const loaded = loadSession({}, async () => ({
+    ok: false,
+    status: 401,
+    json: async () => ({ codigo: 'TOKEN_EXPIRED' })
+  }));
+
+  const session = await loaded.jwtSession.recoverSession(
+    'http://localhost:8080', ['aluno'], '../index.html'
+  );
+
+  assert.equal(session, null);
+  assert.equal(loaded.storage.has('session'), false);
+  assert.equal(loaded.window.location.href, '../index.html?auth=expired');
+});
+
+test('erro do servidor ao recuperar sessao nao e tratado como token expirado', async () => {
+  const loaded = loadSession({}, async () => ({ ok: false, status: 500 }));
+
+  await assert.rejects(
+    loaded.jwtSession.recoverSession(
+      'http://localhost:8080', ['aluno'], '../index.html'
+    ),
+    /Nao foi possivel recuperar a sessao/
+  );
+
+  assert.equal(loaded.window.location.href, '');
+});
