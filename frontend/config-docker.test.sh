@@ -19,16 +19,24 @@ read_config() {
     result=0
     output="$(docker exec "$container" cat "$config_path" 2>/dev/null)" || result=$?
   fi
+  if [ "$result" -ne 0 ]; then
+    docker logs "$container" >&2 || true
+  fi
   docker rm -f "$container" >/dev/null 2>&1 || true
   printf '%s\n' "$output"
   return "$result"
 }
 
 assert_invalid() {
-  description="$1"
-  shift
-  if read_config "$@" >/dev/null 2>&1; then
+  expected_message="$1"
+  description="$2"
+  shift 2
+  if errors="$(read_config "$@" 2>&1 >/dev/null)"; then
     echo "Falha: $description deveria impedir a inicializacao." >&2
+    exit 1
+  fi
+  if ! printf '%s\n' "$errors" | grep -Fq "$expected_message"; then
+    echo "Falha: $description nao apresentou a mensagem esperada: $expected_message" >&2
     exit 1
   fi
 }
@@ -45,9 +53,18 @@ printf '%s\n' "$normalized" | grep -q "API_BASE_URL: 'https://api.example.test'"
 
 read_config -e APP_ENV=development >/dev/null
 
-assert_invalid "URL ausente em producao" -e APP_ENV=production
-assert_invalid "URL sem protocolo" -e APP_ENV=staging -e API_BASE_URL=api.example.test
-assert_invalid "URL com espaco" -e APP_ENV=staging -e "API_BASE_URL=https://api example.test"
-assert_invalid "URL com aspas" -e APP_ENV=staging -e "API_BASE_URL=https://api.example.test/';alert(1)//"
+development="$(read_config \
+  -e APP_ENV=development \
+  -e API_BASE_URL=http://api-dev.example.test:8081/v1/)"
+printf '%s\n' "$development" | grep -q "API_BASE_URL: 'http://api-dev.example.test:8081/v1'"
+
+assert_invalid "API_BASE_URL e obrigatoria" "URL ausente em producao" -e APP_ENV=production
+assert_invalid "deve utilizar HTTPS" "HTTP em producao" -e APP_ENV=production -e API_BASE_URL=http://api.example.test
+assert_invalid "API_BASE_URL invalida" "URL sem protocolo" -e APP_ENV=staging -e API_BASE_URL=api.example.test
+assert_invalid "API_BASE_URL invalida" "URL com espaco" -e APP_ENV=staging -e "API_BASE_URL=https://api example.test"
+assert_invalid "API_BASE_URL invalida" "URL com aspas" -e APP_ENV=staging -e "API_BASE_URL=https://api.example.test/';alert(1)//"
+assert_invalid "API_BASE_URL invalida" "hostname malformado" -e APP_ENV=staging -e API_BASE_URL=https://...
+assert_invalid "porta deve estar" "porta acima do limite" -e APP_ENV=staging -e API_BASE_URL=https://api.example.test:70000
+assert_invalid "API_BASE_URL invalida" "URL com query" -e APP_ENV=staging -e "API_BASE_URL=https://api.example.test?version=1"
 
 echo "Configuracao Docker validada com sucesso."
