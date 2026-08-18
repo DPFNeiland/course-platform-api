@@ -147,7 +147,10 @@ class FrontendContractTests {
         assertThat(script)
                 .contains("document.querySelector('.courses-grid, [data-curator-courses]')")
                 .contains("container.removeAttribute('aria-busy')")
-                .contains("container.innerHTML = state.cursos.length");
+                .contains("container.innerHTML = state.cursos.length")
+                .contains("message.textContent = error?.message")
+                .contains("container.replaceChildren(message)")
+                .doesNotContain("insertAdjacentHTML");
         assertThat(styles)
                 .contains(".course-skeleton")
                 .contains("@keyframes skeleton-pulse")
