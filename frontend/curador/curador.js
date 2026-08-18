@@ -37,6 +37,15 @@ document.addEventListener('DOMContentLoaded', async function() {
   const cursoPorId = id => state.cursos.find(curso => Number(curso.id) === Number(id));
   const alunoPorId = id => state.alunos.find(aluno => Number(aluno.id) === Number(id));
   const professorPorId = id => state.professores.find(prof => Number(prof.id) === Number(id));
+  const catalogContainer = () => {
+    const container = document.querySelector('.courses-grid, [data-curator-courses]');
+    return container && !document.querySelector('[data-pending-courses]') ? container : null;
+  };
+
+  const finishCatalogLoading = container => {
+    container.removeAttribute('aria-busy');
+    container.removeAttribute('aria-label');
+  };
 
   const updateIdentity = () => {
     document.querySelectorAll('.avatar').forEach(el => {
@@ -81,10 +90,9 @@ document.addEventListener('DOMContentLoaded', async function() {
   };
 
   const renderCatalog = () => {
-    const container = document.querySelector('.courses-grid, [data-curator-courses]');
-    if (!container || document.querySelector('[data-pending-courses]')) return;
-    container.removeAttribute('aria-busy');
-    container.removeAttribute('aria-label');
+    const container = catalogContainer();
+    if (!container) return;
+    finishCatalogLoading(container);
     container.innerHTML = state.cursos.length
       ? state.cursos.map(curso => `
         <article class="course-card">
@@ -102,6 +110,18 @@ document.addEventListener('DOMContentLoaded', async function() {
         </article>
       `).join('')
       : '<p class="empty-state">Nenhum curso cadastrado.</p>';
+  };
+
+  const renderCatalogError = error => {
+    const container = catalogContainer();
+    if (!container) return false;
+
+    const message = document.createElement('p');
+    message.className = 'empty-state';
+    message.textContent = error?.message || 'Nao foi possivel carregar os cursos.';
+    finishCatalogLoading(container);
+    container.replaceChildren(message);
+    return true;
   };
 
   const renderDashboard = () => {
@@ -206,7 +226,22 @@ document.addEventListener('DOMContentLoaded', async function() {
     await refreshData();
   };
 
+  async function refreshCatalog() {
+    const [cursos, professores] = await Promise.all([
+      api('/curso'),
+      api('/professor').catch(() => [])
+    ]);
+    state.cursos = cursos;
+    state.professores = professores;
+    renderCatalog();
+  }
+
   async function refreshData() {
+    if (catalogContainer()) {
+      await refreshCatalog();
+      return;
+    }
+
     const [cursos, matriculas, alunos, professores, usuarios] = await Promise.all([
       api('/curso'),
       api('/matricula'),
@@ -259,6 +294,13 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   updateIdentity();
   await refreshData().catch(err => {
-    document.querySelector('main, .container')?.insertAdjacentHTML('afterbegin', `<p class="empty-state">${err.message}</p>`);
+    if (renderCatalogError(err)) return;
+
+    const target = document.querySelector('main, .container');
+    if (!target) return;
+    const message = document.createElement('p');
+    message.className = 'empty-state';
+    message.textContent = err.message;
+    target.prepend(message);
   });
 });
