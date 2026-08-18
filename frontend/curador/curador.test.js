@@ -22,6 +22,32 @@ function deferred() {
   return { promise, resolve };
 }
 
+function element(tagName) {
+  return {
+    tagName: tagName.toUpperCase(),
+    className: '',
+    textContent: '',
+    dataset: {},
+    children: [],
+    appendChild(child) {
+      this.children.push(child);
+      return child;
+    },
+    replaceChildren(...children) {
+      this.children = children;
+      this.innerHTML = '';
+    }
+  };
+}
+
+function treeText(node) {
+  return [node.textContent, ...(node.children || []).map(treeText)].join(' ');
+}
+
+function treeTags(node) {
+  return [node.tagName, ...(node.children || []).flatMap(treeTags)].filter(Boolean);
+}
+
 function createHarness(responses = {}) {
   const listeners = {};
   const calls = [];
@@ -29,15 +55,9 @@ function createHarness(responses = {}) {
     ['aria-busy', 'true'],
     ['aria-label', 'Carregando cursos']
   ]);
-  const container = {
-    innerHTML: '<div class="course-skeleton"></div>',
-    children: [],
-    removeAttribute: name => attributes.delete(name),
-    replaceChildren(...children) {
-      this.children = children;
-      this.innerHTML = '';
-    }
-  };
+  const container = element('div');
+  container.innerHTML = '<div class="course-skeleton"></div>';
+  container.removeAttribute = name => attributes.delete(name);
 
   const document = {
     addEventListener(type, listener) {
@@ -52,7 +72,7 @@ function createHarness(responses = {}) {
       return [];
     },
     createElement(tagName) {
-      return { tagName: tagName.toUpperCase(), className: '', textContent: '' };
+      return element(tagName);
     }
   };
   const sessionStorage = { setItem() {} };
@@ -115,7 +135,7 @@ test('mantem o skeleton enquanto GET /curso esta pendente e depois exibe os curs
   }]));
   await loading;
 
-  assert.match(harness.container.innerHTML, /Curso Real/);
+  assert.match(treeText(harness.container), /Curso Real/);
   assert.doesNotMatch(harness.container.innerHTML, /course-skeleton/);
   assert.equal(harness.attributes.has('aria-busy'), false);
 });
@@ -128,8 +148,80 @@ test('lista vazia encerra o loading e apresenta o estado vazio', async () => {
 
   await harness.start();
 
-  assert.match(harness.container.innerHTML, /Nenhum curso cadastrado/);
+  assert.match(treeText(harness.container), /Nenhum curso cadastrado/);
   assert.equal(harness.attributes.has('aria-busy'), false);
+});
+
+test('exibe os cursos sem aguardar GET /professor e atualiza o nome depois', async () => {
+  const professores = deferred();
+  const harness = createHarness({
+    '/curso': response([{
+      id: 1,
+      nome: 'Curso Real',
+      professorId: 7,
+      tipoCurso: 'ONLINE',
+      tipoAssinatura: 'GRATUITO',
+      status: 'APROVADO'
+    }]),
+    '/professor': professores.promise
+  });
+
+  await harness.start();
+
+  assert.doesNotMatch(harness.container.innerHTML, /course-skeleton/);
+  assert.match(treeText(harness.container), /Curso Real/);
+  assert.match(treeText(harness.container), /Professor #7/);
+  assert.equal(harness.attributes.has('aria-busy'), false);
+
+  professores.resolve(response([{ id: 7, nome: 'Professora Real' }]));
+  await new Promise(resolve => setImmediate(resolve));
+
+  assert.match(treeText(harness.container), /Professora Real/);
+});
+
+test('falha ao carregar professores nao impede a exibicao dos cursos', async () => {
+  const harness = createHarness({
+    '/curso': response([{
+      id: 1,
+      nome: 'Curso sem professor carregado',
+      professorId: 8,
+      tipoCurso: 'PRESENCIAL',
+      tipoAssinatura: 'PAGO',
+      status: 'APROVADO'
+    }]),
+    '/professor': () => Promise.reject(new Error('Falha ao carregar professores'))
+  });
+
+  await harness.start();
+  await new Promise(resolve => setImmediate(resolve));
+
+  assert.match(treeText(harness.container), /Curso sem professor carregado/);
+  assert.match(treeText(harness.container), /Professor #8/);
+  assert.equal(harness.attributes.has('aria-busy'), false);
+});
+
+test('renderiza nomes de curso e professor como texto sem criar HTML', async () => {
+  const unsafeCourseName = '<img src=x onerror=alert(1)>';
+  const unsafeProfessorName = '<script>alert(2)</script>';
+  const harness = createHarness({
+    '/curso': response([{
+      id: 1,
+      nome: unsafeCourseName,
+      professorId: 7,
+      tipoCurso: 'ONLINE',
+      tipoAssinatura: 'GRATUITO',
+      status: 'APROVADO'
+    }]),
+    '/professor': response([{ id: 7, nome: unsafeProfessorName }])
+  });
+
+  await harness.start();
+  await new Promise(resolve => setImmediate(resolve));
+
+  assert.match(treeText(harness.container), /<img src=x onerror=alert\(1\)>/);
+  assert.match(treeText(harness.container), /<script>alert\(2\)<\/script>/);
+  assert.equal(treeTags(harness.container).includes('IMG'), false);
+  assert.equal(treeTags(harness.container).includes('SCRIPT'), false);
 });
 
 test('falha ao carregar cursos encerra o loading e apresenta mensagem como texto', async () => {
@@ -171,5 +263,5 @@ test('catalogo nao aguarda nem consulta matriculas para renderizar', async () =>
   await harness.start();
 
   assert.equal(harness.calls.includes('/matricula'), false);
-  assert.match(harness.container.innerHTML, /Nenhum curso cadastrado/);
+  assert.match(treeText(harness.container), /Nenhum curso cadastrado/);
 });
