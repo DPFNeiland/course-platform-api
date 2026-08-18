@@ -10,9 +10,10 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class JwtFrontendContractTests {
+class FrontendContractTests {
 
-    private final Path frontend = Path.of(System.getProperty("user.dir"), "frontend");
+    private final Path project = Path.of(System.getProperty("user.dir"));
+    private final Path frontend = project.resolve("frontend");
 
     @Test
     void frontendNaoDeveExporJwtOuCredenciaisViaJavascript() throws IOException {
@@ -100,5 +101,19 @@ class JwtFrontendContractTests {
                         .isLessThan(html.indexOf("session.js"));
             }
         }
+    }
+
+    @Test
+    void configuracaoPorAmbienteDeveEstarDocumentada() throws IOException {
+        Path envExample = project.resolve(".env.example");
+
+        assertThat(envExample).exists();
+        assertThat(Files.readString(envExample))
+                .contains("APP_ENV=development")
+                .contains("API_BASE_URL=")
+                .contains("APP_ENV=staging")
+                .contains("APP_ENV=production")
+                .contains("CORS_ALLOWED_ORIGINS")
+                .contains("HTTPS");
     }
 }

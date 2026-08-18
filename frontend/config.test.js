@@ -15,13 +15,17 @@ test('configuracao local fornece uma unica API_BASE_URL', () => {
   const config = execute(source);
 
   assert.equal(typeof config.API_BASE_URL, 'string');
+  assert.notEqual(config.API_BASE_URL.trim(), '');
   assert.equal(Object.isFrozen(config), true);
 });
 
-test('template aceita URL diferente por configuracao de deploy', () => {
+test('template preserva o mesmo contrato da configuracao local', () => {
+  const localSource = fs.readFileSync(path.join(__dirname, 'config.js'), 'utf8');
   const template = fs.readFileSync(path.join(__dirname, 'config.template.js'), 'utf8');
   const configuredSource = template.replace('${API_BASE_URL}', 'https://api-hml.example.test');
+  const localConfig = execute(localSource);
   const config = execute(configuredSource);
 
+  assert.deepEqual(Object.keys(config), Object.keys(localConfig));
   assert.equal(config.API_BASE_URL, 'https://api-hml.example.test');
 });
