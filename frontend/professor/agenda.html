@@ -42,11 +42,11 @@
     <!-- Main Content -->
     <main class="main-container">
         <!-- Calendar Section -->
-        <section class="calendar-section">
+        <section class="calendar-section" aria-busy="true" aria-label="Carregando calendário">
             <div class="month-nav">
-                <button class="nav-btn">&larr;</button>
-                <h2 class="month-title">Novembro 2024</h2>
-                <button class="nav-btn">&rarr;</button>
+                <button class="nav-btn" type="button" data-month-direction="-1" aria-label="Mês anterior" disabled>&larr;</button>
+                <h2 class="month-title">Carregando mês atual...</h2>
+                <button class="nav-btn" type="button" data-month-direction="1" aria-label="Próximo mês" disabled>&rarr;</button>
             </div>
             <div class="calendar-header">
                 <span class="day-header">Dom</span>
@@ -58,75 +58,16 @@
                 <span class="day-header">Sáb</span>
             </div>
             <div class="calendar-grid">
-                <!-- Week 1 -->
-                <div class="day other-month"><span class="date">29</span></div>
-                <div class="day other-month"><span class="date">30</span></div>
-                <div class="day other-month"><span class="date">31</span></div>
-                <div class="day"><span class="date">1</span></div>
-                <div class="day"><span class="date">2</span></div>
-                <div class="day"><span class="date">3</span></div>
-                <div class="day"><span class="date">4</span></div>
-                <!-- Week 2 -->
-                <div class="day"><span class="date">5</span></div>
-                <div class="day"><span class="date">6</span></div>
-                <div class="day"><span class="date">7</span></div>
-                <div class="day"><span class="date">8</span></div>
-                <div class="day"><span class="date">9</span></div>
-                <div class="day"><span class="date">10</span></div>
-                <div class="day"><span class="date">11</span></div>
-                <!-- Week 3 -->
-                <div class="day today"><span class="date">12</span></div>
-                <div class="day"><span class="date">13</span></div>
-                <div class="day"><span class="date">14</span></div>
-                <div class="day"><span class="date">15</span></div>
-                <div class="day"><span class="date">16</span></div>
-                <div class="day"><span class="date">17</span></div>
-                <div class="day"><span class="date">18</span></div>
-                <!-- Week 4 -->
-                <div class="day"><span class="date">19</span></div>
-                <div class="day"><span class="date">20</span></div>
-                <div class="day"><span class="date">21</span></div>
-                <div class="day"><span class="date">22</span></div>
-                <div class="day"><span class="date">23</span></div>
-                <div class="day"><span class="date">24</span></div>
-                <div class="day"><span class="date">25</span></div>
-                <!-- Week 5 -->
-                <div class="day"><span class="date">26</span></div>
-                <div class="day"><span class="date">27</span></div>
-                <div class="day"><span class="date">28</span></div>
-                <div class="day"><span class="date">29</span></div>
-                <div class="day"><span class="date">30</span></div>
-                <div class="day other-month"><span class="date">1</span></div>
-                <div class="day other-month"><span class="date">2</span></div>
+                <p class="calendar-loading">Carregando calendário atual...</p>
             </div>
         </section>
 
         <!-- Events Section -->
-        <section class="events-section">
-            <h3>Próximos eventos</h3>
+        <section class="events-section" aria-busy="true" aria-label="Carregando cursos do professor">
+            <h3>Cursos vinculados</h3>
+            <p class="agenda-notice">O sistema ainda não possui datas de aulas ou eventos para associar aos dias do calendário.</p>
             <div class="events-list">
-                <a href="aula-ao-vivo.html">
-                <div class="event-card">
-                    <div class="event-time">Hoje, 10:00 - 11:00</div>
-                    <div class="event-title">Reunião com pais do 3º ano</div>
-                    <span class="badge reuniao event-badge">Reunião</span>
-                </div>
-                </a>
-                <div class="event-card">
-                    <div class="event-time">Amanhã, 14:00 - 15:30</div>
-                    <div class="event-title">Atendimento individual - João S.</div>
-                    <span class="badge atendimento event-badge">Atend. Ind.</span>
-                </div>
-                <div class="event-card">
-                    <div class="event-time">Dia 20, 15:00 - 16:00</div>
-                    <div class="event-title">Aula ao vivo de Matemática</div>
-                    <span class="badge aula event-badge">Aula</span>
-                </div>
-                <div class="event-card">
-                    <div class="event-time">Dia 23, 09:00 - 10:30</div>
-                    <div class="event-title">Avaliação de Ciências 2º ano</div>
-                    <span class="badge avaliacao event-badge">Avaliação</span>
-                </div>
+                <p class="events-loading">Carregando cursos reais...</p>
             </div>
         </section>
     </main>
