@@ -11,9 +11,11 @@ import ananditos.sandraxandreia.repository.AlunoRepository;
 import ananditos.sandraxandreia.repository.CursoRepository;
 import ananditos.sandraxandreia.repository.MatriculaRepository;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class MatriculaService {
@@ -39,12 +41,13 @@ public class MatriculaService {
         );
     }
 
-    public MatriculaResponseDTO criar(MatriculaRequestDTO request) {
-        Aluno aluno = buscarAluno(request.getAlunoId());
+    public MatriculaResponseDTO criar(MatriculaRequestDTO request, Long alunoAutenticadoId) {
+        validarAlunoSolicitado(request.getAlunoId(), alunoAutenticadoId);
+        Aluno aluno = buscarAluno(alunoAutenticadoId);
         Curso curso = buscarCurso(request.getCursoId());
 
         validarCursoDisponivelParaMatricula(curso);
-        validarMatriculaDuplicada(request.getAlunoId(), request.getCursoId(), null);
+        validarMatriculaDuplicada(alunoAutenticadoId, request.getCursoId(), null);
 
         Matricula matricula = new Matricula(
                 null,
@@ -80,13 +83,15 @@ public class MatriculaService {
         return toResponse(buscarMatricula(id));
     }
 
-    public MatriculaResponseDTO atualizar(Long id, MatriculaRequestDTO request) {
+    public MatriculaResponseDTO atualizar(Long id, MatriculaRequestDTO request, Long alunoAutenticadoId) {
         Matricula matricula = buscarMatricula(id);
-        Aluno aluno = buscarAluno(request.getAlunoId());
+        validarProprietario(matricula, alunoAutenticadoId);
+        validarAlunoSolicitado(request.getAlunoId(), alunoAutenticadoId);
+        Aluno aluno = buscarAluno(alunoAutenticadoId);
         Curso curso = buscarCurso(request.getCursoId());
 
         validarCursoDisponivelParaMatricula(curso);
-        validarMatriculaDuplicada(request.getAlunoId(), request.getCursoId(), id);
+        validarMatriculaDuplicada(alunoAutenticadoId, request.getCursoId(), id);
 
         matricula.setStatus(request.getStatus());
         matricula.setAluno(aluno);
@@ -101,8 +106,17 @@ public class MatriculaService {
         return salvarMatricula(matricula);
     }
 
-    public void deletar(Long id) {
-        matriculaRepository.delete(buscarMatricula(id));
+    public MatriculaResponseDTO atualizarStatusDoAluno(Long id, StatusMatricula novoStatus, Long alunoAutenticadoId) {
+        Matricula matricula = buscarMatricula(id);
+        validarProprietario(matricula, alunoAutenticadoId);
+        matricula.setStatus(novoStatus);
+        return salvarMatricula(matricula);
+    }
+
+    public void deletar(Long id, Long alunoAutenticadoId) {
+        Matricula matricula = buscarMatricula(id);
+        validarProprietario(matricula, alunoAutenticadoId);
+        matriculaRepository.delete(matricula);
     }
 
     private Matricula buscarMatricula(Long id) {
@@ -118,6 +132,18 @@ public class MatriculaService {
     private Curso buscarCurso(Long id) {
         return cursoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Curso nao encontrado"));
+    }
+
+    private void validarAlunoSolicitado(Long alunoSolicitadoId, Long alunoAutenticadoId) {
+        if (!Objects.equals(alunoSolicitadoId, alunoAutenticadoId)) {
+            throw new AccessDeniedException("Aluno nao pode alterar matriculas de outro aluno");
+        }
+    }
+
+    private void validarProprietario(Matricula matricula, Long alunoAutenticadoId) {
+        if (!Objects.equals(matricula.getAluno().getId(), alunoAutenticadoId)) {
+            throw new AccessDeniedException("Aluno nao pode alterar matriculas de outro aluno");
+        }
     }
 
     private void validarCursoDisponivelParaMatricula(Curso curso) {

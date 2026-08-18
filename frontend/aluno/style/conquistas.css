@@ -65,6 +65,12 @@ body {
   background: var(--primary-blue);
 }
 
+.avatar-skeleton {
+  background: linear-gradient(90deg, #dbe4f0 25%, #f8fafc 50%, #dbe4f0 75%);
+  background-size: 200% 100%;
+  animation: achievement-loading 1.4s ease-in-out infinite;
+}
+
 /* HEADER ------------------------------------------------ */
 
 .main-header {
@@ -113,6 +119,26 @@ body {
   box-shadow: var(--shadow-hover);
 }
 
+.achievement-skeleton,
+.ranking-skeleton {
+  background: linear-gradient(90deg, #eef2f7 25%, #f8fafc 50%, #eef2f7 75%);
+  background-size: 200% 100%;
+  animation: achievement-loading 1.4s ease-in-out infinite;
+}
+
+.achievement-skeleton {
+  min-height: 230px;
+}
+
+.ranking-skeleton {
+  min-height: 96px;
+}
+
+@keyframes achievement-loading {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
 .icon {
   font-size: 4rem;
   margin-bottom: 1rem;
@@ -154,43 +180,6 @@ body {
   color: white;
 }
 
-.badge-consistencia {
-  background: linear-gradient(135deg, #F59E0B, #D97706);
-  color: white;
-}
-
-/* PROGRESS BAR ----------------------------------------- */
-
-.progress-bar {
-  background: var(--border-light);
-  height: 8px;
-  border-radius: 9999px;
-  overflow: hidden;
-  margin-top: 1rem;
-}
-
-.progress-fill {
-  height: 100%;
-  border-radius: 9999px;
-  background: linear-gradient(90deg, var(--success-green), var(--warning-yellow));
-  transition: width .4s ease;
-}
-
-/* CONQUISTAS ESPECIAIS --------------------------------- */
-
-.special-section {
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-  padding: 3rem;
-  border-radius: var(--radius-lg);
-  color: white;
-  margin-bottom: 4rem;
-}
-
-.special-section h2 {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
 /* RANKING ----------------------------------------------- */
 
 .ranking-section h2 {
@@ -222,28 +211,6 @@ body {
   width: 40px;
   text-align: center;
   color: var(--text-muted);
-}
-
-.medal {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  font-size: 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.medal-gold {
-  background: linear-gradient(135deg, #FFD700, #FFA500);
-}
-
-.medal-silver {
-  background: linear-gradient(135deg, #C0C0C0, #A9A9A9);
-}
-
-.medal-bronze {
-  background: linear-gradient(135deg, #CD7F32, #B8860B);
 }
 
 .rank-avatar {
@@ -291,5 +258,13 @@ body {
     flex-wrap: wrap;
     text-align: center;
     justify-content: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .achievement-skeleton,
+  .ranking-skeleton,
+  .avatar-skeleton {
+    animation: none;
   }
 }
