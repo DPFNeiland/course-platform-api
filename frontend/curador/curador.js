@@ -37,6 +37,22 @@ document.addEventListener('DOMContentLoaded', async function() {
   const cursoPorId = id => state.cursos.find(curso => Number(curso.id) === Number(id));
   const alunoPorId = id => state.alunos.find(aluno => Number(aluno.id) === Number(id));
   const professorPorId = id => state.professores.find(prof => Number(prof.id) === Number(id));
+  const catalogContainer = () => {
+    const container = document.querySelector('.courses-grid, [data-curator-courses]');
+    return container && !document.querySelector('[data-pending-courses]') ? container : null;
+  };
+
+  const finishCatalogLoading = container => {
+    container.removeAttribute('aria-busy');
+    container.removeAttribute('aria-label');
+  };
+
+  const createElement = (tagName, className, text) => {
+    const element = document.createElement(tagName);
+    if (className) element.className = className;
+    if (text !== undefined) element.textContent = text;
+    return element;
+  };
 
   const updateIdentity = () => {
     document.querySelectorAll('.avatar').forEach(el => {
@@ -81,25 +97,59 @@ document.addEventListener('DOMContentLoaded', async function() {
   };
 
   const renderCatalog = () => {
-    const container = document.querySelector('.courses-grid, [data-curator-courses]');
-    if (!container || document.querySelector('[data-pending-courses]')) return;
-    container.innerHTML = state.cursos.length
-      ? state.cursos.map(curso => `
-        <article class="course-card">
-          <div class="course-thumb"></div>
-          <h3 class="course-title">${curso.nome}</h3>
-          <p class="course-desc">${formatEnum(curso.tipoCurso)} - ${formatEnum(curso.tipoAssinatura)}</p>
-          <div class="course-badges">
-            <span class="badge-pill">${formatEnum(curso.status)}</span>
-            <span class="badge-pill">${professorPorId(curso.professorId)?.nome || `Professor #${curso.professorId}`}</span>
-          </div>
-          <div class="actions">
-            <button class="btn approve-course" data-id="${curso.id}">Aprovar</button>
-            <button class="btn reject-course" data-id="${curso.id}">Reavaliar</button>
-          </div>
-        </article>
-      `).join('')
-      : '<p class="empty-state">Nenhum curso cadastrado.</p>';
+    const container = catalogContainer();
+    if (!container) return;
+    finishCatalogLoading(container);
+
+    if (!state.cursos.length) {
+      container.replaceChildren(createElement('p', 'empty-state', 'Nenhum curso cadastrado.'));
+      return;
+    }
+
+    const cards = state.cursos.map(curso => {
+      const card = createElement('article', 'course-card');
+      card.appendChild(createElement('div', 'course-thumb'));
+      card.appendChild(createElement('h3', 'course-title', curso.nome));
+      card.appendChild(createElement(
+        'p',
+        'course-desc',
+        `${formatEnum(curso.tipoCurso)} - ${formatEnum(curso.tipoAssinatura)}`
+      ));
+
+      const badges = createElement('div', 'course-badges');
+      badges.appendChild(createElement('span', 'badge-pill', formatEnum(curso.status)));
+      badges.appendChild(createElement(
+        'span',
+        'badge-pill',
+        professorPorId(curso.professorId)?.nome || `Professor #${curso.professorId}`
+      ));
+      card.appendChild(badges);
+
+      const actions = createElement('div', 'actions');
+      const approveButton = createElement('button', 'btn approve-course', 'Aprovar');
+      approveButton.dataset.id = curso.id;
+      actions.appendChild(approveButton);
+      const rejectButton = createElement('button', 'btn reject-course', 'Reavaliar');
+      rejectButton.dataset.id = curso.id;
+      actions.appendChild(rejectButton);
+      card.appendChild(actions);
+
+      return card;
+    });
+
+    container.replaceChildren(...cards);
+  };
+
+  const renderCatalogError = error => {
+    const container = catalogContainer();
+    if (!container) return false;
+
+    const message = document.createElement('p');
+    message.className = 'empty-state';
+    message.textContent = error?.message || 'Nao foi possivel carregar os cursos.';
+    finishCatalogLoading(container);
+    container.replaceChildren(message);
+    return true;
   };
 
   const renderDashboard = () => {
@@ -204,7 +254,23 @@ document.addEventListener('DOMContentLoaded', async function() {
     await refreshData();
   };
 
+  async function refreshCatalog() {
+    const professoresPromise = api('/professor').catch(() => []);
+    state.cursos = await api('/curso');
+    renderCatalog();
+
+    professoresPromise.then(professores => {
+      state.professores = professores;
+      renderCatalog();
+    });
+  }
+
   async function refreshData() {
+    if (catalogContainer()) {
+      await refreshCatalog();
+      return;
+    }
+
     const [cursos, matriculas, alunos, professores, usuarios] = await Promise.all([
       api('/curso'),
       api('/matricula'),
@@ -257,6 +323,13 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   updateIdentity();
   await refreshData().catch(err => {
-    document.querySelector('main, .container')?.insertAdjacentHTML('afterbegin', `<p class="empty-state">${err.message}</p>`);
+    if (renderCatalogError(err)) return;
+
+    const target = document.querySelector('main, .container');
+    if (!target) return;
+    const message = document.createElement('p');
+    message.className = 'empty-state';
+    message.textContent = err.message;
+    target.prepend(message);
   });
 });

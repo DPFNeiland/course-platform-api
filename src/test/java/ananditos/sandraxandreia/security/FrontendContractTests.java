@@ -123,6 +123,45 @@ class FrontendContractTests {
                 .contains("HTTPS");
     }
 
+    @Test
+    void catalogoDoCuradorDeveExibirSkeletonSemCursosFicticios() throws IOException {
+        String html = Files.readString(frontend.resolve("curador/catalogo.html"));
+        String script = Files.readString(frontend.resolve("curador/curador.js"));
+        String styles = Files.readString(frontend.resolve("aluno/style/catalogo.css"));
+
+        assertThat(html)
+                .doesNotContain(
+                        "JavaScript Moderno",
+                        "Node.js & Express",
+                        "Data Science com Python",
+                        "React Avançado",
+                        "Banco de Dados SQL",
+                        "Habilidades de Comunicação")
+                .contains("class=\"courses-grid\"")
+                .contains("aria-busy=\"true\"")
+                .contains("aria-label=\"Carregando cursos\"");
+        assertThat(countOccurrences(html, "class=\"course-skeleton\""))
+                .as("quantidade de skeletons do catalogo")
+                .isEqualTo(4);
+
+        assertThat(script)
+                .contains("document.querySelector('.courses-grid, [data-curator-courses]')")
+                .contains("container.removeAttribute('aria-busy')")
+                .contains("container.replaceChildren(...cards)")
+                .contains("element.textContent = text")
+                .contains("message.textContent = error?.message")
+                .contains("container.replaceChildren(message)")
+                .doesNotContain("insertAdjacentHTML");
+        assertThat(styles)
+                .contains(".course-skeleton")
+                .contains("@keyframes skeleton-pulse")
+                .contains("prefers-reduced-motion: reduce");
+    }
+
+    private long countOccurrences(String content, String fragment) {
+        return content.split(java.util.regex.Pattern.quote(fragment), -1).length - 1L;
+    }
+
     private boolean isProjectTextFile(Path path) {
         String name = path.getFileName().toString();
         if (name.equals("Dockerfile") || name.equals(".gitignore") || name.startsWith("README")) {
