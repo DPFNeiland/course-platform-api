@@ -83,6 +83,8 @@ document.addEventListener('DOMContentLoaded', async function() {
   const renderCatalog = () => {
     const container = document.querySelector('.courses-grid, [data-curator-courses]');
     if (!container || document.querySelector('[data-pending-courses]')) return;
+    container.removeAttribute('aria-busy');
+    container.removeAttribute('aria-label');
     container.innerHTML = state.cursos.length
       ? state.cursos.map(curso => `
         <article class="course-card">
