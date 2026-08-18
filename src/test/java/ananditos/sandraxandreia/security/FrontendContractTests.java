@@ -233,6 +233,8 @@ class FrontendContractTests {
                         "Top da Turma",
                         "Master Legendário",
                         "João Silva", "Maria Santos", "Pedro Costa", "Ana Souza", "Roberto Lima")
+                .doesNotContain(">JD<")
+                .contains("class=\"avatar avatar-skeleton\"")
                 .contains("class=\"achievements-grid\" aria-busy=\"true\"")
                 .contains("class=\"ranking-section\" aria-busy=\"true\"")
                 .contains("class=\"rank-item ranking-skeleton\"");
@@ -244,14 +246,22 @@ class FrontendContractTests {
                 .contains("const provisionalGamificationPoints = () =>")
                 .contains("TODO: Validar com Produto a regra definitiva de gamificacao")
                 .contains("const renderAchievementsError = error =>")
-                .contains("const matriculas = await api('/matricula')")
+                .contains("const matriculas = await api('/matricula/me')")
+                .doesNotContain("const matriculas = await api('/matricula')")
                 .contains("grid.replaceChildren(")
                 .contains("createTextElement('div', 'rank-position', '—')");
         assertThat(styles)
                 .contains(".achievement-skeleton")
                 .contains(".ranking-skeleton")
                 .contains("@keyframes achievement-loading")
-                .contains("prefers-reduced-motion: reduce");
+                .contains("prefers-reduced-motion: reduce")
+                .doesNotContain(
+                        ".badge-consistencia",
+                        ".progress-bar",
+                        ".progress-fill",
+                        ".medal-gold",
+                        ".medal-silver",
+                        ".medal-bronze");
     }
 
     private long countOccurrences(String content, String fragment) {

@@ -290,7 +290,7 @@ const renderForum = () => {
 
 const refreshData = async () => {
   if (isAchievementsPage()) {
-    const matriculas = await api('/matricula');
+    const matriculas = await api('/matricula/me');
     if (!Array.isArray(matriculas)) throw new Error('Resposta de matriculas invalida.');
     appState.matriculas = matriculas.filter(m => Number(m.alunoId) === Number(appState.session.id));
     renderAchievements();
@@ -299,7 +299,7 @@ const refreshData = async () => {
 
   const [cursos, matriculas] = await Promise.all([
     api('/curso'),
-    api('/matricula')
+    api('/matricula/me')
   ]);
   appState.cursos = cursos;
   appState.cursosAprovados = cursos.filter(c => c.status === 'APROVADO');
@@ -375,28 +375,30 @@ const handleClick = async event => {
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
-  appState.session = await window.jwtSession.recoverSession(API_BASE_URL, ['aluno'], '../index.html');
-  if (!appState.session) {
-    window.location.href = '../index.html';
-    return;
-  }
-
-  document.querySelectorAll('[data-field="nomeAluno"]').forEach(el => {
-    el.textContent = appState.session.nome || 'Aluno';
-  });
-  document.querySelectorAll('.avatar').forEach(el => {
-    el.textContent = (appState.session.nome || 'AL').slice(0, 2).toUpperCase();
-  });
-
-  document.addEventListener('click', handleClick);
-  document.addEventListener('input', event => {
-    if (event.target.matches('.search-bar')) {
-      appState.searchQuery = event.target.value;
-      renderCatalog();
-    }
-  });
-
   try {
+    appState.session = await window.jwtSession.recoverSession(API_BASE_URL, ['aluno'], '../index.html');
+    if (!appState.session) {
+      window.location.href = '../index.html';
+      return;
+    }
+
+    document.querySelectorAll('[data-field="nomeAluno"]').forEach(el => {
+      el.textContent = appState.session.nome || 'Aluno';
+    });
+    document.querySelectorAll('.avatar').forEach(el => {
+      el.textContent = (appState.session.nome || 'AL').slice(0, 2).toUpperCase();
+      el.classList.remove('avatar-skeleton');
+      el.removeAttribute('aria-label');
+    });
+
+    document.addEventListener('click', handleClick);
+    document.addEventListener('input', event => {
+      if (event.target.matches('.search-bar')) {
+        appState.searchQuery = event.target.value;
+        renderCatalog();
+      }
+    });
+
     await refreshData();
   } catch (err) {
     if (renderAchievementsError(err)) return;

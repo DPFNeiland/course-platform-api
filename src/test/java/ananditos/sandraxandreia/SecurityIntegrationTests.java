@@ -2,11 +2,19 @@ package ananditos.sandraxandreia;
 
 import ananditos.sandraxandreia.domain.aluno.Aluno;
 import ananditos.sandraxandreia.domain.aluno.StatusAluno;
+import ananditos.sandraxandreia.domain.curso.Curso;
+import ananditos.sandraxandreia.domain.curso.CursoAssinatura;
+import ananditos.sandraxandreia.domain.curso.StatusCurso;
+import ananditos.sandraxandreia.domain.curso.TipoCurso;
 import ananditos.sandraxandreia.domain.professor.Professor;
 import ananditos.sandraxandreia.domain.professor.TipoEnsinoProfessor;
 import ananditos.sandraxandreia.domain.curador.Curador;
+import ananditos.sandraxandreia.domain.matricula.Matricula;
+import ananditos.sandraxandreia.domain.matricula.StatusMatricula;
 import ananditos.sandraxandreia.domain.usuario.GeneroUsuario;
 import ananditos.sandraxandreia.repository.AlunoRepository;
+import ananditos.sandraxandreia.repository.CursoRepository;
+import ananditos.sandraxandreia.repository.MatriculaRepository;
 import ananditos.sandraxandreia.repository.ProfessorRepository;
 import ananditos.sandraxandreia.repository.CuradorRepository;
 import ananditos.sandraxandreia.repository.UsuarioRepository;
@@ -56,6 +64,12 @@ class SecurityIntegrationTests {
     private AlunoRepository alunoRepository;
 
     @Autowired
+    private CursoRepository cursoRepository;
+
+    @Autowired
+    private MatriculaRepository matriculaRepository;
+
+    @Autowired
     private ProfessorRepository professorRepository;
 
     @Autowired
@@ -73,6 +87,8 @@ class SecurityIntegrationTests {
                 .apply(springSecurity())
                 .build();
 
+        matriculaRepository.deleteAll();
+        cursoRepository.deleteAll();
         usuarioRepository.deleteAll();
 
         alunoRepository.save(new Aluno(
@@ -133,6 +149,69 @@ class SecurityIntegrationTests {
     void deveBloquearProfessorNoEndpointDeMatricula() throws Exception {
         mockMvc.perform(get("/matricula").header("Authorization", bearer("professor@teste.com")))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void deveRetornarSomenteMatriculasDoAlunoAutenticado() throws Exception {
+        Aluno alunoAutenticado = alunoRepository.findAll().stream()
+                .filter(aluno -> aluno.getEmail().getValor().equals("aluno@teste.com"))
+                .findFirst()
+                .orElseThrow();
+        Aluno outroAluno = alunoRepository.save(new Aluno(
+                null,
+                "Outro Aluno",
+                "outro.aluno@teste.com",
+                passwordEncoder.encode("123456"),
+                "24681357928",
+                GeneroUsuario.NAO_INFORMADO,
+                "1/1/2001",
+                "CD5678",
+                StatusAluno.CURSANDO
+        ));
+        Professor professor = professorRepository.findAll().getFirst();
+        Curso cursoDoAluno = novoCursoAprovado("Curso do aluno autenticado", professor);
+        Curso cursoDoOutroAluno = novoCursoAprovado("Curso do outro aluno", professor);
+        matriculaRepository.save(novaMatricula(alunoAutenticado, cursoDoAluno));
+        Matricula matriculaDoOutroAluno = matriculaRepository.save(novaMatricula(outroAluno, cursoDoOutroAluno));
+
+        mockMvc.perform(get("/matricula/me").header("Authorization", bearer("aluno@teste.com")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", org.hamcrest.Matchers.hasSize(1)))
+                .andExpect(jsonPath("$[0].alunoId").value(alunoAutenticado.getId()))
+                .andExpect(jsonPath("$[0].cursoId").value(cursoDoAluno.getId()));
+
+        mockMvc.perform(get("/matricula/{id}", matriculaDoOutroAluno.getId())
+                        .header("Authorization", bearer("aluno@teste.com")))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void deveBloquearAlunoNasConsultasDeMatriculasDeTerceiros() throws Exception {
+        Long outroAlunoId = alunoRepository.save(new Aluno(
+                null,
+                "Outro Aluno",
+                "outro.aluno@teste.com",
+                passwordEncoder.encode("123456"),
+                "24681357928",
+                GeneroUsuario.NAO_INFORMADO,
+                "1/1/2001",
+                "CD5678",
+                StatusAluno.CURSANDO
+        )).getId();
+
+        mockMvc.perform(get("/matricula").header("Authorization", bearer("aluno@teste.com")))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(get("/matricula/aluno/{alunoId}", outroAlunoId)
+                        .header("Authorization", bearer("aluno@teste.com")))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(get("/matricula/me"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void devePermitirCuradorNaConsultaGlobalDeMatriculas() throws Exception {
+        mockMvc.perform(get("/matricula").header("Authorization", bearer("curador@teste.com")))
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -437,6 +516,20 @@ class SecurityIntegrationTests {
                 .getCookie(JwtCookieService.COOKIE_NAME);
         org.assertj.core.api.Assertions.assertThat(cookie).isNotNull();
         return cookie;
+    }
+
+    private Curso novoCursoAprovado(String nome, Professor professor) {
+        Curso curso = new Curso(null, nome, CursoAssinatura.COMUM, TipoCurso.ASSINCRONO);
+        curso.setProfessor(professor);
+        curso.setStatus(StatusCurso.APROVADO);
+        return cursoRepository.save(curso);
+    }
+
+    private Matricula novaMatricula(Aluno aluno, Curso curso) {
+        Matricula matricula = new Matricula(null, StatusMatricula.ATIVA);
+        matricula.setAluno(aluno);
+        matricula.setCurso(curso);
+        return matricula;
     }
 
     private Cookie cookieCsrf(Cookie... existingCookies) throws Exception {
