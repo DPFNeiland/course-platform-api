@@ -1,6 +1,7 @@
 package ananditos.sandraxandreia.controller;
 
 import ananditos.sandraxandreia.domain.curso.MaterialCurso;
+import ananditos.sandraxandreia.domain.usuario.Usuario;
 import ananditos.sandraxandreia.dto.request.CursoMaterialLinkRequestDTO;
 import ananditos.sandraxandreia.dto.response.CursoMaterialResponseDTO;
 import ananditos.sandraxandreia.service.MaterialCursoService;
@@ -15,6 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -55,15 +57,17 @@ public class MaterialCursoController {
     @GetMapping
     @PreAuthorize("hasAnyRole('ALUNO','PROFESSOR','CURADOR','ADMIN')")
     @Operation(summary = "Lista os materiais de um curso")
-    public List<CursoMaterialResponseDTO> listarPorCurso(@PathVariable Long cursoId) {
-        return service.listarPorCurso(cursoId);
+    public List<CursoMaterialResponseDTO> listarPorCurso(@PathVariable Long cursoId,
+                                                        @AuthenticationPrincipal Usuario usuario) {
+        return service.listarPorCurso(cursoId, usuario);
     }
 
     @GetMapping("/{materialId}/arquivo")
     @PreAuthorize("hasAnyRole('ALUNO','PROFESSOR','CURADOR','ADMIN')")
     @Operation(summary = "Baixa um arquivo de aula")
-    public ResponseEntity<byte[]> baixarArquivo(@PathVariable Long cursoId, @PathVariable Long materialId) {
-        MaterialCurso material = service.buscarArquivo(cursoId, materialId);
+    public ResponseEntity<byte[]> baixarArquivo(@PathVariable Long cursoId, @PathVariable Long materialId,
+                                                @AuthenticationPrincipal Usuario usuario) {
+        MaterialCurso material = service.buscarArquivo(cursoId, materialId, usuario);
 
         MediaType mediaType = MediaType.APPLICATION_OCTET_STREAM;
         if (material.getContentType() != null && !material.getContentType().isBlank()) {

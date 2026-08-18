@@ -3,10 +3,13 @@ package ananditos.sandraxandreia.service;
 import ananditos.sandraxandreia.domain.curso.Curso;
 import ananditos.sandraxandreia.domain.curso.MaterialCurso;
 import ananditos.sandraxandreia.domain.curso.TipoMaterialCurso;
+import ananditos.sandraxandreia.domain.usuario.Usuario;
+import ananditos.sandraxandreia.domain.usuario.UsuarioCargo;
 import ananditos.sandraxandreia.dto.request.CursoMaterialLinkRequestDTO;
 import ananditos.sandraxandreia.dto.response.CursoMaterialResponseDTO;
 import ananditos.sandraxandreia.repository.CursoRepository;
 import ananditos.sandraxandreia.repository.MaterialCursoRepository;
+import ananditos.sandraxandreia.repository.MatriculaRepository;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,10 +24,13 @@ public class MaterialCursoService {
 
     private final MaterialCursoRepository materialCursoRepository;
     private final CursoRepository cursoRepository;
+    private final MatriculaRepository matriculaRepository;
 
-    public MaterialCursoService(MaterialCursoRepository materialCursoRepository, CursoRepository cursoRepository) {
+    public MaterialCursoService(MaterialCursoRepository materialCursoRepository, CursoRepository cursoRepository,
+                                MatriculaRepository matriculaRepository) {
         this.materialCursoRepository = materialCursoRepository;
         this.cursoRepository = cursoRepository;
+        this.matriculaRepository = matriculaRepository;
     }
 
     public CursoMaterialResponseDTO adicionarLink(Long cursoId, CursoMaterialLinkRequestDTO request, String emailProfessorAutenticado) {
@@ -58,14 +64,16 @@ public class MaterialCursoService {
         return toResponse(materialCursoRepository.save(material));
     }
 
-    public List<CursoMaterialResponseDTO> listarPorCurso(Long cursoId) {
+    public List<CursoMaterialResponseDTO> listarPorCurso(Long cursoId, Usuario usuarioAutenticado) {
+        validarAcessoDeLeitura(cursoId, usuarioAutenticado);
         buscarCurso(cursoId);
         return materialCursoRepository.findByCursoIdOrderByDataCadastroAsc(cursoId).stream()
                 .map(this::toResponse)
                 .toList();
     }
 
-    public MaterialCurso buscarArquivo(Long cursoId, Long materialId) {
+    public MaterialCurso buscarArquivo(Long cursoId, Long materialId, Usuario usuarioAutenticado) {
+        validarAcessoDeLeitura(cursoId, usuarioAutenticado);
         MaterialCurso material = materialCursoRepository.findByIdAndCurso_Id(materialId, cursoId)
                 .orElseThrow(() -> new IllegalArgumentException("Material nao encontrado para o curso informado"));
 
@@ -74,6 +82,13 @@ public class MaterialCursoService {
         }
 
         return material;
+    }
+
+    private void validarAcessoDeLeitura(Long cursoId, Usuario usuarioAutenticado) {
+        if (usuarioAutenticado.getPerfil() == UsuarioCargo.ALUNO
+                && !matriculaRepository.existsByAluno_IdAndCurso_Id(usuarioAutenticado.getId(), cursoId)) {
+            throw new AccessDeniedException("Aluno nao possui matricula neste curso");
+        }
     }
 
     private Curso buscarCurso(Long cursoId) {
