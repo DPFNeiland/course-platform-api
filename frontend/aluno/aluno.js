@@ -21,7 +21,7 @@ const api = async (path, options = {}) => {
   }
   if (!response.ok) {
     const error = await response.json().catch(() => null);
-    throw new Error(error?.message || error?.error || 'Nao foi possivel concluir a operacao.');
+    throw new Error(error?.message || error?.error || error?.erro || 'Nao foi possivel concluir a operacao.');
   }
   return response.status === 204 ? null : response.json();
 };
@@ -214,9 +214,12 @@ const createMaterialCard = (material, cursoId) => {
     createTextElement('p', '', formatEnum(material.tipo))
   );
 
-  const link = createTextElement('a', 'btn-pill btn-secondary', material.tipo === 'ARQUIVO' ? 'Baixar' : 'Acessar');
+  const link = createTextElement(material.tipo === 'ARQUIVO' ? 'button' : 'a', 'btn-pill btn-secondary', material.tipo === 'ARQUIVO' ? 'Baixar' : 'Acessar');
   if (material.tipo === 'ARQUIVO' && material.id != null) {
-    link.href = `${API_BASE_URL}/curso/${cursoId}/materiais/${material.id}/arquivo`;
+    link.type = 'button';
+    link.className += ' download-material';
+    link.dataset.downloadPath = `/curso/${cursoId}/materiais/${material.id}/arquivo`;
+    link.dataset.fileName = material.nomeArquivo || 'material.bin';
   } else if (material.tipo === 'LINK' && /^https?:\/\//i.test(material.url || '')) {
     link.href = material.url;
     link.target = '_blank';
@@ -233,6 +236,87 @@ const createMaterialCard = (material, cursoId) => {
 const renderMaterialsState = (container, message) => {
   container.replaceChildren(createTextElement('p', 'empty-state', message));
   finishLoading(container);
+};
+
+const isSalaAulaPage = () => Boolean(document.querySelector('.lesson-title'));
+
+const renderSalaAulaError = error => {
+  if (!isSalaAulaPage()) return false;
+  const message = error?.message || 'Não foi possível carregar a sala de aula.';
+  document.querySelectorAll('[data-room-course-title]').forEach(element => {
+    element.textContent = 'Sala de aula indisponível';
+    finishLoading(element);
+  });
+
+  const lessonTitle = document.querySelector('.lesson-title');
+  if (lessonTitle) {
+    lessonTitle.textContent = 'Não foi possível carregar o curso';
+    finishLoading(lessonTitle);
+  }
+  const description = document.querySelector('.lesson-description');
+  if (description) {
+    description.replaceChildren(createTextElement('p', 'empty-state', message));
+    finishLoading(description);
+  }
+  const progressText = document.querySelector('.progress-text');
+  if (progressText) {
+    progressText.textContent = 'Progresso indisponível';
+    finishLoading(progressText);
+  }
+  const fill = document.querySelector('.lesson-content .progress-fill');
+  if (fill) fill.style.width = '0%';
+  const button = document.querySelector('.complete-course-btn');
+  if (button) {
+    button.textContent = 'Curso indisponível';
+    button.disabled = true;
+    delete button.dataset.completeMatricula;
+    delete button.dataset.courseId;
+  }
+  const materials = document.querySelector('.support-materials .cards-grid');
+  if (materials) renderMaterialsState(materials, message);
+  return true;
+};
+
+const downloadFileName = (response, fallback) => {
+  const disposition = response.headers?.get('Content-Disposition') || '';
+  const match = disposition.match(/filename="?([^";]+)"?/i);
+  if (!match) return fallback;
+  try {
+    return decodeURIComponent(match[1]);
+  } catch {
+    return match[1];
+  }
+};
+
+const downloadMaterial = async button => {
+  button.disabled = true;
+  let objectUrl;
+  try {
+    const response = await window.jwtSession.authenticatedFetch(
+      API_BASE_URL,
+      button.dataset.downloadPath,
+      { method: 'GET' },
+      '../index.html'
+    );
+    if (response.status === 401) throw new Error('Sessão expirada. Faça login novamente.');
+    if (!response.ok) {
+      const error = await response.json().catch(() => null);
+      throw new Error(error?.message || error?.error || error?.erro || 'Não foi possível baixar o material.');
+    }
+
+    objectUrl = URL.createObjectURL(await response.blob());
+    const download = document.createElement('a');
+    download.href = objectUrl;
+    download.download = downloadFileName(response, button.dataset.fileName || 'material.bin');
+    document.body.appendChild(download);
+    download.click();
+    download.remove();
+  } catch (error) {
+    alert(error?.message || 'Não foi possível baixar o material.');
+  } finally {
+    if (objectUrl) URL.revokeObjectURL(objectUrl);
+    button.disabled = false;
+  }
 };
 
 const renderSalaAula = async () => {
@@ -391,6 +475,8 @@ const refreshData = async () => {
     api('/curso'),
     api('/matricula/me')
   ]);
+  if (!Array.isArray(cursos)) throw new Error('Resposta de cursos inválida.');
+  if (!Array.isArray(matriculas)) throw new Error('Resposta de matrículas inválida.');
   appState.cursos = cursos;
   appState.cursosAprovados = cursos.filter(c => c.status === 'APROVADO');
   appState.matriculas = matriculas.filter(m => Number(m.alunoId) === Number(appState.session.id));
@@ -405,6 +491,13 @@ const refreshData = async () => {
 };
 
 const handleClick = async event => {
+  const materialDownload = event.target.closest('.download-material');
+  if (materialDownload) {
+    event.preventDefault();
+    await downloadMaterial(materialDownload);
+    return;
+  }
+
   const enroll = event.target.closest('.enroll-course');
   if (enroll) {
     event.preventDefault();
@@ -492,6 +585,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   } catch (err) {
     finishAvatarLoading();
     if (renderAchievementsError(err)) return;
+    if (renderSalaAulaError(err)) return;
     document.querySelectorAll('[data-approved-courses], [data-student-progress]').forEach(container => {
       container.innerHTML = `<p class="empty-state">${err.message}</p>`;
     });

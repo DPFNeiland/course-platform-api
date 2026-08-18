@@ -354,6 +354,9 @@ class FrontendContractTests {
                         "const courseMaterials = await api(`/curso/${curso.id}/materiais`)",
                         "if (!Array.isArray(courseMaterials))",
                         "createMaterialCard(material, curso.id)",
+                        "className += ' download-material'",
+                        "window.jwtSession.authenticatedFetch(",
+                        "const renderSalaAulaError = error =>",
                         "fill.style.width = finished ? '100%' : '0%'",
                         "await renderSalaAula();");
 
@@ -361,7 +364,13 @@ class FrontendContractTests {
                 .contains(
                         ".material-skeleton",
                         "@keyframes sala-loading",
-                        "prefers-reduced-motion: reduce");
+                        "prefers-reduced-motion: reduce")
+                .doesNotContain(
+                        ".timeline-item",
+                        ".video-player",
+                        ".play-overlay",
+                        ".comment-form",
+                        ".comment-card");
     }
 
     private long countOccurrences(String content, String fragment) {
