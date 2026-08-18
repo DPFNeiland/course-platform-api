@@ -264,6 +264,33 @@ class FrontendContractTests {
                         ".medal-bronze");
     }
 
+    @Test
+    void boletimSemEndpointDeNotasDevePermanecerRemovido() throws IOException {
+        assertThat(frontend.resolve("aluno/boletim.html")).doesNotExist();
+        assertThat(frontend.resolve("aluno/style/boletim.css")).doesNotExist();
+
+        try (Stream<Path> files = Files.walk(frontend)) {
+            List<Path> sources = files
+                    .filter(Files::isRegularFile)
+                    .filter(path -> Stream.of(".html", ".js", ".css")
+                            .anyMatch(path.getFileName().toString()::endsWith))
+                    .filter(path -> !path.getFileName().toString().endsWith(".test.js"))
+                    .toList();
+
+            assertThat(sources).isNotEmpty();
+            for (Path source : sources) {
+                assertThat(Files.readString(source))
+                        .as("conteudo de %s", frontend.relativize(source))
+                        .doesNotContain(
+                                "boletim.html",
+                                "renderBoletim",
+                                "select-curso",
+                                "notas-section",
+                                "midia-final");
+            }
+        }
+    }
+
     private long countOccurrences(String content, String fragment) {
         return content.split(java.util.regex.Pattern.quote(fragment), -1).length - 1L;
     }
