@@ -1,6 +1,14 @@
 document.addEventListener('DOMContentLoaded', async function() {
   const API_BASE_URL = window.APP_CONFIG.API_BASE_URL;
-  const state = { user: null, cursos: [], matriculas: [], alunos: [], professores: [], usuarios: [] };
+  const state = {
+    user: null,
+    cursos: [],
+    matriculas: [],
+    alunos: [],
+    professores: [],
+    usuarios: [],
+    monitoringAvailability: null
+  };
 
   const api = async (path, options = {}) => {
     const session = window.jwtSession.requireSession(['curador', 'admin'], '../index.html');
@@ -41,6 +49,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     const container = document.querySelector('.courses-grid, [data-curator-courses]');
     return container && !document.querySelector('[data-pending-courses]') ? container : null;
   };
+  const isMonitoringPage = () => Boolean(
+    document.querySelector('.kpis') && document.querySelector('.table-section')
+  );
 
   const finishCatalogLoading = container => {
     container.removeAttribute('aria-busy');
@@ -210,31 +221,48 @@ document.addEventListener('DOMContentLoaded', async function() {
   };
 
   const renderMonitoring = () => {
+    const availability = state.monitoringAvailability || {
+      cursos: true,
+      matriculas: true,
+      alunos: true,
+      professores: true
+    };
     const kpis = document.querySelectorAll('.kpi-number');
     if (kpis.length) {
-      kpis[0].textContent = state.cursos.filter(c => c.status === 'APROVADO').length;
-      kpis[1].textContent = state.professores.length;
-      kpis[2].textContent = state.alunos.length;
-      kpis[3].textContent = state.matriculas.length;
+      kpis[0].textContent = availability.cursos
+        ? state.cursos.filter(c => c.status === 'APROVADO').length
+        : '--';
+      kpis[1].textContent = availability.professores ? state.professores.length : '--';
+      kpis[2].textContent = availability.alunos ? state.alunos.length : '--';
+      kpis[3].textContent = availability.matriculas ? state.matriculas.length : '--';
       finishLoading(document.querySelector('.kpis'));
     }
     const tbody = document.querySelector('.table-section tbody');
     if (tbody) {
-      const rows = state.matriculas.length
+      const rows = availability.matriculas && state.matriculas.length
         ? state.matriculas.map(matricula => {
           const curso = cursoPorId(matricula.cursoId);
           const aluno = alunoPorId(matricula.alunoId);
           const row = createElement('tr');
-          row.appendChild(createElement('td', '', curso?.nome || `Curso #${matricula.cursoId}`));
-          row.appendChild(createElement('td', '', aluno?.nome || `Aluno #${matricula.alunoId}`));
+          const courseName = availability.cursos
+            ? curso?.nome || `Curso #${matricula.cursoId}`
+            : 'Curso indisponível';
+          const studentName = availability.alunos
+            ? aluno?.nome || `Aluno #${matricula.alunoId}`
+            : 'Aluno indisponível';
+          row.appendChild(createElement('td', '', courseName));
+          row.appendChild(createElement('td', '', studentName));
           row.appendChild(createElement('td', '', formatEnum(matricula.status)));
           row.appendChild(createElement('td', '', matricula.dataMatricula || '-'));
           return row;
         })
         : [createElement('tr')];
 
-      if (!state.matriculas.length) {
-        const empty = createElement('td', '', 'Nenhuma matricula registrada.');
+      if (!availability.matriculas || !state.matriculas.length) {
+        const text = availability.matriculas
+          ? 'Nenhuma matrícula registrada.'
+          : 'Matrículas indisponíveis.';
+        const empty = createElement('td', 'monitoring-placeholder', text);
         empty.colSpan = 4;
         rows[0].appendChild(empty);
       }
@@ -245,13 +273,24 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (graphs) {
       const coursesCard = createElement('div', 'graph-card');
       coursesCard.appendChild(createElement('h3', '', 'Cursos por status'));
-      coursesCard.appendChild(createElement('p', '', `Aprovados: ${state.cursos.filter(c => c.status === 'APROVADO').length}`));
-      coursesCard.appendChild(createElement('p', '', `Em avaliacao: ${state.cursos.filter(c => c.status === 'EM_AVALIACAO').length}`));
-      coursesCard.appendChild(createElement('p', '', `Reavaliar: ${state.cursos.filter(c => c.status === 'REAVALIAR').length}`));
+      if (availability.cursos) {
+        coursesCard.appendChild(createElement('p', '', `Aprovados: ${state.cursos.filter(c => c.status === 'APROVADO').length}`));
+        coursesCard.appendChild(createElement('p', '', `Em avaliação: ${state.cursos.filter(c => c.status === 'EM_AVALIACAO').length}`));
+        coursesCard.appendChild(createElement('p', '', `Reavaliar: ${state.cursos.filter(c => c.status === 'REAVALIAR').length}`));
+      } else {
+        coursesCard.appendChild(createElement('p', 'monitoring-placeholder', 'Dados de cursos indisponíveis.'));
+      }
 
       const enrollmentsCard = createElement('div', 'graph-card');
-      enrollmentsCard.appendChild(createElement('h3', '', 'Matriculas'));
-      enrollmentsCard.appendChild(createElement('p', '', `${state.matriculas.length} registro(s) reais no banco.`));
+      enrollmentsCard.appendChild(createElement('h3', '', 'Matrículas'));
+      const enrollmentText = availability.matriculas
+        ? `${state.matriculas.length} registro(s) reais no banco.`
+        : 'Dados de matrículas indisponíveis.';
+      enrollmentsCard.appendChild(createElement(
+        'p',
+        availability.matriculas ? '' : 'monitoring-placeholder',
+        enrollmentText
+      ));
 
       graphs.replaceChildren(coursesCard, enrollmentsCard);
       finishLoading(graphs);
@@ -261,30 +300,13 @@ document.addEventListener('DOMContentLoaded', async function() {
   const renderMonitoringError = () => {
     const kpis = document.querySelectorAll('.kpi-number');
     if (!kpis.length) return false;
-
-    kpis.forEach(kpi => {
-      kpi.textContent = '--';
-    });
-    finishLoading(document.querySelector('.kpis'));
-
-    const tbody = document.querySelector('.table-section tbody');
-    if (tbody) {
-      const row = createElement('tr');
-      const message = createElement('td', 'monitoring-placeholder', 'Dados de monitoramento indisponiveis.');
-      message.colSpan = 4;
-      row.appendChild(message);
-      tbody.replaceChildren(row);
-      finishLoading(document.querySelector('.table-section'));
-    }
-
-    const graphs = document.querySelector('.graphs');
-    if (graphs) {
-      const card = createElement('div', 'graph-card');
-      card.appendChild(createElement('h3', '', 'Monitoramento indisponivel'));
-      card.appendChild(createElement('p', 'monitoring-placeholder', 'Nao foi possivel carregar os dados reais.'));
-      graphs.replaceChildren(card);
-      finishLoading(graphs);
-    }
+    state.monitoringAvailability = {
+      cursos: false,
+      matriculas: false,
+      alunos: false,
+      professores: false
+    };
+    renderMonitoring();
     return true;
   };
 
@@ -316,9 +338,34 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
   }
 
+  async function refreshMonitoring() {
+    const [cursos, matriculas, alunos, professores] = await Promise.allSettled([
+      api('/curso'),
+      api('/matricula'),
+      api('/aluno'),
+      api('/professor')
+    ]);
+    const hasArrayValue = result => result.status === 'fulfilled' && Array.isArray(result.value);
+    state.monitoringAvailability = {
+      cursos: hasArrayValue(cursos),
+      matriculas: hasArrayValue(matriculas),
+      alunos: hasArrayValue(alunos),
+      professores: hasArrayValue(professores)
+    };
+    state.cursos = state.monitoringAvailability.cursos ? cursos.value : [];
+    state.matriculas = state.monitoringAvailability.matriculas ? matriculas.value : [];
+    state.alunos = state.monitoringAvailability.alunos ? alunos.value : [];
+    state.professores = state.monitoringAvailability.professores ? professores.value : [];
+    renderMonitoring();
+  }
+
   async function refreshData() {
     if (catalogContainer()) {
       await refreshCatalog();
+      return;
+    }
+    if (isMonitoringPage()) {
+      await refreshMonitoring();
       return;
     }
 
