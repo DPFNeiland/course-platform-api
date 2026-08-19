@@ -373,6 +373,70 @@ class FrontendContractTests {
                         ".comment-card");
     }
 
+    @Test
+    void dashboardsDevemCompartilharSkeletonSemDadosFicticios() throws IOException {
+        String aluno = Files.readString(frontend.resolve("aluno/dashboard.html"));
+        String curador = Files.readString(frontend.resolve("curador/dashboard.html"));
+        String professor = Files.readString(frontend.resolve("professor/dashboard.html"));
+        String globalStyles = Files.readString(frontend.resolve("global.css"));
+
+        assertThat(aluno)
+                .doesNotContain(
+                        ">JD<", "1.250", "2.000", "🥇 Ouro", "🥈 Prata",
+                        "Cursos Bônus", "Curso de JavaScript Básico", "Design Thinking", "Produtividade com Notion",
+                        "width: 62.5%")
+                .contains(
+                        "data-field=\"nomeAluno\" class=\"loading-skeleton loading-skeleton-text\"",
+                        "data-dashboard-course-list",
+                        "disabled aria-disabled=\"true\" title=\"Alteração de plano em breve\"");
+
+        assertThat(curador)
+                .doesNotContain(">JD<", "Olá, Fulano!")
+                .contains(
+                        "data-field=\"nomeCurador\" class=\"loading-skeleton loading-skeleton-text\"",
+                        "data-curator-dashboard-summary");
+
+        assertThat(professor)
+                .doesNotContain(
+                        ">JD<", ">92%<", ">87%<",
+                        "Avaliações pendentes", "Aulas ministradas no mês",
+                        "Nova avaliação criada", "Aluno Maria entregou tarefa", "Atividade 3.2 - Física",
+                        "Resposta no fórum", "Revisão geral - Turma B", "Slides da aula 5 enviados")
+                .doesNotContain("<svg", "polyline points=")
+                .contains(
+                        "data-field=\"nomeProfessor\" class=\"loading-skeleton loading-skeleton-text\"",
+                        "class=\"kpi-grid\" aria-busy=\"true\"",
+                        "class=\"activities-grid\" aria-busy=\"true\"");
+
+        for (String dashboard : List.of(aluno, curador, professor)) {
+            assertThat(dashboard)
+                    .contains("loading-skeleton")
+                    .contains("loading-skeleton-avatar");
+        }
+
+        assertThat(globalStyles)
+                .contains(
+                        ".loading-skeleton",
+                        ".loading-skeleton-text",
+                        ".loading-skeleton-avatar",
+                        ".loading-skeleton-card",
+                        "@keyframes dashboard-skeleton-loading",
+                        "prefers-reduced-motion: reduce");
+
+        assertThat(Files.readString(frontend.resolve("aluno/aluno.js")))
+                .contains("const renderDashboardStats = () =>")
+                .contains("const renderStudentDashboardError = error =>")
+                .contains("finishLoading(document.querySelector('.gamificacao'))");
+        assertThat(Files.readString(frontend.resolve("curador/curador.js")))
+                .contains("document.querySelectorAll('[data-field=\"nomeCurador\"]')")
+                .contains("const renderDashboardError = error =>");
+        assertThat(Files.readString(frontend.resolve("professor/professor.js")))
+                .contains("const renderDashboard = () =>")
+                .contains("const renderDashboardError = error =>")
+                .contains("activities.replaceChildren")
+                .contains("charts.replaceChildren");
+    }
+
     private long countOccurrences(String content, String fragment) {
         return content.split(java.util.regex.Pattern.quote(fragment), -1).length - 1L;
     }

@@ -93,6 +93,7 @@ const renderCatalog = () => {
     container.innerHTML = cursos.length
       ? cursos.map(createCourseCard).join('')
       : '<p class="empty-state">Nenhum curso aprovado disponivel no momento.</p>';
+    finishLoading(container);
   });
 };
 
@@ -107,6 +108,7 @@ const renderStudentProgress = () => {
       return createCourseCard(curso, index);
     }).join('')
     : '<p class="empty-state">Nenhum curso iniciado ainda.</p>';
+  finishLoading(container);
 };
 
 const provisionalGamificationPoints = () => {
@@ -117,28 +119,74 @@ const provisionalGamificationPoints = () => {
 const renderDashboardStats = () => {
   const active = appState.matriculas.filter(m => m.status !== 'ENCERRADA').length;
   const finished = appState.matriculas.filter(m => m.status === 'ENCERRADA').length;
-  document.querySelector('.points-current')?.replaceChildren(document.createTextNode(String(provisionalGamificationPoints())));
-  document.querySelector('.points-total')?.replaceChildren(document.createTextNode('/ pontos reais'));
+  const currentPoints = document.querySelector('.points-current');
+  const pointsLabel = document.querySelector('.points-total');
+  currentPoints?.replaceChildren(document.createTextNode(String(provisionalGamificationPoints())));
+  pointsLabel?.replaceChildren(document.createTextNode('pontos provisórios'));
+  finishLoading(currentPoints);
+  finishLoading(pointsLabel);
   document.querySelectorAll('.achievements .badge').forEach((badge, index) => {
     badge.textContent = index === 0 ? `${finished} concluidos` : `${active} ativos`;
+    finishLoading(badge);
   });
-  document.querySelector('.bonus-list')?.replaceChildren(...(appState.cursosAprovados.slice(0, 3).map(curso => {
+  const availableCourses = document.querySelector('[data-dashboard-course-list]');
+  const courseItems = appState.cursosAprovados.slice(0, 3).map(curso => {
     const li = document.createElement('li');
-    li.innerHTML = `<span>${curso.nome}</span><span class="badge badge-success">${formatEnum(curso.status)}</span>`;
+    li.append(
+      createTextElement('span', '', curso.nome),
+      createTextElement('span', 'badge badge-success', formatEnum(curso.status))
+    );
     return li;
-  })));
+  });
+  if (availableCourses) {
+    availableCourses.replaceChildren(...(courseItems.length
+      ? courseItems
+      : [createTextElement('li', 'empty-state', 'Nenhum curso aprovado disponível.')]
+    ));
+    finishLoading(availableCourses.closest('.card'));
+  }
+  finishLoading(document.querySelector('.gamificacao'));
+};
+
+const renderStudentDashboardError = error => {
+  const availableCourses = document.querySelector('[data-dashboard-course-list]');
+  if (!availableCourses) return false;
+  const message = error?.message || 'Dados do dashboard indisponíveis.';
+  const currentPoints = document.querySelector('.points-current');
+  const pointsLabel = document.querySelector('.points-total');
+  if (currentPoints) currentPoints.textContent = '--';
+  if (pointsLabel) pointsLabel.textContent = 'pontos indisponíveis';
+  finishLoading(currentPoints);
+  finishLoading(pointsLabel);
+  document.querySelectorAll('.achievements .badge').forEach(badge => {
+    badge.textContent = '--';
+    finishLoading(badge);
+  });
+  availableCourses.replaceChildren(createTextElement('li', 'dashboard-unavailable', message));
+  finishLoading(availableCourses.closest('.card'));
+  finishLoading(document.querySelector('.gamificacao'));
+  return true;
 };
 
 const finishLoading = element => {
   if (!element) return;
   element.removeAttribute('aria-busy');
   element.removeAttribute('aria-label');
+  if (typeof element.className === 'string') {
+    const loadingClasses = new Set([
+      'loading-skeleton', 'loading-skeleton-text', 'loading-skeleton-card', 'loading-skeleton-chip'
+    ]);
+    element.className = element.className
+      .split(/\s+/)
+      .filter(className => className && !loadingClasses.has(className))
+      .join(' ');
+  }
 };
 
 const finishAvatarLoading = () => {
   document.querySelectorAll('.avatar').forEach(element => {
     element.classList.remove('avatar-skeleton');
-    element.removeAttribute('aria-label');
+    finishLoading(element);
   });
 };
 
@@ -567,6 +615,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     document.querySelectorAll('[data-field="nomeAluno"]').forEach(el => {
       el.textContent = appState.session.nome || 'Aluno';
+      finishLoading(el);
     });
     document.querySelectorAll('.avatar').forEach(el => {
       el.textContent = (appState.session.nome || 'AL').slice(0, 2).toUpperCase();
@@ -584,10 +633,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     await refreshData();
   } catch (err) {
     finishAvatarLoading();
+    document.querySelectorAll('[data-field="nomeAluno"]').forEach(el => {
+      if (!el.textContent.trim()) el.textContent = 'Nome indisponível';
+      finishLoading(el);
+    });
     if (renderAchievementsError(err)) return;
     if (renderSalaAulaError(err)) return;
+    renderStudentDashboardError(err);
     document.querySelectorAll('[data-approved-courses], [data-student-progress]').forEach(container => {
       container.innerHTML = `<p class="empty-state">${err.message}</p>`;
+      finishLoading(container);
     });
   }
 });

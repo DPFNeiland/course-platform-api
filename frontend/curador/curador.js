@@ -69,14 +69,26 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (!element) return;
     element.removeAttribute('aria-busy');
     element.removeAttribute('aria-label');
+    if (typeof element.className === 'string') {
+      const loadingClasses = new Set([
+        'loading-skeleton', 'loading-skeleton-text', 'loading-skeleton-card', 'loading-skeleton-chip'
+      ]);
+      element.className = element.className
+        .split(/\s+/)
+        .filter(className => className && !loadingClasses.has(className))
+        .join(' ');
+    }
   };
 
   const updateIdentity = () => {
     document.querySelectorAll('.avatar').forEach(el => {
       el.textContent = (state.user.nome || 'CU').slice(0, 2).toUpperCase();
+      finishLoading(el);
     });
-    const greeting = document.querySelector('.header h1');
-    if (greeting) greeting.textContent = `Olá, ${state.user.nome || 'Curador'}!`;
+    document.querySelectorAll('[data-field="nomeCurador"]').forEach(el => {
+      el.textContent = state.user.nome || 'Curador';
+      finishLoading(el);
+    });
   };
 
   const renderPendingCourses = () => {
@@ -183,10 +195,25 @@ document.addEventListener('DOMContentLoaded', async function() {
         const title = card.querySelector('h3')?.textContent.trim();
         const count = totals[title];
         if (count !== undefined) {
-          card.querySelector('p').textContent = `${count} registro(s) reais no banco.`;
+          const summary = card.querySelector('[data-curator-dashboard-summary]');
+          if (summary) {
+            summary.textContent = `${count} registro(s) reais no banco.`;
+            finishLoading(summary);
+          }
         }
       });
     }
+  };
+
+  const renderDashboardError = error => {
+    const summaries = document.querySelectorAll('[data-curator-dashboard-summary]');
+    if (!summaries.length) return false;
+    summaries.forEach(summary => {
+      summary.textContent = error?.message || 'Dados indisponíveis.';
+      summary.className = 'dashboard-unavailable';
+      finishLoading(summary);
+    });
+    return true;
   };
 
   const renderUsers = () => {
@@ -423,6 +450,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   await refreshData().catch(err => {
     if (renderCatalogError(err)) return;
     if (renderMonitoringError()) return;
+    if (renderDashboardError(err)) return;
 
     const target = document.querySelector('main, .container');
     if (!target) return;
