@@ -379,22 +379,26 @@ class FrontendContractTests {
         String curador = Files.readString(frontend.resolve("curador/dashboard.html"));
         String professor = Files.readString(frontend.resolve("professor/dashboard.html"));
         String globalStyles = Files.readString(frontend.resolve("global.css"));
+        String dashboardUi = Files.readString(frontend.resolve("dashboard-ui.js"));
 
         assertThat(aluno)
                 .doesNotContain(
                         ">JD<", "1.250", "2.000", "🥇 Ouro", "🥈 Prata",
                         "Cursos Bônus", "Curso de JavaScript Básico", "Design Thinking", "Produtividade com Notion",
-                        "width: 62.5%")
+                        "width: 62.5%", "points-current", "points-total")
                 .contains(
                         "data-field=\"nomeAluno\" class=\"loading-skeleton loading-skeleton-text\"",
                         "data-dashboard-course-list",
+                        "data-dashboard-gamification",
+                        "../dashboard-ui.js",
                         "disabled aria-disabled=\"true\" title=\"Alteração de plano em breve\"");
 
         assertThat(curador)
                 .doesNotContain(">JD<", "Olá, Fulano!")
                 .contains(
                         "data-field=\"nomeCurador\" class=\"loading-skeleton loading-skeleton-text\"",
-                        "data-curator-dashboard-summary");
+                        "data-curator-dashboard-summary",
+                        "../dashboard-ui.js");
 
         assertThat(professor)
                 .doesNotContain(
@@ -406,7 +410,10 @@ class FrontendContractTests {
                 .contains(
                         "data-field=\"nomeProfessor\" class=\"loading-skeleton loading-skeleton-text\"",
                         "class=\"kpi-grid\" aria-busy=\"true\"",
-                        "class=\"activities-grid\" aria-busy=\"true\"");
+                        "class=\"activities-grid\" aria-busy=\"true\"",
+                        "<h2>Cursos cadastrados</h2>",
+                        "../dashboard-ui.js")
+                .doesNotContain("<h2>Atividades Recentes</h2>");
 
         for (String dashboard : List.of(aluno, curador, professor)) {
             assertThat(dashboard)
@@ -423,9 +430,16 @@ class FrontendContractTests {
                         "@keyframes dashboard-skeleton-loading",
                         "prefers-reduced-motion: reduce");
 
+        assertThat(dashboardUi)
+                .contains(
+                        "global.dashboardUI = Object.freeze({ finishLoading })",
+                        "element.removeAttribute('aria-hidden')",
+                        "'loading-skeleton-avatar'");
+
         assertThat(Files.readString(frontend.resolve("aluno/aluno.js")))
                 .contains("const renderDashboardStats = () =>")
                 .contains("const renderStudentDashboardError = error =>")
+                .contains("Gamificação em breve.")
                 .contains("finishLoading(document.querySelector('.gamificacao'))");
         assertThat(Files.readString(frontend.resolve("curador/curador.js")))
                 .contains("document.querySelectorAll('[data-field=\"nomeCurador\"]')")

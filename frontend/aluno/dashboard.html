@@ -41,14 +41,7 @@
         <section class="top-cards">
             <div class="card gamificacao" aria-busy="true" aria-label="Carregando gamificação">
                 <h3>Gamificação</h3>
-                <div class="points-display">
-                    <span class="points-current loading-skeleton loading-skeleton-text" aria-hidden="true"></span>
-                    <span class="points-total loading-skeleton loading-skeleton-text" aria-hidden="true"></span>
-                </div>
-                <div class="achievements">
-                    <span class="badge loading-skeleton loading-skeleton-chip" aria-hidden="true"></span>
-                    <span class="badge loading-skeleton loading-skeleton-chip" aria-hidden="true"></span>
-                </div>
+                <p data-dashboard-gamification class="loading-skeleton loading-skeleton-text" aria-hidden="true"></p>
             </div>
             <div class="card cursos-disponiveis" aria-busy="true" aria-label="Carregando cursos disponíveis">
                 <h3>Cursos disponíveis</h3>
@@ -88,6 +81,7 @@
     </main>
     <script src="../config.js"></script>
     <script src="../session.js"></script>
+    <script src="../dashboard-ui.js"></script>
     <script src="aluno.js"></script>
 </body>
 

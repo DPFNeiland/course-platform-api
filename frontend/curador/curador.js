@@ -32,16 +32,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     .replaceAll('_', ' ')
     .replace(/\b\w/g, letter => letter.toUpperCase());
 
-  state.user = await window.jwtSession.recoverSession(API_BASE_URL, ['curador', 'admin'], '../index.html');
-
-  const perfil = String(state.user?.perfil || state.user?.cargo || '').trim().toLowerCase();
-  if (!state.user || !['curador', 'admin'].includes(perfil)) {
-    window.location.href = '../index.html';
-    return;
-  }
-  state.user.perfil = perfil;
-  sessionStorage.setItem('session', JSON.stringify(state.user));
-
   const cursoPorId = id => state.cursos.find(curso => Number(curso.id) === Number(id));
   const alunoPorId = id => state.alunos.find(aluno => Number(aluno.id) === Number(id));
   const professorPorId = id => state.professores.find(prof => Number(prof.id) === Number(id));
@@ -66,18 +56,25 @@ document.addEventListener('DOMContentLoaded', async function() {
   };
 
   const finishLoading = element => {
+    if (window.dashboardUI?.finishLoading) {
+      window.dashboardUI.finishLoading(element);
+      return;
+    }
     if (!element) return;
     element.removeAttribute('aria-busy');
     element.removeAttribute('aria-label');
-    if (typeof element.className === 'string') {
-      const loadingClasses = new Set([
-        'loading-skeleton', 'loading-skeleton-text', 'loading-skeleton-card', 'loading-skeleton-chip'
-      ]);
-      element.className = element.className
-        .split(/\s+/)
-        .filter(className => className && !loadingClasses.has(className))
-        .join(' ');
-    }
+    element.removeAttribute('aria-hidden');
+  };
+
+  const renderIdentityError = () => {
+    document.querySelectorAll('.avatar').forEach(el => {
+      el.textContent = '--';
+      finishLoading(el);
+    });
+    document.querySelectorAll('[data-field="nomeCurador"]').forEach(el => {
+      el.textContent = 'Nome indisponível';
+      finishLoading(el);
+    });
   };
 
   const updateIdentity = () => {
@@ -446,8 +443,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (e.target.matches('.filter-select')) renderUsers();
   });
 
-  updateIdentity();
-  await refreshData().catch(err => {
+  const handleLoadingError = err => {
     if (renderCatalogError(err)) return;
     if (renderMonitoringError()) return;
     if (renderDashboardError(err)) return;
@@ -458,5 +454,21 @@ document.addEventListener('DOMContentLoaded', async function() {
     message.className = 'empty-state';
     message.textContent = err.message;
     target.prepend(message);
-  });
+  };
+
+  try {
+    state.user = await window.jwtSession.recoverSession(API_BASE_URL, ['curador', 'admin'], '../index.html');
+    const perfil = String(state.user?.perfil || state.user?.cargo || '').trim().toLowerCase();
+    if (!state.user || !['curador', 'admin'].includes(perfil)) {
+      window.location.href = '../index.html';
+      return;
+    }
+    state.user.perfil = perfil;
+    sessionStorage.setItem('session', JSON.stringify(state.user));
+    updateIdentity();
+    await refreshData();
+  } catch (err) {
+    if (!state.user) renderIdentityError();
+    handleLoadingError(err);
+  }
 });
