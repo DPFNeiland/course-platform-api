@@ -414,3 +414,75 @@ test('erro no download não abre arquivo e reabilita o botão', async () => {
   assert.equal(harness.downloads.filter(item => item.clicked).length, 0);
   assert.equal(button.disabled, false);
 });
+
+test('falha de rede no download não cria URL temporária e reabilita o botão', async () => {
+  const harness = createHarness({
+    courses: response([course]),
+    enrollments: response([activeEnrollment]),
+    materials: response([
+      { id: 2, cursoId: 10, titulo: 'Apostila real', tipo: 'ARQUIVO', nomeArquivo: 'apostila.pdf' }
+    ]),
+    download: Promise.reject(new Error('Rede indisponível'))
+  });
+  await harness.start();
+
+  const button = harness.materialGrid.children[0].children[2];
+  await harness.click(button);
+
+  assert.deepEqual(harness.alerts, ['Rede indisponível']);
+  assert.deepEqual(harness.objectUrls, []);
+  assert.equal(harness.downloads.filter(item => item.clicked).length, 0);
+  assert.equal(button.disabled, false);
+});
+
+test('401 no download informa sessão expirada sem abrir o arquivo', async () => {
+  const harness = createHarness({
+    courses: response([course]),
+    enrollments: response([activeEnrollment]),
+    materials: response([
+      { id: 2, cursoId: 10, titulo: 'Apostila real', tipo: 'ARQUIVO', nomeArquivo: 'apostila.pdf' }
+    ]),
+    download: response({ codigo: 'TOKEN_EXPIRED' }, 401)
+  });
+  await harness.start();
+
+  const button = harness.materialGrid.children[0].children[2];
+  await harness.click(button);
+
+  assert.deepEqual(harness.alerts, ['Sessão expirada. Faça login novamente.']);
+  assert.deepEqual(harness.objectUrls, []);
+  assert.equal(button.disabled, false);
+});
+
+test('download usa o nome retornado na listagem quando o header não está exposto', async () => {
+  const harness = createHarness({
+    courses: response([course]),
+    enrollments: response([activeEnrollment]),
+    materials: response([
+      { id: 2, cursoId: 10, titulo: 'Apostila real', tipo: 'ARQUIVO', nomeArquivo: 'nome-listagem.pdf' }
+    ]),
+    download: response({}, 200, { blob: { bytes: 'arquivo' } })
+  });
+  await harness.start();
+
+  await harness.click(harness.materialGrid.children[0].children[2]);
+
+  assert.equal(harness.downloads.at(-1).download, 'nome-listagem.pdf');
+  assert.equal(harness.downloads.at(-1).clicked, true);
+});
+
+test('link de material com protocolo não permitido fica indisponível', async () => {
+  const harness = createHarness({
+    courses: response([course]),
+    enrollments: response([activeEnrollment]),
+    materials: response([
+      { id: 3, cursoId: 10, titulo: 'Link inválido', tipo: 'LINK', url: 'javascript:alert(1)' }
+    ])
+  });
+  await harness.start();
+
+  const link = harness.materialGrid.children[0].children[2];
+  assert.equal(link.href, undefined);
+  assert.match(link.className, /disabled/);
+  assert.equal(link.textContent, 'Indisponível');
+});
