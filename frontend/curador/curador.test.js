@@ -48,7 +48,7 @@ function treeTags(node) {
   return [node.tagName, ...(node.children || []).flatMap(treeTags)].filter(Boolean);
 }
 
-function createHarness(responses = {}) {
+function createHarness(responses = {}, recoverSession) {
   const listeners = {};
   const calls = [];
   const attributes = new Map([
@@ -80,7 +80,7 @@ function createHarness(responses = {}) {
     APP_CONFIG: { API_BASE_URL: 'https://api.test' },
     location: { href: '' },
     jwtSession: {
-      recoverSession: async () => ({ perfil: 'curador', nome: 'Curador' }),
+      recoverSession: recoverSession || (async () => ({ perfil: 'curador', nome: 'Curador' })),
       requireSession: () => ({ perfil: 'curador' }),
       authenticatedFetch: async (_baseUrl, requestPath) => {
         calls.push(requestPath);
@@ -264,4 +264,16 @@ test('catalogo nao aguarda nem consulta matriculas para renderizar', async () =>
 
   assert.equal(harness.calls.includes('/matricula'), false);
   assert.match(treeText(harness.container), /Nenhum curso cadastrado/);
+});
+
+test('falha ao recuperar a sessao encerra o loading sem consultar a API', async () => {
+  const harness = createHarness({}, async () => {
+    throw new Error('Servidor de sessão indisponível');
+  });
+
+  await harness.start();
+
+  assert.deepEqual(harness.calls, []);
+  assert.match(treeText(harness.container), /Servidor de sessão indisponível/);
+  assert.equal(harness.attributes.has('aria-busy'), false);
 });
