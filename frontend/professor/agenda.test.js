@@ -85,7 +85,7 @@ function expectedMonth(now, offset = 0) {
   return label.charAt(0).toUpperCase() + label.slice(1);
 }
 
-function createHarness(courseResponse = response([]), now = '2026-08-18T12:00:00Z') {
+function createHarness(courseResponse = response([]), now = '2026-08-18T12:00:00Z', recoverSession) {
   const listeners = {};
   const calls = [];
   const calendarSection = element('section');
@@ -132,7 +132,7 @@ function createHarness(courseResponse = response([]), now = '2026-08-18T12:00:00
     APP_CONFIG: { API_BASE_URL: 'https://api.test' },
     location: { href: '' },
     jwtSession: {
-      recoverSession: async () => ({ id: 7, perfil: 'professor', nome: 'Professora Real' }),
+      recoverSession: recoverSession || (async () => ({ id: 7, perfil: 'professor', nome: 'Professora Real' })),
       requireSession: () => ({ id: 7, perfil: 'professor' }),
       authenticatedFetch: async (_baseUrl, requestPath) => {
         calls.push(requestPath);
@@ -253,4 +253,16 @@ test('nome de curso recebido da API e exibido como texto sem criar HTML', async 
 
   assert.match(treeText(harness.eventsList), /<script>alert\(1\)<\/script>/);
   assert.equal(treeTags(harness.eventsList).includes('SCRIPT'), false);
+});
+
+test('falha ao recuperar a sessao encerra o loading da agenda sem consultar cursos', async () => {
+  const harness = createHarness(response([]), '2026-08-18T12:00:00Z', async () => {
+    throw new Error('Servidor de sessão indisponível');
+  });
+
+  await harness.start();
+
+  assert.deepEqual(harness.calls, []);
+  assert.match(treeText(harness.eventsList), /Servidor de sessão indisponível/);
+  assert.equal(harness.eventsSection.attributes.has('aria-busy'), false);
 });

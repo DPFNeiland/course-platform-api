@@ -174,14 +174,14 @@
         </ul>
         <div class="nav-right">
         
-        <a href="#"><div class="avatar">JD</div></a>
+        <div class="avatar loading-skeleton loading-skeleton-avatar" aria-label="Carregando perfil"></div>
         </div>
     </nav>  
 
     <main>
         <section class="header">
             <div class="container">
-                <h1>Olá, Fulano!</h1>
+                <h1>Olá, <span data-field="nomeCurador" class="loading-skeleton loading-skeleton-text" aria-label="Carregando nome"></span>!</h1>
                 <p>Bem-vindo ao seu painel de curador. Gerencie cursos, usuários e muito mais.</p>
             </div>
         </section>
@@ -191,12 +191,12 @@
                 <div class="grid">
                     <div class="card">
                         <h3>Aprovar Cursos</h3>
-                        <p>Revise e aprove cursos submetidos pelos professores.</p>
+                        <p data-curator-dashboard-summary class="loading-skeleton loading-skeleton-text" aria-label="Carregando cursos pendentes"></p>
                         <a href="aprovacao-cursos.html" class="btn">Acessar</a>
                     </div>
                     <div class="card">
                         <h3>Monitorar</h3>
-                        <p>Acompanhe o progresso e atividades dos usuários.</p>
+                        <p data-curator-dashboard-summary class="loading-skeleton loading-skeleton-text" aria-label="Carregando matrículas"></p>
                         <a href="monitoramento.html" class="btn">Acessar</a>
                     </div>
 
@@ -206,6 +206,7 @@
     </main>
     <script src="../config.js"></script>
     <script src="../session.js"></script>
+    <script src="../dashboard-ui.js"></script>
     <script src="curador.js"></script>
 </body>
 </html>
