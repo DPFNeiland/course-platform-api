@@ -10,6 +10,12 @@ function response(body, status = 200) {
   return { ok: status >= 200 && status < 300, status, json: async () => body };
 }
 
+function deferred() {
+  let resolve;
+  const promise = new Promise(resolvePromise => { resolve = resolvePromise; });
+  return { promise, resolve };
+}
+
 function element(tagName, textContent = '') {
   const node = {
     tagName: tagName.toUpperCase(),
@@ -46,6 +52,10 @@ function treeText(node) {
   return [node.textContent, ...(node.children || []).map(treeText)].join(' ');
 }
 
+function treeTags(node) {
+  return [node.tagName, ...(node.children || []).flatMap(treeTags)].filter(Boolean);
+}
+
 function execute(scriptPath, document, window) {
   const listeners = {};
   document.addEventListener = (type, listener) => {
@@ -66,7 +76,11 @@ function execute(scriptPath, document, window) {
   return () => listeners.DOMContentLoaded[0]();
 }
 
-test('dashboard do aluno encerra skeleton com dados reais e sem pontuacao provisoria', async () => {
+function createStudentDashboardHarness({
+  courseResponse = response([{ id: 10, nome: 'Curso Real', professorId: 3, status: 'APROVADO' }]),
+  enrollmentResponse = response([{ id: 20, alunoId: 7, cursoId: 10, status: 'ATIVA' }]),
+  recoverSession = async () => ({ id: 7, perfil: 'aluno', nome: 'Aluna Real' })
+} = {}) {
   const gamification = element('p');
   gamification.className = 'loading-skeleton loading-skeleton-text';
   gamification.attributes.set('aria-hidden', 'true');
@@ -81,18 +95,28 @@ test('dashboard do aluno encerra skeleton com dados reais e sem pontuacao provis
   const name = element('span');
   const avatar = element('div');
   avatar.className = 'avatar loading-skeleton loading-skeleton-avatar';
+  const catalog = element('div');
+  catalog.dataset.limit = '6';
+  catalog.attributes.set('aria-busy', 'true');
+  catalog.appendChild(element('div', 'skeleton'));
+  const progress = element('div');
+  progress.attributes.set('aria-busy', 'true');
+  progress.appendChild(element('div', 'skeleton'));
+  const calls = [];
 
   const document = {
     querySelector(selector) {
       return {
         '[data-dashboard-gamification]': gamification,
         '[data-dashboard-course-list]': courseList,
-        '.gamificacao': gamificationCard
+        '.gamificacao': gamificationCard,
+        '[data-student-progress]': progress
       }[selector] || null;
     },
     querySelectorAll(selector) {
       return {
-        '[data-approved-courses]': [],
+        '[data-approved-courses]': [catalog],
+        '[data-approved-courses], [data-student-progress]': [catalog, progress],
         '.achievements .badge': [],
         '[data-field="nomeAluno"]': [name],
         '.avatar': [avatar]
@@ -105,27 +129,109 @@ test('dashboard do aluno encerra skeleton com dados reais e sem pontuacao provis
     APP_CONFIG: { API_BASE_URL: 'https://api.test' },
     location: { href: '', search: '' },
     jwtSession: {
-      recoverSession: async () => ({ id: 7, perfil: 'aluno', nome: 'Aluna Real' }),
+      recoverSession,
       requireSession: () => ({ id: 7, perfil: 'aluno' }),
-      authenticatedFetch: async (_base, requestPath) => requestPath === '/curso'
-        ? response([{ id: 10, nome: 'Curso Real', professorId: 3, status: 'APROVADO' }])
-        : response([{ id: 20, alunoId: 7, cursoId: 10, status: 'ATIVA' }]),
+      authenticatedFetch: async (_base, requestPath) => {
+        calls.push(requestPath);
+        return requestPath === '/curso' ? courseResponse : enrollmentResponse;
+      },
       logout() {}
     },
     open() {}
   };
 
-  await execute('aluno/aluno.js', document, window)();
+  return {
+    avatar,
+    calls,
+    catalog,
+    courseCard,
+    courseList,
+    gamification,
+    gamificationCard,
+    name,
+    progress,
+    start: execute('aluno/aluno.js', document, window)
+  };
+}
 
-  assert.equal(name.textContent, 'Aluna Real');
-  assert.equal(gamification.textContent, 'Gamificação em breve.');
-  assert.equal(gamification.attributes.has('aria-hidden'), false);
-  assert.doesNotMatch(treeText(gamificationCard), /pontos/i);
-  assert.match(treeText(courseList), /Curso Real/);
-  assert.equal(courseCard.attributes.has('aria-busy'), false);
+test('dashboard do aluno encerra skeleton com dados reais e sem pontuacao provisoria', async () => {
+  const harness = createStudentDashboardHarness();
+
+  await harness.start();
+
+  assert.equal(harness.name.textContent, 'Aluna Real');
+  assert.equal(harness.gamification.textContent, 'Gamificação em breve.');
+  assert.equal(harness.gamification.attributes.has('aria-hidden'), false);
+  assert.doesNotMatch(treeText(harness.gamificationCard), /pontos/i);
+  assert.match(treeText(harness.courseList), /Curso Real/);
+  assert.match(treeText(harness.catalog), /Curso Real/);
+  assert.match(treeText(harness.progress), /Curso Real/);
+  assert.equal(harness.courseCard.attributes.has('aria-busy'), false);
 });
 
-test('dashboard do curador apresenta identidade e contagens reais', async () => {
+test('dashboard do aluno mantém skeleton enquanto a API está pendente', async () => {
+  const courses = deferred();
+  const harness = createStudentDashboardHarness({ courseResponse: courses.promise });
+
+  const loading = harness.start();
+  await new Promise(resolve => setImmediate(resolve));
+
+  assert.equal(harness.catalog.attributes.get('aria-busy'), 'true');
+  assert.match(treeText(harness.catalog), /skeleton/);
+
+  courses.resolve(response([]));
+  await loading;
+  assert.equal(harness.catalog.attributes.has('aria-busy'), false);
+  assert.match(treeText(harness.catalog), /Nenhum curso aprovado disponível/);
+});
+
+test('dashboard do aluno renderiza nome de curso malicioso somente como texto', async () => {
+  const maliciousName = '<img src=x onerror=alert(1)>';
+  const harness = createStudentDashboardHarness({
+    courseResponse: response([{ id: 10, nome: maliciousName, professorId: 3, status: 'APROVADO' }])
+  });
+
+  await harness.start();
+
+  assert.match(treeText(harness.catalog), /<img src=x onerror=alert\(1\)>/);
+  assert.equal(treeTags(harness.catalog).includes('IMG'), false);
+});
+
+test('dashboard do aluno trata mensagem de erro maliciosa como texto', async () => {
+  const maliciousMessage = '<script>alert(1)</script>';
+  const harness = createStudentDashboardHarness({
+    courseResponse: response({ message: maliciousMessage }, 500)
+  });
+
+  await harness.start();
+
+  assert.match(treeText(harness.catalog), /<script>alert\(1\)<\/script>/);
+  assert.equal(treeTags(harness.catalog).includes('SCRIPT'), false);
+  assert.equal(harness.catalog.attributes.has('aria-busy'), false);
+  assert.equal(harness.progress.attributes.has('aria-busy'), false);
+});
+
+test('dashboard do aluno encerra loading para payload inválido e falha de sessão', async () => {
+  const invalidPayload = createStudentDashboardHarness({ courseResponse: response({ id: 10 }) });
+  await invalidPayload.start();
+  assert.match(treeText(invalidPayload.catalog), /Resposta de cursos inválida/);
+  assert.equal(invalidPayload.catalog.attributes.has('aria-busy'), false);
+
+  const sessionFailure = createStudentDashboardHarness({
+    recoverSession: async () => { throw new Error('Sessão indisponível'); }
+  });
+  await sessionFailure.start();
+  assert.deepEqual(sessionFailure.calls, []);
+  assert.match(treeText(sessionFailure.catalog), /Sessão indisponível/);
+});
+
+function createCuratorDashboardHarness({
+  responses = {
+    '/curso': response([{ id: 1, status: 'EM_AVALIACAO' }]),
+    '/matricula': response([{ id: 1 }, { id: 2 }])
+  },
+  recoverSession = async () => ({ id: 2, perfil: 'curador', nome: 'Curadora Real' })
+} = {}) {
   const name = element('span');
   const avatar = element('div');
   const pendingSummary = element('p');
@@ -138,6 +244,7 @@ test('dashboard do curador apresenta identidade e contagens reais', async () => 
     querySelector: selector => selector === 'h3' ? element('h3', title) : summary
   });
   const cards = [card('Aprovar Cursos', pendingSummary), card('Monitorar', enrollmentSummary)];
+  const calls = [];
 
   const document = {
     querySelector(selector) {
@@ -157,26 +264,81 @@ test('dashboard do curador apresenta identidade e contagens reais', async () => 
     APP_CONFIG: { API_BASE_URL: 'https://api.test' },
     location: { href: '' },
     jwtSession: {
-      recoverSession: async () => ({ id: 2, perfil: 'curador', nome: 'Curadora Real' }),
+      recoverSession,
       requireSession: () => ({ perfil: 'curador' }),
-      authenticatedFetch: async (_base, requestPath) => ({
-        '/curso': response([{ id: 1, status: 'EM_AVALIACAO' }]),
-        '/matricula': response([{ id: 1 }, { id: 2 }])
-      }[requestPath] || response([])),
+      authenticatedFetch: async (_base, requestPath) => {
+        calls.push(requestPath);
+        return responses[requestPath] || response([]);
+      },
       logout() {}
     }
   };
 
-  await execute('curador/curador.js', document, window)();
+  return {
+    avatar,
+    calls,
+    enrollmentSummary,
+    name,
+    pendingSummary,
+    start: execute('curador/curador.js', document, window)
+  };
+}
 
-  assert.equal(name.textContent, 'Curadora Real');
-  assert.equal(avatar.textContent, 'CU');
-  assert.match(pendingSummary.textContent, /^1 registro/);
-  assert.match(enrollmentSummary.textContent, /^2 registro/);
-  assert.equal(pendingSummary.attributes.has('aria-hidden'), false);
+test('dashboard do curador apresenta identidade e contagens reais', async () => {
+  const harness = createCuratorDashboardHarness();
+
+  await harness.start();
+
+  assert.equal(harness.name.textContent, 'Curadora Real');
+  assert.equal(harness.avatar.textContent, 'CU');
+  assert.match(harness.pendingSummary.textContent, /^1 registro/);
+  assert.match(harness.enrollmentSummary.textContent, /^2 registro/);
+  assert.equal(harness.pendingSummary.attributes.has('aria-hidden'), false);
 });
 
-test('dashboard do professor apresenta KPIs e cursos reais do proprio professor', async () => {
+test('dashboard do curador cobre loading, listas vazias e falhas', async () => {
+  const pendingCourses = deferred();
+  const pending = createCuratorDashboardHarness({ responses: {
+    '/curso': pendingCourses.promise,
+    '/matricula': response([])
+  } });
+  const loading = pending.start();
+  await new Promise(resolve => setImmediate(resolve));
+  assert.match(pending.pendingSummary.className, /loading-skeleton/);
+  pendingCourses.resolve(response([]));
+  await loading;
+  assert.match(pending.pendingSummary.textContent, /^0 registro/);
+  assert.match(pending.enrollmentSummary.textContent, /^0 registro/);
+
+  const apiError = createCuratorDashboardHarness({ responses: {
+    '/curso': response({ message: 'Cursos indisponíveis' }, 500),
+    '/matricula': response([])
+  } });
+  await apiError.start();
+  assert.match(apiError.pendingSummary.textContent, /Cursos indisponíveis/);
+  assert.doesNotMatch(apiError.pendingSummary.className, /loading-skeleton/);
+
+  const sessionError = createCuratorDashboardHarness({
+    recoverSession: async () => { throw new Error('Sessão indisponível'); }
+  });
+  await sessionError.start();
+  assert.deepEqual(sessionError.calls, []);
+  assert.match(sessionError.pendingSummary.textContent, /Sessão indisponível/);
+});
+
+function createProfessorDashboardHarness({
+  responses = {
+    '/curso': response([
+      { id: 1, professorId: 7, nome: 'Curso Próprio', status: 'APROVADO' },
+      { id: 2, professorId: 99, nome: 'Curso de Outro Professor', status: 'APROVADO' }
+    ]),
+    '/matricula': response([
+      { id: 1, cursoId: 1 },
+      { id: 2, cursoId: 2 }
+    ])
+  },
+  recoverSession = async () => ({ id: 7, perfil: 'professor', nome: 'Professora Real' })
+} = {}) {
   const values = Array.from({ length: 4 }, () => {
     const value = element('div');
     value.className = 'value loading-skeleton loading-skeleton-text';
@@ -190,6 +352,7 @@ test('dashboard do professor apresenta KPIs e cursos reais do proprio professor'
   const name = element('span');
   const avatar = element('div');
   const courseForm = element('form');
+  const calls = [];
 
   const document = {
     querySelector(selector) {
@@ -216,28 +379,78 @@ test('dashboard do professor apresenta KPIs e cursos reais do proprio professor'
     APP_CONFIG: { API_BASE_URL: 'https://api.test' },
     location: { href: '' },
     jwtSession: {
-      recoverSession: async () => ({ id: 7, perfil: 'professor', nome: 'Professora Real' }),
+      recoverSession,
       requireSession: () => ({ id: 7, perfil: 'professor' }),
-      authenticatedFetch: async (_base, requestPath) => ({
-        '/curso': response([
-          { id: 1, professorId: 7, nome: 'Curso Próprio', status: 'APROVADO' },
-          { id: 2, professorId: 99, nome: 'Curso de Outro Professor', status: 'APROVADO' }
-        ]),
-        '/matricula': response([
-          { id: 1, cursoId: 1 },
-          { id: 2, cursoId: 2 }
-        ])
-      }[requestPath] || response([])),
+      authenticatedFetch: async (_base, requestPath) => {
+        calls.push(requestPath);
+        return responses[requestPath] || response([]);
+      },
       logout() {}
     }
   };
 
-  await execute('professor/professor.js', document, window)();
+  return {
+    activities,
+    avatar,
+    calls,
+    charts,
+    name,
+    start: execute('professor/professor.js', document, window),
+    values
+  };
+}
 
-  assert.equal(name.textContent, 'Professora Real');
-  assert.deepEqual(values.map(value => value.textContent), [1, 0, 1, 1]);
-  assert.equal(values.every(value => !value.attributes.has('aria-hidden')), true);
-  assert.match(treeText(activities), /Curso Próprio/);
-  assert.doesNotMatch(treeText(activities), /Curso de Outro Professor/);
-  assert.match(treeText(charts), /Matrículas reais/);
+test('dashboard do professor apresenta KPIs e cursos reais do proprio professor', async () => {
+  const harness = createProfessorDashboardHarness();
+
+  await harness.start();
+
+  assert.equal(harness.name.textContent, 'Professora Real');
+  assert.deepEqual(harness.values.map(value => value.textContent), [1, 0, 1, 1]);
+  assert.equal(harness.values.every(value => !value.attributes.has('aria-hidden')), true);
+  assert.match(treeText(harness.activities), /Curso Próprio/);
+  assert.doesNotMatch(treeText(harness.activities), /Curso de Outro Professor/);
+  assert.match(treeText(harness.charts), /Matrículas reais/);
+});
+
+test('dashboard do professor cobre loading, listas vazias e falhas', async () => {
+  const pendingCourses = deferred();
+  const pending = createProfessorDashboardHarness({ responses: {
+    '/curso': pendingCourses.promise,
+    '/matricula': response([])
+  } });
+  const loading = pending.start();
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(pending.values[0].attributes.get('aria-hidden'), 'true');
+  pendingCourses.resolve(response([]));
+  await loading;
+  assert.deepEqual(pending.values.map(value => value.textContent), [0, 0, 0, 0]);
+  assert.match(treeText(pending.activities), /Nenhum curso cadastrado/);
+
+  const invalidPayload = createProfessorDashboardHarness({ responses: {
+    '/curso': response({ id: 1 }),
+    '/matricula': response([])
+  } });
+  await invalidPayload.start();
+  assert.deepEqual(invalidPayload.values.map(value => value.textContent), ['--', '--', '--', '--']);
+  assert.match(treeText(invalidPayload.activities), /Resposta de cursos inválida/);
+
+  const sessionError = createProfessorDashboardHarness({
+    recoverSession: async () => { throw new Error('Sessão indisponível'); }
+  });
+  await sessionError.start();
+  assert.deepEqual(sessionError.calls, []);
+  assert.match(treeText(sessionError.activities), /Sessão indisponível/);
+  assert.equal(sessionError.values.every(value => !value.attributes.has('aria-hidden')), true);
+});
+
+test('dashboard do professor renderiza nome malicioso de curso como texto', async () => {
+  const maliciousName = '<img src=x onerror=alert(1)>';
+  const harness = createProfessorDashboardHarness({ responses: {
+    '/curso': response([{ id: 1, professorId: 7, nome: maliciousName, status: 'APROVADO' }]),
+    '/matricula': response([])
+  } });
+  await harness.start();
+  assert.match(treeText(harness.activities), /<img src=x onerror=alert\(1\)>/);
+  assert.equal(treeTags(harness.activities).includes('IMG'), false);
 });
