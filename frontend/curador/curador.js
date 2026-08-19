@@ -32,16 +32,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     .replaceAll('_', ' ')
     .replace(/\b\w/g, letter => letter.toUpperCase());
 
-  state.user = await window.jwtSession.recoverSession(API_BASE_URL, ['curador', 'admin'], '../index.html');
-
-  const perfil = String(state.user?.perfil || state.user?.cargo || '').trim().toLowerCase();
-  if (!state.user || !['curador', 'admin'].includes(perfil)) {
-    window.location.href = '../index.html';
-    return;
-  }
-  state.user.perfil = perfil;
-  sessionStorage.setItem('session', JSON.stringify(state.user));
-
   const cursoPorId = id => state.cursos.find(curso => Number(curso.id) === Number(id));
   const alunoPorId = id => state.alunos.find(aluno => Number(aluno.id) === Number(id));
   const professorPorId = id => state.professores.find(prof => Number(prof.id) === Number(id));
@@ -66,17 +56,37 @@ document.addEventListener('DOMContentLoaded', async function() {
   };
 
   const finishLoading = element => {
+    // As demais telas reutilizam este módulo sem carregar dashboard-ui.js.
+    if (window.dashboardUI?.finishLoading) {
+      window.dashboardUI.finishLoading(element);
+      return;
+    }
     if (!element) return;
     element.removeAttribute('aria-busy');
     element.removeAttribute('aria-label');
+    element.removeAttribute('aria-hidden');
+  };
+
+  const renderIdentityError = () => {
+    document.querySelectorAll('.avatar').forEach(el => {
+      el.textContent = '--';
+      finishLoading(el);
+    });
+    document.querySelectorAll('[data-field="nomeCurador"]').forEach(el => {
+      el.textContent = 'Nome indisponível';
+      finishLoading(el);
+    });
   };
 
   const updateIdentity = () => {
     document.querySelectorAll('.avatar').forEach(el => {
       el.textContent = (state.user.nome || 'CU').slice(0, 2).toUpperCase();
+      finishLoading(el);
     });
-    const greeting = document.querySelector('.header h1');
-    if (greeting) greeting.textContent = `Olá, ${state.user.nome || 'Curador'}!`;
+    document.querySelectorAll('[data-field="nomeCurador"]').forEach(el => {
+      el.textContent = state.user.nome || 'Curador';
+      finishLoading(el);
+    });
   };
 
   const renderPendingCourses = () => {
@@ -183,10 +193,25 @@ document.addEventListener('DOMContentLoaded', async function() {
         const title = card.querySelector('h3')?.textContent.trim();
         const count = totals[title];
         if (count !== undefined) {
-          card.querySelector('p').textContent = `${count} registro(s) reais no banco.`;
+          const summary = card.querySelector('[data-curator-dashboard-summary]');
+          if (summary) {
+            summary.textContent = `${count} registro(s) reais no banco.`;
+            finishLoading(summary);
+          }
         }
       });
     }
+  };
+
+  const renderDashboardError = error => {
+    const summaries = document.querySelectorAll('[data-curator-dashboard-summary]');
+    if (!summaries.length) return false;
+    summaries.forEach(summary => {
+      summary.textContent = error?.message || 'Dados indisponíveis.';
+      summary.className = 'dashboard-unavailable';
+      finishLoading(summary);
+    });
+    return true;
   };
 
   const renderUsers = () => {
@@ -419,10 +444,10 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (e.target.matches('.filter-select')) renderUsers();
   });
 
-  updateIdentity();
-  await refreshData().catch(err => {
+  const handleLoadingError = err => {
     if (renderCatalogError(err)) return;
     if (renderMonitoringError()) return;
+    if (renderDashboardError(err)) return;
 
     const target = document.querySelector('main, .container');
     if (!target) return;
@@ -430,5 +455,21 @@ document.addEventListener('DOMContentLoaded', async function() {
     message.className = 'empty-state';
     message.textContent = err.message;
     target.prepend(message);
-  });
+  };
+
+  try {
+    state.user = await window.jwtSession.recoverSession(API_BASE_URL, ['curador', 'admin'], '../index.html');
+    const perfil = String(state.user?.perfil || state.user?.cargo || '').trim().toLowerCase();
+    if (!state.user || !['curador', 'admin'].includes(perfil)) {
+      window.location.href = '../index.html';
+      return;
+    }
+    state.user.perfil = perfil;
+    sessionStorage.setItem('session', JSON.stringify(state.user));
+    updateIdentity();
+    await refreshData();
+  } catch (err) {
+    if (!state.user) renderIdentityError();
+    handleLoadingError(err);
+  }
 });

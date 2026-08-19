@@ -373,6 +373,92 @@ class FrontendContractTests {
                         ".comment-card");
     }
 
+    @Test
+    void dashboardsDevemCompartilharSkeletonSemDadosFicticios() throws IOException {
+        String aluno = Files.readString(frontend.resolve("aluno/dashboard.html"));
+        String curador = Files.readString(frontend.resolve("curador/dashboard.html"));
+        String professor = Files.readString(frontend.resolve("professor/dashboard.html"));
+        String globalStyles = Files.readString(frontend.resolve("global.css"));
+        String dashboardUi = Files.readString(frontend.resolve("dashboard-ui.js"));
+
+        assertThat(aluno)
+                .doesNotContain(
+                        ">JD<", "1.250", "2.000", "🥇 Ouro", "🥈 Prata",
+                        "Cursos Bônus", "Curso de JavaScript Básico", "Design Thinking", "Produtividade com Notion",
+                        "width: 62.5%", "points-current", "points-total")
+                .contains(
+                        "data-field=\"nomeAluno\"",
+                        "loading-skeleton loading-skeleton-text",
+                        "data-dashboard-course-list",
+                        "data-dashboard-gamification",
+                        "../dashboard-ui.js",
+                        ">Mudar Plano</button>",
+                        "disabled",
+                        "aria-disabled=\"true\"");
+
+        assertThat(curador)
+                .doesNotContain(">JD<", "Olá, Fulano!")
+                .contains(
+                        "data-field=\"nomeCurador\"",
+                        "data-curator-dashboard-summary",
+                        "../dashboard-ui.js");
+
+        assertThat(professor)
+                .doesNotContain(
+                        ">JD<", ">92%<", ">87%<",
+                        "Avaliações pendentes", "Aulas ministradas no mês",
+                        "Nova avaliação criada", "Aluno Maria entregou tarefa", "Atividade 3.2 - Física",
+                        "Resposta no fórum", "Revisão geral - Turma B", "Slides da aula 5 enviados")
+                .doesNotContain("<svg", "polyline points=")
+                .contains(
+                        "data-field=\"nomeProfessor\"",
+                        "class=\"kpi-grid\"",
+                        "class=\"activities-grid\"",
+                        "<h2>Cursos cadastrados</h2>",
+                        "../dashboard-ui.js")
+                .doesNotContain("<h2>Atividades Recentes</h2>");
+
+        for (String dashboard : List.of(aluno, curador, professor)) {
+            assertThat(dashboard)
+                    .contains("loading-skeleton")
+                    .contains("loading-skeleton-avatar");
+        }
+
+        assertThat(globalStyles)
+                .contains(
+                        ".loading-skeleton",
+                        ".loading-skeleton-text",
+                        ".loading-skeleton-avatar",
+                        ".loading-skeleton-card",
+                        "@keyframes dashboard-skeleton-loading",
+                        "prefers-reduced-motion: reduce");
+
+        assertThat(dashboardUi)
+                .contains(
+                        "global.dashboardUI = Object.freeze({ finishLoading })",
+                        "element.removeAttribute('aria-hidden')",
+                        "'loading-skeleton-avatar'");
+
+        assertThat(Files.readString(frontend.resolve("aluno/aluno.js")))
+                .contains("const renderDashboardStats = () =>")
+                .contains("const renderStudentDashboardError = error =>")
+                .contains("Gamificação em breve.")
+                .contains("finishLoading(document.querySelector('.gamificacao'))")
+                .contains(
+                        "const hasValidCourseId = Number.isInteger(courseId) && courseId > 0",
+                        "container.replaceChildren",
+                        "action.dataset.courseId = String(courseId)")
+                .doesNotContain("container.innerHTML = `<p class=\"empty-state\">${err.message}</p>`");
+        assertThat(Files.readString(frontend.resolve("curador/curador.js")))
+                .contains("document.querySelectorAll('[data-field=\"nomeCurador\"]')")
+                .contains("const renderDashboardError = error =>");
+        assertThat(Files.readString(frontend.resolve("professor/professor.js")))
+                .contains("const renderDashboard = () =>")
+                .contains("const renderDashboardError = error =>")
+                .contains("activities.replaceChildren")
+                .contains("charts.replaceChildren");
+    }
+
     private long countOccurrences(String content, String fragment) {
         return content.split(java.util.regex.Pattern.quote(fragment), -1).length - 1L;
     }

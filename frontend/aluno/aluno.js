@@ -61,38 +61,71 @@ const createCourseCard = (curso, index) => {
     'linear-gradient(135deg, #F59E0B, #10B981)',
     'linear-gradient(135deg, #1E3A8A, #EF4444)'
   ];
-  const matricula = matriculaDoCurso(curso.id);
+  const courseId = Number(curso.id);
+  const hasValidCourseId = Number.isInteger(courseId) && courseId > 0;
+  const matricula = hasValidCourseId ? matriculaDoCurso(courseId) : null;
   const enrolled = Boolean(matricula);
   const finished = matricula?.status === 'ENCERRADA';
-  const action = finished
-    ? `<a class="btn-pill btn-secondary" href="certificado.html">Certificado</a>`
-    : enrolled
-      ? `<a class="btn-pill btn-primary" href="sala-aula.html?cursoId=${curso.id}">Continuar</a>`
-      : `<button class="btn-pill btn-primary enroll-course" data-course-id="${curso.id}">Matricular</button>`;
+  const card = createTextElement('div', 'course-card card curso-card', '');
+  const thumb = createTextElement('div', 'course-thumb curso-thumb', '');
+  thumb.setAttribute('style', `background: ${gradients[index % gradients.length]};`);
+  const badges = createTextElement('div', 'course-badges curso-info', '');
+  badges.append(
+    createTextElement('span', 'badge-pill', formatEnum(curso.tipoCurso)),
+    createTextElement('span', 'badge-pill', formatEnum(curso.tipoAssinatura)),
+    createTextElement('span', 'badge-pill', enrolled ? formatEnum(matricula.status) : 'Disponível')
+  );
+  const metadata = createTextElement('div', 'course-meta', '');
+  const professorId = Number(curso.professorId);
+  metadata.appendChild(createTextElement(
+    'span',
+    '',
+    Number.isInteger(professorId) && professorId > 0 ? `Professor #${professorId}` : 'Professor indisponível'
+  ));
 
-  return `
-    <div class="course-card card curso-card">
-      <div class="course-thumb curso-thumb" style="background: ${gradients[index % gradients.length]};"></div>
-      <h3 class="course-title">${curso.nome}</h3>
-      <p class="course-desc">Curso ${formatEnum(curso.tipoCurso).toLowerCase()} no plano ${formatEnum(curso.tipoAssinatura).toLowerCase()}.</p>
-      <div class="course-badges curso-info">
-        <span class="badge-pill">${formatEnum(curso.tipoCurso)}</span>
-        <span class="badge-pill">${formatEnum(curso.tipoAssinatura)}</span>
-        <span class="badge-pill">${enrolled ? formatEnum(matricula.status) : 'Disponivel'}</span>
-      </div>
-      <div class="course-meta"><span>Professor #${curso.professorId}</span></div>
-      ${action}
-    </div>
-  `;
+  let action;
+  if (finished) {
+    action = createTextElement('a', 'btn-pill btn-secondary', 'Certificado');
+    action.setAttribute('href', 'certificado.html');
+  } else if (enrolled && hasValidCourseId) {
+    action = createTextElement('a', 'btn-pill btn-primary', 'Continuar');
+    action.setAttribute('href', `sala-aula.html?cursoId=${courseId}`);
+  } else {
+    action = createTextElement('button', 'btn-pill btn-primary enroll-course', hasValidCourseId ? 'Matricular' : 'Indisponível');
+    action.setAttribute('type', 'button');
+    if (hasValidCourseId) {
+      action.dataset.courseId = String(courseId);
+    } else {
+      action.disabled = true;
+      action.setAttribute('aria-disabled', 'true');
+    }
+  }
+
+  card.append(
+    thumb,
+    createTextElement('h3', 'course-title', curso.nome || 'Curso sem nome'),
+    createTextElement(
+      'p',
+      'course-desc',
+      `Curso ${formatEnum(curso.tipoCurso).toLowerCase()} no plano ${formatEnum(curso.tipoAssinatura).toLowerCase()}.`
+    ),
+    badges,
+    metadata,
+    action
+  );
+  return card;
 };
 
 const renderCatalog = () => {
   document.querySelectorAll('[data-approved-courses]').forEach(container => {
     const limit = Number(container.dataset.limit || filteredCourses().length);
     const cursos = filteredCourses().slice(0, limit);
-    container.innerHTML = cursos.length
-      ? cursos.map(createCourseCard).join('')
-      : '<p class="empty-state">Nenhum curso aprovado disponivel no momento.</p>';
+    const cards = cursos.map(createCourseCard);
+    container.replaceChildren(...(cards.length
+      ? cards
+      : [createTextElement('p', 'empty-state', 'Nenhum curso aprovado disponível no momento.')]
+    ));
+    finishLoading(container);
   });
 };
 
@@ -100,13 +133,18 @@ const renderStudentProgress = () => {
   const container = document.querySelector('[data-student-progress]');
   if (!container) return;
   const ativas = appState.matriculas.filter(m => m.status !== 'ENCERRADA');
-  container.innerHTML = ativas.length
-    ? ativas.map((matricula, index) => {
+  const cards = ativas
+    .map((matricula, index) => {
       const curso = cursoPorId(matricula.cursoId);
-      if (!curso) return '';
+      if (!curso) return null;
       return createCourseCard(curso, index);
-    }).join('')
-    : '<p class="empty-state">Nenhum curso iniciado ainda.</p>';
+    })
+    .filter(Boolean);
+  container.replaceChildren(...(cards.length
+    ? cards
+    : [createTextElement('p', 'empty-state', 'Nenhum curso iniciado ainda.')]
+  ));
+  finishLoading(container);
 };
 
 const provisionalGamificationPoints = () => {
@@ -115,30 +153,61 @@ const provisionalGamificationPoints = () => {
 };
 
 const renderDashboardStats = () => {
-  const active = appState.matriculas.filter(m => m.status !== 'ENCERRADA').length;
-  const finished = appState.matriculas.filter(m => m.status === 'ENCERRADA').length;
-  document.querySelector('.points-current')?.replaceChildren(document.createTextNode(String(provisionalGamificationPoints())));
-  document.querySelector('.points-total')?.replaceChildren(document.createTextNode('/ pontos reais'));
-  document.querySelectorAll('.achievements .badge').forEach((badge, index) => {
-    badge.textContent = index === 0 ? `${finished} concluidos` : `${active} ativos`;
-  });
-  document.querySelector('.bonus-list')?.replaceChildren(...(appState.cursosAprovados.slice(0, 3).map(curso => {
+  const gamification = document.querySelector('[data-dashboard-gamification]');
+  if (gamification) {
+    gamification.textContent = 'Gamificação em breve.';
+    finishLoading(gamification);
+  }
+  const availableCourses = document.querySelector('[data-dashboard-course-list]');
+  const courseItems = appState.cursosAprovados.slice(0, 3).map(curso => {
     const li = document.createElement('li');
-    li.innerHTML = `<span>${curso.nome}</span><span class="badge badge-success">${formatEnum(curso.status)}</span>`;
+    li.append(
+      createTextElement('span', '', curso.nome),
+      createTextElement('span', 'badge badge-success', formatEnum(curso.status))
+    );
     return li;
-  })));
+  });
+  if (availableCourses) {
+    availableCourses.replaceChildren(...(courseItems.length
+      ? courseItems
+      : [createTextElement('li', 'empty-state', 'Nenhum curso aprovado disponível.')]
+    ));
+    finishLoading(availableCourses.closest('.card'));
+  }
+  finishLoading(document.querySelector('.gamificacao'));
+};
+
+const renderStudentDashboardError = error => {
+  const availableCourses = document.querySelector('[data-dashboard-course-list]');
+  if (!availableCourses) return false;
+  const message = error?.message || 'Dados do dashboard indisponíveis.';
+  const gamification = document.querySelector('[data-dashboard-gamification]');
+  if (gamification) {
+    gamification.textContent = 'Gamificação indisponível.';
+    finishLoading(gamification);
+  }
+  availableCourses.replaceChildren(createTextElement('li', 'dashboard-unavailable', message));
+  finishLoading(availableCourses.closest('.card'));
+  finishLoading(document.querySelector('.gamificacao'));
+  return true;
 };
 
 const finishLoading = element => {
+  // As demais telas reutilizam este módulo sem carregar dashboard-ui.js.
+  if (window.dashboardUI?.finishLoading) {
+    window.dashboardUI.finishLoading(element);
+    return;
+  }
   if (!element) return;
   element.removeAttribute('aria-busy');
   element.removeAttribute('aria-label');
+  element.removeAttribute('aria-hidden');
 };
 
 const finishAvatarLoading = () => {
   document.querySelectorAll('.avatar').forEach(element => {
     element.classList.remove('avatar-skeleton');
-    element.removeAttribute('aria-label');
+    finishLoading(element);
   });
 };
 
@@ -567,6 +636,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     document.querySelectorAll('[data-field="nomeAluno"]').forEach(el => {
       el.textContent = appState.session.nome || 'Aluno';
+      finishLoading(el);
     });
     document.querySelectorAll('.avatar').forEach(el => {
       el.textContent = (appState.session.nome || 'AL').slice(0, 2).toUpperCase();
@@ -584,10 +654,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     await refreshData();
   } catch (err) {
     finishAvatarLoading();
+    document.querySelectorAll('[data-field="nomeAluno"]').forEach(el => {
+      if (!el.textContent.trim()) el.textContent = 'Nome indisponível';
+      finishLoading(el);
+    });
     if (renderAchievementsError(err)) return;
     if (renderSalaAulaError(err)) return;
+    renderStudentDashboardError(err);
     document.querySelectorAll('[data-approved-courses], [data-student-progress]').forEach(container => {
-      container.innerHTML = `<p class="empty-state">${err.message}</p>`;
+      container.replaceChildren(createTextElement(
+        'p',
+        'empty-state',
+        err?.message || 'Dados indisponíveis.'
+      ));
+      finishLoading(container);
     });
   }
 });

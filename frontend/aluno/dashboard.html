@@ -27,55 +27,37 @@
                 <li><a href="forum.html">Fórum</a></li>
             </ul>
             <div class="nav-right">
-                <div class="avatar">JD</div>
+                <div class="avatar loading-skeleton loading-skeleton-avatar" aria-label="Carregando perfil"></div>
             </div>
         </nav>
     </header>
 
     <main>
         <section class="greeting">
-            <h1>Olá, <span data-field="nomeAluno">Aluno</span>!</h1>
-            <button class="btn-pill btn-primary">Mudar Plano</button>
+            <h1>Olá, <span data-field="nomeAluno" class="loading-skeleton loading-skeleton-text" aria-label="Carregando nome"></span>!</h1>
+            <button class="btn-pill btn-primary" type="button" disabled aria-disabled="true" title="Alteração de plano em breve">Mudar Plano</button>
         </section>
 
         <section class="top-cards">
-            <div class="card gamificacao">
+            <div class="card gamificacao" aria-busy="true" aria-label="Carregando gamificação">
                 <h3>Gamificação</h3>
-                <div class="points-display">
-                    <span class="points-current">1.250</span>
-                    <span class="points-total">/ 2.000 pts</span>
-                </div>
-                <div class="progress">
-                    <div class="progress-fill" style="width: 62.5%;"></div>
-                </div>
-                <div class="achievements">
-                    <span class="badge badge-gold">🥇 Ouro</span>
-                    <span class="badge badge-silver">🥈 Prata</span>
-                </div>
+                <p data-dashboard-gamification class="loading-skeleton loading-skeleton-text" aria-hidden="true"></p>
             </div>
-            <div class="card cursos-bonus">
-                <h3>Cursos Bônus</h3>
-                <ul class="bonus-list">
-                    <li>
-                        <span>Curso de JavaScript Básico</span>
-                        <span class="badge badge-success">Grátis</span>
-                    </li>
-                    <li>
-                        <span>Design Thinking</span>
-                        <span class="badge badge-success">Grátis</span>
-                    </li>
-                    <li>
-                        <span>Produtividade com Notion</span>
-                        <span class="badge badge-success">Grátis</span>
-                    </li>
+            <div class="card cursos-disponiveis" aria-busy="true" aria-label="Carregando cursos disponíveis">
+                <h3>Cursos disponíveis</h3>
+                <ul class="bonus-list" data-dashboard-course-list>
+                    <li><span class="loading-skeleton loading-skeleton-text" aria-hidden="true"></span></li>
+                    <li><span class="loading-skeleton loading-skeleton-text" aria-hidden="true"></span></li>
+                    <li><span class="loading-skeleton loading-skeleton-text" aria-hidden="true"></span></li>
                 </ul>
             </div>
         </section>
 
         <section class="section-andamento">
             <h2>Cursos em Andamento</h2>
-            <div class="cards-grid" data-student-progress>
-                <p class="empty-state">Nenhum curso iniciado ainda.</p>
+            <div class="cards-grid" data-student-progress aria-busy="true" aria-label="Carregando cursos em andamento">
+                <div class="card loading-skeleton loading-skeleton-card" aria-hidden="true"></div>
+                <div class="card loading-skeleton loading-skeleton-card" aria-hidden="true"></div>
             </div>
         </section>
 
@@ -88,8 +70,9 @@
                 <button class="filtro">Front-end</button>
                 <button class="filtro">Back-end</button>
             </div>
-            <div class="cards-grid" data-approved-courses data-limit="6">
-                <p class="empty-state">Carregando cursos aprovados...</p>
+            <div class="cards-grid" data-approved-courses data-limit="6" aria-busy="true" aria-label="Carregando cursos aprovados">
+                <div class="card loading-skeleton loading-skeleton-card" aria-hidden="true"></div>
+                <div class="card loading-skeleton loading-skeleton-card" aria-hidden="true"></div>
             </div>
             <div class="saber-mais">
                 <a href="catalogo.html"><button class="btn-pill btn-primary">Ver mais</button></a>
@@ -98,6 +81,7 @@
     </main>
     <script src="../config.js"></script>
     <script src="../session.js"></script>
+    <script src="../dashboard-ui.js"></script>
     <script src="aluno.js"></script>
 </body>
 

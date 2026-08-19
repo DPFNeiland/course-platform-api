@@ -253,6 +253,14 @@ h4 {
     box-shadow: 0 15px 35px rgba(59,130,246,0.3);
 }
 
+.btn-pill:disabled,
+.btn-pill[aria-disabled="true"] {
+    cursor: not-allowed;
+    opacity: 0.55;
+    transform: none;
+    box-shadow: none;
+}
+
 .btn-primary {
     background: var(--primary-blue);
     color: white;
