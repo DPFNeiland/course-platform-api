@@ -46,14 +46,32 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (!element) return;
     element.removeAttribute('aria-busy');
     element.removeAttribute('aria-label');
+    if (typeof element.className === 'string') {
+      const loadingClasses = new Set([
+        'loading-skeleton', 'loading-skeleton-text', 'loading-skeleton-card', 'loading-skeleton-chip'
+      ]);
+      element.className = element.className
+        .split(/\s+/)
+        .filter(className => className && !loadingClasses.has(className))
+        .join(' ');
+    }
+  };
+
+  const createElement = (tagName, className, text) => {
+    const element = document.createElement(tagName);
+    if (className) element.className = className;
+    if (text !== undefined) element.textContent = text;
+    return element;
   };
 
   const setAvatarAndName = () => {
     document.querySelectorAll('[data-field="nomeProfessor"]').forEach(el => {
       el.textContent = state.user.nome || 'Professor';
+      finishLoading(el);
     });
     document.querySelectorAll('.avatar').forEach(el => {
       el.textContent = (state.user.nome || 'PR').slice(0, 2).toUpperCase();
+      finishLoading(el);
     });
   };
 
@@ -66,6 +84,8 @@ document.addEventListener('DOMContentLoaded', async function() {
       values[1].textContent = cursos.filter(c => c.status === 'EM_AVALIACAO').length;
       values[2].textContent = matriculas.length;
       values[3].textContent = cursos.length;
+      values.forEach(finishLoading);
+      finishLoading(document.querySelector('.kpi-grid'));
     }
 
     const labels = document.querySelectorAll('.kpi-card .label');
@@ -78,24 +98,66 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     const activities = document.querySelector('.activities-grid');
     if (activities) {
-      activities.innerHTML = cursos.length
-        ? cursos.map(curso => `
-          <div class="card activity-card">
-            <h4>${curso.nome}</h4>
-            <p>${formatEnum(curso.tipoCurso)} - ${formatEnum(curso.tipoAssinatura)}</p>
-            <div class="meta"><span class="pill bg-blue">${formatEnum(curso.status)}</span></div>
-          </div>
-        `).join('')
-        : '<p class="empty-state">Nenhum curso cadastrado ainda.</p>';
+      const cards = cursos.map(curso => {
+        const card = createElement('article', 'card activity-card');
+        card.appendChild(createElement('h4', '', curso.nome));
+        card.appendChild(createElement(
+          'p',
+          '',
+          `${formatEnum(curso.tipoCurso)} - ${formatEnum(curso.tipoAssinatura)}`
+        ));
+        const meta = createElement('div', 'meta');
+        meta.appendChild(createElement('span', 'pill bg-blue', formatEnum(curso.status)));
+        card.appendChild(meta);
+        return card;
+      });
+      activities.replaceChildren(...(cards.length
+        ? cards
+        : [createElement('p', 'empty-state', 'Nenhum curso cadastrado ainda.')]
+      ));
+      finishLoading(activities);
     }
 
     const charts = document.querySelector('.charts-grid');
     if (charts && document.querySelector('#courseForm')) {
-      charts.innerHTML = `
-        <div class="card chart-card"><h3>Cursos por status</h3><p>Aprovados: ${cursos.filter(c => c.status === 'APROVADO').length}</p><p>Em avaliacao: ${cursos.filter(c => c.status === 'EM_AVALIACAO').length}</p><p>Reavaliar: ${cursos.filter(c => c.status === 'REAVALIAR').length}</p></div>
-        <div class="card chart-card"><h3>Matriculas reais</h3><p>${matriculas.length} matricula(s) vinculadas aos seus cursos.</p></div>
-      `;
+      const statusCard = createElement('div', 'card chart-card');
+      statusCard.append(
+        createElement('h3', '', 'Cursos por status'),
+        createElement('p', '', `Aprovados: ${cursos.filter(c => c.status === 'APROVADO').length}`),
+        createElement('p', '', `Em avaliação: ${cursos.filter(c => c.status === 'EM_AVALIACAO').length}`),
+        createElement('p', '', `Reavaliar: ${cursos.filter(c => c.status === 'REAVALIAR').length}`)
+      );
+      const enrollmentsCard = createElement('div', 'card chart-card');
+      enrollmentsCard.append(
+        createElement('h3', '', 'Matrículas reais'),
+        createElement('p', '', `${matriculas.length} matrícula(s) vinculada(s) aos seus cursos.`)
+      );
+      charts.replaceChildren(statusCard, enrollmentsCard);
+      finishLoading(charts);
     }
+  };
+
+  const renderDashboardError = error => {
+    const values = document.querySelectorAll('.kpi-card .value');
+    if (!values.length) return false;
+    values.forEach(value => {
+      value.textContent = '--';
+      finishLoading(value);
+    });
+    finishLoading(document.querySelector('.kpi-grid'));
+
+    const message = error?.message || 'Dados do dashboard indisponíveis.';
+    const activities = document.querySelector('.activities-grid');
+    if (activities) {
+      activities.replaceChildren(createElement('p', 'dashboard-unavailable', message));
+      finishLoading(activities);
+    }
+    const charts = document.querySelector('.charts-grid');
+    if (charts) {
+      charts.replaceChildren(createElement('p', 'dashboard-unavailable', message));
+      finishLoading(charts);
+    }
+    return true;
   };
 
   const dateKey = date => [
@@ -305,6 +367,9 @@ document.addEventListener('DOMContentLoaded', async function() {
       api('/matricula'),
       api('/aluno').catch(() => [])
     ]);
+    if (!Array.isArray(cursos)) throw new Error('Resposta de cursos inválida.');
+    if (!Array.isArray(matriculas)) throw new Error('Resposta de matrículas inválida.');
+    if (!Array.isArray(alunos)) throw new Error('Resposta de alunos inválida.');
     state.cursos = cursos;
     state.matriculas = matriculas;
     state.alunos = alunos;
@@ -380,6 +445,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   setAvatarAndName();
   await refreshData().catch(err => {
     if (renderAgendaError(err)) return;
+    if (renderDashboardError(err)) return;
     document.querySelector('main, .section, .container')?.insertAdjacentHTML('afterbegin', `<p class="empty-state">${err.message}</p>`);
   });
 });
