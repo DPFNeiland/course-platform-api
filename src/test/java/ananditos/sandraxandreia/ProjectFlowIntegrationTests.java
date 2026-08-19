@@ -6,13 +6,17 @@ import ananditos.sandraxandreia.domain.assinatura.Assinatura;
 import ananditos.sandraxandreia.domain.curador.Curador;
 import ananditos.sandraxandreia.domain.curso.Curso;
 import ananditos.sandraxandreia.domain.curso.CursoAssinatura;
+import ananditos.sandraxandreia.domain.curso.MaterialCurso;
 import ananditos.sandraxandreia.domain.curso.StatusCurso;
+import ananditos.sandraxandreia.domain.curso.TipoMaterialCurso;
 import ananditos.sandraxandreia.domain.curso.TipoCurso;
 import ananditos.sandraxandreia.domain.matricula.Matricula;
 import ananditos.sandraxandreia.domain.matricula.StatusMatricula;
 import ananditos.sandraxandreia.domain.professor.Professor;
 import ananditos.sandraxandreia.domain.professor.TipoEnsinoProfessor;
 import ananditos.sandraxandreia.domain.usuario.GeneroUsuario;
+import ananditos.sandraxandreia.domain.usuario.Usuario;
+import ananditos.sandraxandreia.domain.usuario.UsuarioCargo;
 import ananditos.sandraxandreia.repository.AlunoRepository;
 import ananditos.sandraxandreia.repository.AssinaturaRepository;
 import ananditos.sandraxandreia.repository.CuradorRepository;
@@ -269,6 +273,90 @@ class ProjectFlowIntegrationTests {
                 .andExpect(status().isOk())
                 .andExpect(header().string("Content-Disposition", org.hamcrest.Matchers.containsString("roteiro.txt")))
                 .andExpect(content().bytes("conteudo da aula".getBytes()));
+    }
+
+    @Test
+    void devePermitirAlunoMatriculadoListarEBaixarMateriais() throws Exception {
+        Curso curso = new Curso(null, "Curso Matriculado", CursoAssinatura.COMUM, TipoCurso.ASSINCRONO);
+        curso.setProfessor(professor);
+        curso.setStatus(StatusCurso.APROVADO);
+        curso = cursoRepository.save(curso);
+
+        Matricula matricula = new Matricula(null, StatusMatricula.EM_ANDAMENTO);
+        matricula.setAluno(aluno);
+        matricula.setCurso(curso);
+        matriculaRepository.save(matricula);
+
+        MaterialCurso material = new MaterialCurso(null, curso, "Apostila", TipoMaterialCurso.ARQUIVO);
+        material.setNomeArquivo("apostila.txt");
+        material.setContentType(MediaType.TEXT_PLAIN_VALUE);
+        material.setDadosArquivo("conteudo restrito".getBytes());
+        material = materialCursoRepository.save(material);
+
+        mockMvc.perform(get("/curso/{cursoId}/materiais", curso.getId())
+                        .header("Authorization", bearer(aluno.getEmail().getValor())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(material.getId()));
+
+        mockMvc.perform(get("/curso/{cursoId}/materiais/{materialId}/arquivo", curso.getId(), material.getId())
+                        .header("Authorization", bearer(aluno.getEmail().getValor())))
+                .andExpect(status().isOk())
+                .andExpect(content().bytes("conteudo restrito".getBytes()));
+
+        mockMvc.perform(get("/curso/{cursoId}/materiais", curso.getId())
+                        .header("Authorization", bearer(curador.getEmail().getValor())))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/curso/{cursoId}/materiais", curso.getId())
+                        .header("Authorization", bearer(professor.getEmail().getValor())))
+                .andExpect(status().isOk());
+
+        Usuario admin = usuarioRepository.save(new Usuario(
+                null,
+                "Administrador Fluxo",
+                "admin.fluxo@teste.com",
+                passwordEncoder.encode("123456"),
+                "11144477735",
+                GeneroUsuario.NAO_INFORMADO,
+                "1/1/1980",
+                UsuarioCargo.ADMIN
+        ));
+        mockMvc.perform(get("/curso/{cursoId}/materiais/{materialId}/arquivo", curso.getId(), material.getId())
+                        .header("Authorization", bearer(admin.getEmail().getValor())))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void deveBloquearAlunoNaoMatriculadoNaListagemENoDownloadDeMateriais() throws Exception {
+        Curso curso = new Curso(null, "Curso Restrito", CursoAssinatura.PREMIUM, TipoCurso.ASSINCRONO);
+        curso.setProfessor(professor);
+        curso.setStatus(StatusCurso.APROVADO);
+        curso = cursoRepository.save(curso);
+
+        MaterialCurso material = new MaterialCurso(null, curso, "Material privado", TipoMaterialCurso.ARQUIVO);
+        material.setNomeArquivo("privado.txt");
+        material.setContentType(MediaType.TEXT_PLAIN_VALUE);
+        material.setDadosArquivo("privado".getBytes());
+        material = materialCursoRepository.save(material);
+
+        mockMvc.perform(get("/curso/{cursoId}/materiais", curso.getId())
+                        .header("Authorization", bearer(aluno.getEmail().getValor())))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.erro").value("Aluno nao possui matricula neste curso"));
+
+        mockMvc.perform(get("/curso/{cursoId}/materiais/{materialId}/arquivo", curso.getId(), material.getId())
+                        .header("Authorization", bearer(aluno.getEmail().getValor())))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.erro").value("Aluno nao possui matricula neste curso"));
+    }
+
+    @Test
+    void deveExigirAutenticacaoParaListarEBaixarMateriais() throws Exception {
+        mockMvc.perform(get("/curso/{cursoId}/materiais", 999L))
+                .andExpect(status().isUnauthorized());
+
+        mockMvc.perform(get("/curso/{cursoId}/materiais/{materialId}/arquivo", 999L, 999L))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
