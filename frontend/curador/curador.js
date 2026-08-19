@@ -56,6 +56,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   };
 
   const finishLoading = element => {
+    // As demais telas reutilizam este módulo sem carregar dashboard-ui.js.
     if (window.dashboardUI?.finishLoading) {
       window.dashboardUI.finishLoading(element);
       return;

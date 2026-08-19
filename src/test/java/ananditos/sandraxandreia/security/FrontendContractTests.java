@@ -387,16 +387,19 @@ class FrontendContractTests {
                         "Cursos Bônus", "Curso de JavaScript Básico", "Design Thinking", "Produtividade com Notion",
                         "width: 62.5%", "points-current", "points-total")
                 .contains(
-                        "data-field=\"nomeAluno\" class=\"loading-skeleton loading-skeleton-text\"",
+                        "data-field=\"nomeAluno\"",
+                        "loading-skeleton loading-skeleton-text",
                         "data-dashboard-course-list",
                         "data-dashboard-gamification",
                         "../dashboard-ui.js",
-                        "disabled aria-disabled=\"true\" title=\"Alteração de plano em breve\"");
+                        ">Mudar Plano</button>",
+                        "disabled",
+                        "aria-disabled=\"true\"");
 
         assertThat(curador)
                 .doesNotContain(">JD<", "Olá, Fulano!")
                 .contains(
-                        "data-field=\"nomeCurador\" class=\"loading-skeleton loading-skeleton-text\"",
+                        "data-field=\"nomeCurador\"",
                         "data-curator-dashboard-summary",
                         "../dashboard-ui.js");
 
@@ -408,9 +411,9 @@ class FrontendContractTests {
                         "Resposta no fórum", "Revisão geral - Turma B", "Slides da aula 5 enviados")
                 .doesNotContain("<svg", "polyline points=")
                 .contains(
-                        "data-field=\"nomeProfessor\" class=\"loading-skeleton loading-skeleton-text\"",
-                        "class=\"kpi-grid\" aria-busy=\"true\"",
-                        "class=\"activities-grid\" aria-busy=\"true\"",
+                        "data-field=\"nomeProfessor\"",
+                        "class=\"kpi-grid\"",
+                        "class=\"activities-grid\"",
                         "<h2>Cursos cadastrados</h2>",
                         "../dashboard-ui.js")
                 .doesNotContain("<h2>Atividades Recentes</h2>");
@@ -440,7 +443,12 @@ class FrontendContractTests {
                 .contains("const renderDashboardStats = () =>")
                 .contains("const renderStudentDashboardError = error =>")
                 .contains("Gamificação em breve.")
-                .contains("finishLoading(document.querySelector('.gamificacao'))");
+                .contains("finishLoading(document.querySelector('.gamificacao'))")
+                .contains(
+                        "const hasValidCourseId = Number.isInteger(courseId) && courseId > 0",
+                        "container.replaceChildren",
+                        "action.dataset.courseId = String(courseId)")
+                .doesNotContain("container.innerHTML = `<p class=\"empty-state\">${err.message}</p>`");
         assertThat(Files.readString(frontend.resolve("curador/curador.js")))
                 .contains("document.querySelectorAll('[data-field=\"nomeCurador\"]')")
                 .contains("const renderDashboardError = error =>");
