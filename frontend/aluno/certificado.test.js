@@ -1,0 +1,214 @@
+const { test } = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const vm = require('node:vm');
+
+const source = fs.readFileSync(path.join(__dirname, 'aluno.js'), 'utf8');
+const uiSource = fs.readFileSync(path.join(__dirname, '..', 'dashboard-ui.js'), 'utf8');
+
+function response(body, status = 200) {
+  return { ok: status >= 200 && status < 300, status, json: async () => body };
+}
+
+function deferred() {
+  let resolve;
+  const promise = new Promise(resolvePromise => { resolve = resolvePromise; });
+  return { promise, resolve };
+}
+
+function element(tagName, textContent = '') {
+  const node = {
+    tagName: tagName.toUpperCase(),
+    className: '',
+    textContent,
+    dataset: {},
+    children: [],
+    attributes: new Map(),
+    appendChild(child) { this.children.push(child); return child; },
+    append(...children) { this.children.push(...children); },
+    replaceChildren(...children) { this.textContent = ''; this.children = children; },
+    removeAttribute(name) { this.attributes.delete(name); },
+    setAttribute(name, value) { this.attributes.set(name, String(value)); },
+    matches() { return false; },
+    closest() { return null; }
+  };
+  node.classList = {
+    remove(className) {
+      node.className = node.className
+        .split(/\s+/)
+        .filter(current => current && current !== className)
+        .join(' ');
+    }
+  };
+  return node;
+}
+
+function createHarness({
+  courseResponse = response([{ id: 10, nome: 'Curso Real', status: 'APROVADO', professorId: 3 }]),
+  enrollmentResponse = response([{ id: 20, alunoId: 7, cursoId: 10, status: 'ENCERRADA', dataMatricula: '2026-08-20' }]),
+  detail = false
+} = {}) {
+  const listeners = {};
+  const avatar = element('div');
+  avatar.className = 'avatar loading-skeleton loading-skeleton-avatar';
+  avatar.attributes.set('aria-label', 'Carregando perfil');
+  const statsSection = element('section');
+  statsSection.attributes.set('aria-busy', 'true');
+  const totalCursos = element('div');
+  const totalHoras = element('div');
+  const mediaGeral = element('div');
+  for (const stat of [totalCursos, totalHoras, mediaGeral]) {
+    stat.className = 'stat-number loading-skeleton loading-skeleton-text';
+    stat.attributes.set('aria-hidden', 'true');
+  }
+  const certificates = element('div', 'Carregando certificados...');
+  const certificateName = element('div');
+  const certificateCourse = element('div');
+  const certificateHours = element('span');
+  const certificateDate = element('span');
+  const modal = element('div');
+  modal.style = {};
+  const modalBody = element('div', 'Texto inicial');
+  const calls = [];
+
+  const selectors = {
+    '#statsSection': detail ? null : statsSection,
+    '#totalCursos': detail ? null : totalCursos,
+    '#totalHoras': detail ? null : totalHoras,
+    '#mediaGeral': detail ? null : mediaGeral,
+    '#certificadosContainer': detail ? null : certificates,
+    '#certificadoNome': detail ? certificateName : null,
+    '#certificadoCurso': detail ? certificateCourse : null,
+    '#certificadoCargaHoraria': detail ? certificateHours : null,
+    '#certificadoData': detail ? certificateDate : null,
+    '#modalCompartilhar': modal,
+    '#modalCompartilharBody': modalBody
+  };
+  const document = {
+    addEventListener(type, listener) {
+      listeners[type] = listeners[type] || [];
+      listeners[type].push(listener);
+    },
+    querySelector(selector) { return selectors[selector] || null; },
+    querySelectorAll(selector) {
+      return {
+        '.avatar': [avatar],
+        '.certificates-grid, .certificados-grid': detail ? [] : [certificates],
+        '[data-approved-courses]': [],
+        '[data-approved-courses], [data-student-progress]': [],
+        '[data-field="nomeAluno"]': []
+      }[selector] || [];
+    },
+    createElement: tagName => element(tagName),
+    createTextNode: text => element('#text', text)
+  };
+  const window = {
+    APP_CONFIG: { API_BASE_URL: 'https://api.test' },
+    location: { href: '', search: detail ? '?cursoId=10' : '' },
+    jwtSession: {
+      recoverSession: async () => ({ id: 7, perfil: 'aluno', nome: 'Ana Real' }),
+      requireSession: () => ({ id: 7, perfil: 'aluno', nome: 'Ana Real' }),
+      authenticatedFetch: async (_base, requestPath) => {
+        calls.push(requestPath);
+        return requestPath === '/curso' ? courseResponse : enrollmentResponse;
+      },
+      logout() {}
+    },
+    open() {}
+  };
+  const context = { window, document, URLSearchParams, alert() {}, console };
+  vm.runInNewContext(uiSource, context);
+  vm.runInNewContext(source, context);
+
+  return {
+    avatar,
+    calls,
+    certificateCourse,
+    certificateDate,
+    certificateHours,
+    certificateName,
+    certificates,
+    click: event => listeners.click[0](event),
+    mediaGeral,
+    modal,
+    modalBody,
+    start: () => listeners.DOMContentLoaded[0](),
+    statsSection,
+    totalCursos,
+    totalHoras
+  };
+}
+
+function treeTags(node) {
+  return [node.tagName, ...(node.children || []).flatMap(treeTags)].filter(Boolean);
+}
+
+test('mantém stats como skeleton até concluir a consulta e então exibe apenas dados reais', async () => {
+  const courses = deferred();
+  const harness = createHarness({ courseResponse: courses.promise });
+
+  const loading = harness.start();
+  await new Promise(resolve => setImmediate(resolve));
+
+  assert.equal(harness.statsSection.attributes.get('aria-busy'), 'true');
+  assert.match(harness.totalCursos.className, /loading-skeleton/);
+  assert.equal(harness.totalCursos.textContent, '');
+
+  courses.resolve(response([{ id: 10, nome: 'Curso Real', status: 'APROVADO', professorId: 3 }]));
+  await loading;
+
+  assert.equal(harness.avatar.textContent, 'AN');
+  assert.doesNotMatch(harness.avatar.className, /loading-skeleton/);
+  assert.equal(harness.totalCursos.textContent, '1');
+  assert.equal(harness.totalHoras.textContent, 'Não disponível');
+  assert.equal(harness.mediaGeral.textContent, 'Não disponível');
+  assert.equal(harness.statsSection.attributes.has('aria-busy'), false);
+});
+
+test('falha da API encerra skeleton sem apresentar zero como dado real', async () => {
+  const harness = createHarness({ courseResponse: response({ message: 'API indisponível' }, 500) });
+
+  await harness.start();
+
+  assert.equal(harness.totalCursos.textContent, 'Indisponível');
+  assert.equal(harness.totalHoras.textContent, 'Indisponível');
+  assert.equal(harness.mediaGeral.textContent, 'Indisponível');
+  assert.equal(harness.statsSection.attributes.has('aria-busy'), false);
+  assert.equal(harness.certificates.children[0].textContent, 'API indisponível');
+});
+
+test('detalhe usa mensagem amigável quando o backend não informa carga horária', async () => {
+  const harness = createHarness({ detail: true });
+
+  await harness.start();
+
+  assert.equal(harness.avatar.textContent, 'AN');
+  assert.equal(harness.certificateName.textContent, 'Ana Real');
+  assert.equal(harness.certificateCourse.textContent, 'Curso Real');
+  assert.equal(harness.certificateHours.textContent, 'Carga horária não disponível para este curso.');
+  assert.equal(harness.certificateDate.textContent, '2026-08-20');
+  assert.doesNotMatch(harness.certificateHours.className, /loading-skeleton/);
+});
+
+test('modal descreve o fluxo real e trata nome do curso somente como texto', async () => {
+  const maliciousName = '<img src=x onerror=alert(1)>';
+  const harness = createHarness({
+    courseResponse: response([{ id: 10, nome: maliciousName, status: 'APROVADO', professorId: 3 }])
+  });
+  await harness.start();
+
+  const shareButton = {
+    closest(selector) {
+      return selector === '[data-share-certificate]' ? { dataset: { shareCertificate: '10' } } : null;
+    },
+    matches() { return false; }
+  };
+  harness.click({ target: shareButton });
+
+  assert.match(harness.modalBody.textContent, /LinkedIn será aberto em uma nova aba/);
+  assert.match(harness.modalBody.textContent, /<img src=x onerror=alert\(1\)>/);
+  assert.doesNotMatch(harness.modalBody.textContent, /<strong>/);
+  assert.equal(treeTags(harness.certificates).includes('IMG'), false);
+  assert.equal(harness.modal.style.display, 'block');
+});

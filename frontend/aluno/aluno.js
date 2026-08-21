@@ -475,39 +475,76 @@ const renderCertificates = () => {
     gradient: `gradient-${(index % 6) + 1}`
   }));
 
-  document.querySelector('#totalCursos')?.replaceChildren(document.createTextNode(String(finished.length)));
-  document.querySelector('#totalHoras')?.replaceChildren(document.createTextNode('-'));
-  document.querySelector('#mediaGeral')?.replaceChildren(document.createTextNode('-'));
+  const stats = [
+    ['#totalCursos', String(finished.length)],
+    ['#totalHoras', 'Não disponível'],
+    ['#mediaGeral', 'Não disponível']
+  ];
+  stats.forEach(([selector, value]) => {
+    const element = document.querySelector(selector);
+    if (!element) return;
+    element.textContent = value;
+    finishLoading(element);
+  });
+  finishLoading(document.querySelector('#statsSection'));
 
   document.querySelectorAll('.certificates-grid, .certificados-grid').forEach(container => {
-    container.innerHTML = certificateItems.length
-      ? certificateItems.map(({ matricula, curso, gradient }) => `
-        <article class="certificado-card">
-          <div class="certificado-card-header ${gradient}">CERT</div>
-          <div class="certificado-card-body">
-            <div class="certificado-card-title">${curso?.nome || `Curso #${matricula.cursoId}`}</div>
-            <div class="certificado-card-info">
-              <div class="certificado-card-info-item">
-                <span class="certificado-card-info-label">Status:</span>
-                <span class="certificado-card-info-value">${formatEnum(matricula.status)}</span>
-              </div>
-              <div class="certificado-card-info-item">
-                <span class="certificado-card-info-label">Concluido em:</span>
-                <span class="certificado-card-info-value">${matricula.dataMatricula || '-'}</span>
-              </div>
-              <div class="certificado-card-info-item">
-                <span class="certificado-card-info-label">Professor:</span>
-                <span class="certificado-card-info-value">#${curso?.professorId || '-'}</span>
-              </div>
-            </div>
-          </div>
-          <div class="certificado-card-footer">
-            <a href="conclusao_certificado.html?cursoId=${matricula.cursoId}" class="btn-visualizar">Visualizar</a>
-            <button class="btn-compartilhar" type="button" data-share-certificate="${matricula.cursoId}">Compartilhar</button>
-          </div>
-        </article>
-      `).join('')
-      : '<div style="grid-column: 1 / -1;"><div class="empty-state"><div class="empty-state-title">Nenhum certificado disponivel</div><div class="empty-state-text">Conclua um curso para gerar certificado.</div><a class="btn-comecal" href="catalogo.html">Explorar Cursos</a></div></div>';
+    const cards = certificateItems.map(({ matricula, curso, gradient }) => {
+      const card = createTextElement('article', 'certificado-card', '');
+      const body = createTextElement('div', 'certificado-card-body', '');
+      const info = createTextElement('div', 'certificado-card-info', '');
+      const addInfo = (label, value) => {
+        const item = createTextElement('div', 'certificado-card-info-item', '');
+        item.append(
+          createTextElement('span', 'certificado-card-info-label', label),
+          createTextElement('span', 'certificado-card-info-value', value)
+        );
+        info.appendChild(item);
+      };
+      addInfo('Status:', formatEnum(matricula.status));
+      addInfo('Concluído em:', matricula.dataMatricula || '-');
+      addInfo('Professor:', curso?.professorId ? `#${curso.professorId}` : '-');
+      body.append(
+        createTextElement('div', 'certificado-card-title', curso?.nome || `Curso #${matricula.cursoId}`),
+        info
+      );
+
+      const footer = createTextElement('div', 'certificado-card-footer', '');
+      const courseId = Number(matricula.cursoId);
+      const hasValidCourseId = Number.isInteger(courseId) && courseId > 0;
+      const view = createTextElement('a', 'btn-visualizar', 'Visualizar');
+      const share = createTextElement('button', 'btn-compartilhar', 'Compartilhar');
+      share.setAttribute('type', 'button');
+      if (hasValidCourseId) {
+        view.setAttribute('href', `conclusao_certificado.html?cursoId=${courseId}`);
+        share.dataset.shareCertificate = String(courseId);
+      } else {
+        view.setAttribute('aria-disabled', 'true');
+        share.disabled = true;
+        share.setAttribute('aria-disabled', 'true');
+      }
+      footer.append(view, share);
+      card.append(
+        createTextElement('div', `certificado-card-header ${gradient}`, 'CERT'),
+        body,
+        footer
+      );
+      return card;
+    });
+
+    if (cards.length) {
+      container.replaceChildren(...cards);
+      return;
+    }
+    const empty = createTextElement('div', 'empty-state', '');
+    const explore = createTextElement('a', 'btn-comecal', 'Explorar Cursos');
+    explore.setAttribute('href', 'catalogo.html');
+    empty.append(
+      createTextElement('div', 'empty-state-title', 'Nenhum certificado disponível'),
+      createTextElement('div', 'empty-state-text', 'Conclua um curso para gerar certificado.'),
+      explore
+    );
+    container.replaceChildren(empty);
   });
 };
 
@@ -520,9 +557,58 @@ const renderCertificateDetail = () => {
   const matricula = appState.matriculas.find(m => m.status === 'ENCERRADA' && (!cursoId || Number(m.cursoId) === cursoId));
   const curso = matricula ? cursoPorId(matricula.cursoId) : null;
   nome.textContent = appState.session.nome || 'Aluno';
-  cursoEl.textContent = curso?.nome || 'Curso nao concluido';
-  document.querySelector('#certificadoCargaHoraria')?.replaceChildren(document.createTextNode(curso ? 'Nao informada pelo backend' : '-'));
-  document.querySelector('#certificadoData')?.replaceChildren(document.createTextNode(matricula?.dataMatricula || new Date().toLocaleDateString('pt-BR')));
+  cursoEl.textContent = curso?.nome || 'Curso não concluído';
+  const cargaHoraria = Number(curso?.cargaHoraria);
+  const cargaHorariaEl = document.querySelector('#certificadoCargaHoraria');
+  const dataEl = document.querySelector('#certificadoData');
+  if (cargaHorariaEl) {
+    cargaHorariaEl.textContent = Number.isFinite(cargaHoraria) && cargaHoraria > 0
+      ? `${cargaHoraria} hora(s)`
+      : 'Carga horária não disponível para este curso.';
+    finishLoading(cargaHorariaEl);
+  }
+  if (dataEl) {
+    dataEl.textContent = matricula?.dataMatricula || new Date().toLocaleDateString('pt-BR');
+    finishLoading(dataEl);
+  }
+  finishLoading(nome);
+  finishLoading(cursoEl);
+};
+
+const renderCertificatesError = error => {
+  const statsSection = document.querySelector('#statsSection');
+  const container = document.querySelector('#certificadosContainer');
+  const nome = document.querySelector('#certificadoNome');
+  if (!statsSection && !container && !nome) return false;
+
+  ['#totalCursos', '#totalHoras', '#mediaGeral'].forEach(selector => {
+    const element = document.querySelector(selector);
+    if (!element) return;
+    element.textContent = 'Indisponível';
+    finishLoading(element);
+  });
+  finishLoading(statsSection);
+
+  if (container) {
+    container.replaceChildren(createTextElement(
+      'p',
+      'empty-state',
+      error?.message || 'Não foi possível carregar os certificados.'
+    ));
+  }
+
+  [
+    ['#certificadoNome', appState.session?.nome || 'Aluno'],
+    ['#certificadoCurso', 'Curso indisponível'],
+    ['#certificadoCargaHoraria', 'Carga horária não disponível para este curso.'],
+    ['#certificadoData', 'Data não disponível']
+  ].forEach(([selector, value]) => {
+    const element = document.querySelector(selector);
+    if (!element) return;
+    element.textContent = value;
+    finishLoading(element);
+  });
+  return true;
 };
 
 const renderForum = () => {
@@ -612,7 +698,9 @@ const handleClick = async event => {
     const curso = cursoPorId(Number(share.dataset.shareCertificate));
     const modal = document.querySelector('#modalCompartilhar');
     const body = document.querySelector('#modalCompartilharBody');
-    if (body) body.innerHTML = `Voce esta prestes a compartilhar o certificado de "<strong>${curso?.nome || 'curso concluido'}</strong>" no LinkedIn.`;
+    if (body) {
+      body.textContent = `O LinkedIn será aberto em uma nova aba para você continuar o compartilhamento do certificado “${curso?.nome || 'curso concluído'}”.`;
+    }
     if (modal) modal.style.display = 'block';
   }
 
@@ -660,6 +748,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     if (renderAchievementsError(err)) return;
     if (renderSalaAulaError(err)) return;
+    if (renderCertificatesError(err)) return;
     renderStudentDashboardError(err);
     document.querySelectorAll('[data-approved-courses], [data-student-progress]').forEach(container => {
       container.replaceChildren(createTextElement(
