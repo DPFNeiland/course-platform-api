@@ -31,6 +31,13 @@ const formatEnum = value => String(value || '')
   .replaceAll('_', ' ')
   .replace(/\b\w/g, letter => letter.toUpperCase());
 
+const getInitials = name => {
+  const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return 'AL';
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0]}${parts.at(-1)[0]}`.toUpperCase();
+};
+
 const getSession = () => {
   return window.jwtSession.requireSession(['aluno'], '../index.html');
 };
@@ -249,7 +256,7 @@ const renderAchievements = () => {
     item.className = 'rank-item';
     item.append(
       createTextElement('div', 'rank-position', '—'),
-      createTextElement('div', 'rank-avatar', studentName.slice(0, 2).toUpperCase()),
+      createTextElement('div', 'rank-avatar', getInitials(studentName)),
       createTextElement('div', 'rank-name', studentName),
       createTextElement('div', 'rank-score', `${provisionalGamificationPoints()} pts`)
     );
@@ -502,7 +509,7 @@ const renderCertificates = () => {
         info.appendChild(item);
       };
       addInfo('Status:', formatEnum(matricula.status));
-      addInfo('Concluído em:', matricula.dataMatricula || '-');
+      addInfo('Conclusão:', matricula.dataConclusao || 'Data de conclusão não disponível');
       addInfo('Professor:', curso?.professorId ? `#${curso.professorId}` : '-');
       body.append(
         createTextElement('div', 'certificado-card-title', curso?.nome || `Curso #${matricula.cursoId}`),
@@ -568,7 +575,9 @@ const renderCertificateDetail = () => {
     finishLoading(cargaHorariaEl);
   }
   if (dataEl) {
-    dataEl.textContent = matricula?.dataMatricula || new Date().toLocaleDateString('pt-BR');
+    dataEl.textContent = matricula?.dataEmissao
+      || matricula?.dataConclusao
+      || 'Data de emissão não disponível';
     finishLoading(dataEl);
   }
   finishLoading(nome);
@@ -727,7 +736,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       finishLoading(el);
     });
     document.querySelectorAll('.avatar').forEach(el => {
-      el.textContent = (appState.session.nome || 'AL').slice(0, 2).toUpperCase();
+      el.textContent = getInitials(appState.session.nome);
     });
     finishAvatarLoading();
 
