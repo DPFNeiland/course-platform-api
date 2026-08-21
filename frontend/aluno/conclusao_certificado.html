@@ -24,7 +24,7 @@
                 <li><a href="forum.html">Forum</a></li>
             </ul>
             <div class="nav-right">
-                <div class="avatar">AL</div>
+                <div class="avatar loading-skeleton loading-skeleton-avatar" aria-label="Carregando perfil"></div>
             </div>
         </nav>
     </header>
@@ -34,17 +34,17 @@
             <div class="certificado-preview">
                 <div class="certificado-title">Certificado de Conclusao</div>
                 <div class="certificado-text">Certificamos que</div>
-                <div class="certificado-nome" id="certificadoNome">Carregando...</div>
+                <div class="certificado-nome loading-skeleton loading-skeleton-text" id="certificadoNome" aria-hidden="true"></div>
                 <div class="certificado-text">concluiu com exito o curso de</div>
-                <div class="certificado-curso" id="certificadoCurso">Carregando...</div>
+                <div class="certificado-curso loading-skeleton loading-skeleton-text" id="certificadoCurso" aria-hidden="true"></div>
                 <div class="certificado-info">
                     <div class="certificado-info-item">
                         <span class="certificado-info-label">Carga Horaria</span>
-                        <span id="certificadoCargaHoraria">Nao informada pelo backend</span>
+                        <span id="certificadoCargaHoraria" class="loading-skeleton loading-skeleton-text" aria-hidden="true"></span>
                     </div>
                     <div class="certificado-info-item">
                         <span class="certificado-info-label">Data de Emissao</span>
-                        <span id="certificadoData">-</span>
+                        <span id="certificadoData" class="loading-skeleton loading-skeleton-text" aria-hidden="true"></span>
                     </div>
                 </div>
             </div>
@@ -58,6 +58,7 @@
 
     <script src="../config.js"></script>
     <script src="../session.js"></script>
+    <script src="../dashboard-ui.js"></script>
     <script src="aluno.js"></script>
 </body>
 </html>
