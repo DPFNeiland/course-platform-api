@@ -465,6 +465,7 @@ class FrontendContractTests {
         String certificados = Files.readString(frontend.resolve("aluno/certificado.html"));
         String conclusao = Files.readString(frontend.resolve("aluno/conclusao_certificado.html"));
         String alunoJs = Files.readString(frontend.resolve("aluno/aluno.js"));
+        String certificadoStyles = Files.readString(frontend.resolve("aluno/style/certificado.css"));
 
         for (String html : List.of(catalogo, certificados, conclusao)) {
             assertThat(html)
@@ -497,11 +498,23 @@ class FrontendContractTests {
                 .contains(
                         "element.textContent = value",
                         "finishLoading(document.querySelector('#statsSection'))",
+                        "const getInitials = name =>",
+                        "getInitials(appState.session.nome)",
+                        "matricula.dataConclusao || 'Data de conclusão não disponível'",
+                        "matricula?.dataEmissao",
+                        "|| matricula?.dataConclusao",
                         "Carga horária não disponível para este curso.",
                         "body.textContent = `O LinkedIn será aberto em uma nova aba")
                 .doesNotContain(
                         "body.innerHTML = `Voce esta prestes a compartilhar",
+                        "addInfo('Concluído em:', matricula.dataMatricula",
+                        "dataEl.textContent = matricula?.dataMatricula",
                         "Nao informada pelo backend");
+
+        assertThat(certificadoStyles)
+                .contains(
+                        ".certificados-grid > .empty-state",
+                        "grid-column: 1 / -1");
     }
 
     private long countOccurrences(String content, String fragment) {

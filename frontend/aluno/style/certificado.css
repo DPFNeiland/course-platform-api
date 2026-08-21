@@ -92,6 +92,10 @@ body {
     margin-bottom: 40px;
 }
 
+.certificados-grid > .empty-state {
+    grid-column: 1 / -1;
+}
+
 /* CARD DO CERTIFICADO */
 .certificado-card {
     background-color: white;

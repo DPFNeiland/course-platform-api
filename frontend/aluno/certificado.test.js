@@ -47,7 +47,8 @@ function element(tagName, textContent = '') {
 function createHarness({
   courseResponse = response([{ id: 10, nome: 'Curso Real', status: 'APROVADO', professorId: 3 }]),
   enrollmentResponse = response([{ id: 20, alunoId: 7, cursoId: 10, status: 'ENCERRADA', dataMatricula: '2026-08-20' }]),
-  detail = false
+  detail = false,
+  studentName = 'Ana Real'
 } = {}) {
   const listeners = {};
   const avatar = element('div');
@@ -107,8 +108,8 @@ function createHarness({
     APP_CONFIG: { API_BASE_URL: 'https://api.test' },
     location: { href: '', search: detail ? '?cursoId=10' : '' },
     jwtSession: {
-      recoverSession: async () => ({ id: 7, perfil: 'aluno', nome: 'Ana Real' }),
-      requireSession: () => ({ id: 7, perfil: 'aluno', nome: 'Ana Real' }),
+      recoverSession: async () => ({ id: 7, perfil: 'aluno', nome: studentName }),
+      requireSession: () => ({ id: 7, perfil: 'aluno', nome: studentName }),
       authenticatedFetch: async (_base, requestPath) => {
         calls.push(requestPath);
         return requestPath === '/curso' ? courseResponse : enrollmentResponse;
@@ -144,6 +145,10 @@ function treeTags(node) {
   return [node.tagName, ...(node.children || []).flatMap(treeTags)].filter(Boolean);
 }
 
+function treeText(node) {
+  return [node.textContent, ...(node.children || []).map(treeText)].join(' ');
+}
+
 test('mantém stats como skeleton até concluir a consulta e então exibe apenas dados reais', async () => {
   const courses = deferred();
   const harness = createHarness({ courseResponse: courses.promise });
@@ -158,11 +163,47 @@ test('mantém stats como skeleton até concluir a consulta e então exibe apenas
   courses.resolve(response([{ id: 10, nome: 'Curso Real', status: 'APROVADO', professorId: 3 }]));
   await loading;
 
-  assert.equal(harness.avatar.textContent, 'AN');
+  assert.equal(harness.avatar.textContent, 'AR');
   assert.doesNotMatch(harness.avatar.className, /loading-skeleton/);
   assert.equal(harness.totalCursos.textContent, '1');
   assert.equal(harness.totalHoras.textContent, 'Não disponível');
   assert.equal(harness.mediaGeral.textContent, 'Não disponível');
+  assert.equal(harness.statsSection.attributes.has('aria-busy'), false);
+});
+
+test('gera iniciais com primeiro e último nome e preserva fallbacks', async () => {
+  const cases = [
+    ['Ana Real', 'AR'],
+    ['João da Silva', 'JS'],
+    ['Maria', 'MA'],
+    ['  Maria   dos   Santos  ', 'MS'],
+    ['', 'AL']
+  ];
+
+  for (const [studentName, expected] of cases) {
+    const harness = createHarness({ studentName });
+    await harness.start();
+    assert.equal(harness.avatar.textContent, expected);
+  }
+});
+
+test('resposta vazia apresenta zero somente depois de encerrar o skeleton', async () => {
+  const enrollments = deferred();
+  const harness = createHarness({ enrollmentResponse: enrollments.promise });
+
+  const loading = harness.start();
+  await new Promise(resolve => setImmediate(resolve));
+
+  assert.equal(harness.totalCursos.textContent, '');
+  assert.match(harness.totalCursos.className, /loading-skeleton/);
+
+  enrollments.resolve(response([]));
+  await loading;
+
+  assert.equal(harness.totalCursos.textContent, '0');
+  assert.equal(harness.totalHoras.textContent, 'Não disponível');
+  assert.equal(harness.mediaGeral.textContent, 'Não disponível');
+  assert.match(treeText(harness.certificates), /Nenhum certificado disponível/);
   assert.equal(harness.statsSection.attributes.has('aria-busy'), false);
 });
 
@@ -183,12 +224,32 @@ test('detalhe usa mensagem amigável quando o backend não informa carga horári
 
   await harness.start();
 
-  assert.equal(harness.avatar.textContent, 'AN');
+  assert.equal(harness.avatar.textContent, 'AR');
   assert.equal(harness.certificateName.textContent, 'Ana Real');
   assert.equal(harness.certificateCourse.textContent, 'Curso Real');
   assert.equal(harness.certificateHours.textContent, 'Carga horária não disponível para este curso.');
-  assert.equal(harness.certificateDate.textContent, '2026-08-20');
+  assert.equal(harness.certificateDate.textContent, 'Data de emissão não disponível');
   assert.doesNotMatch(harness.certificateHours.className, /loading-skeleton/);
+});
+
+test('usa campos próprios de conclusão e emissão quando fornecidos pelo backend', async () => {
+  const enrollment = {
+    id: 20,
+    alunoId: 7,
+    cursoId: 10,
+    status: 'ENCERRADA',
+    dataMatricula: '2026-01-10',
+    dataConclusao: '2026-08-19',
+    dataEmissao: '2026-08-20'
+  };
+  const listHarness = createHarness({ enrollmentResponse: response([enrollment]) });
+  await listHarness.start();
+  assert.match(treeText(listHarness.certificates), /2026-08-19/);
+  assert.doesNotMatch(treeText(listHarness.certificates), /2026-01-10/);
+
+  const detailHarness = createHarness({ detail: true, enrollmentResponse: response([enrollment]) });
+  await detailHarness.start();
+  assert.equal(detailHarness.certificateDate.textContent, '2026-08-20');
 });
 
 test('modal descreve o fluxo real e trata nome do curso somente como texto', async () => {

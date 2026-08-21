@@ -165,7 +165,7 @@ test('mantem o skeleton ate carregar somente as matriculas do aluno autenticado'
   assert.match(treeText(harness.ranking), /—/);
   assert.equal(harness.grid.attributes.has('aria-busy'), false);
   assert.equal(harness.rankingSection.attributes.has('aria-busy'), false);
-  assert.equal(harness.avatar.textContent, 'AL');
+  assert.equal(harness.avatar.textContent, 'AR');
   assert.equal(harness.avatar.className, 'avatar');
   assert.equal(harness.avatar.attributes.has('aria-label'), false);
 });
