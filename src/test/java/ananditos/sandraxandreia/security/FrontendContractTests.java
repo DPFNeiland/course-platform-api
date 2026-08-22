@@ -60,12 +60,28 @@ class FrontendContractTests {
                 .contains("endpoint = '/curador'")
                 .doesNotContain("fetch(`${API_BASE_URL}/login`")
                 .doesNotContain("fetch(`${API_BASE_URL}${endpoint}`");
+    }
 
-        String forum = Files.readString(frontend.resolve("aluno/forum.html"));
-        assertThat(forum)
-                .contains("<script src=\"../session.js\"></script>")
-                .contains("<script src=\"aluno.js\"></script>")
-                .doesNotContain("forum.js");
+    @Test
+    void forumDoAlunoDeveEstarRemovidoDoProduto() throws IOException {
+        Path aluno = frontend.resolve("aluno");
+
+        assertThat(Files.exists(aluno.resolve("forum.html"))).isFalse();
+        assertThat(Files.exists(aluno.resolve("forum.js"))).isFalse();
+        assertThat(Files.exists(aluno.resolve("style/forum.css"))).isFalse();
+
+        try (Stream<Path> files = Files.walk(aluno)) {
+            for (Path file : files.filter(Files::isRegularFile).toList()) {
+                assertThat(file.getFileName().toString().toLowerCase())
+                        .as("arquivo de fórum remanescente em %s", file)
+                        .doesNotContain("forum");
+                if (isProjectTextFile(file)) {
+                    assertThat(Files.readString(file).toLowerCase())
+                            .as("referência de fórum remanescente em %s", file)
+                            .doesNotContain("forum.html", "forum.js", "renderforum", "fórum", "forum");
+                }
+            }
+        }
     }
 
     @Test
