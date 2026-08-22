@@ -646,12 +646,6 @@ const renderCertificatesError = error => {
   return true;
 };
 
-const renderForum = () => {
-  const discussions = document.querySelector('.discussions .container, .discussions');
-  if (!discussions || document.querySelector('[data-approved-courses]')) return;
-
-};
-
 const isCertificatesPage = () => Boolean(
   document.querySelector('#statsSection') || document.querySelector('#certificadoNome')
 );
@@ -706,7 +700,6 @@ const refreshData = async () => {
   await renderSalaAula();
   renderCertificates();
   renderCertificateDetail();
-  renderForum();
 };
 
 const handleClick = async event => {
