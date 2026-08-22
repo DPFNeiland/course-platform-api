@@ -24,7 +24,7 @@
                 <li><a href="forum.html">Forum</a></li>
             </ul>
             <div class="nav-right">
-                <div class="avatar">AL</div>
+                <div class="avatar loading-skeleton loading-skeleton-avatar" aria-label="Carregando perfil"></div>
             </div>
         </nav>
     </header>
@@ -34,17 +34,17 @@
             <h1>Meus Certificados</h1>
         </div>
 
-        <div class="stats-section" id="statsSection">
+        <div class="stats-section" id="statsSection" aria-busy="true" aria-label="Carregando estatísticas dos certificados">
             <div class="stat-card">
-                <div class="stat-number" id="totalCursos">0</div>
+                <div class="stat-number loading-skeleton loading-skeleton-text" id="totalCursos" aria-hidden="true"></div>
                 <div class="stat-label">Cursos Concluidos</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number" id="totalHoras">-</div>
+                <div class="stat-number loading-skeleton loading-skeleton-text" id="totalHoras" aria-hidden="true"></div>
                 <div class="stat-label">Horas de Aprendizado</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number" id="mediaGeral">-</div>
+                <div class="stat-number loading-skeleton loading-skeleton-text" id="mediaGeral" aria-hidden="true"></div>
                 <div class="stat-label">Media Geral</div>
             </div>
         </div>
@@ -62,7 +62,7 @@
         <div class="modal-content">
             <div class="modal-header">Compartilhar Certificado</div>
             <div class="modal-body" id="modalCompartilharBody">
-                Voce sera redirecionado para o LinkedIn para compartilhar seu certificado.
+                O LinkedIn será aberto em uma nova aba para você continuar o compartilhamento do certificado.
             </div>
             <div class="modal-footer">
                 <button class="btn-cancel" type="button" data-close-certificate-modal>Cancelar</button>
@@ -73,6 +73,7 @@
 
     <script src="../config.js"></script>
     <script src="../session.js"></script>
+    <script src="../dashboard-ui.js"></script>
     <script src="aluno.js"></script>
 </body>
 </html>

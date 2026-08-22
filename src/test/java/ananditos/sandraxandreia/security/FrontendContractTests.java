@@ -459,6 +459,71 @@ class FrontendContractTests {
                 .contains("charts.replaceChildren");
     }
 
+    @Test
+    void perfilECertificadosDoAlunoNaoDevemExibirDadosFicticiosDuranteCarregamento() throws IOException {
+        String catalogo = Files.readString(frontend.resolve("aluno/catalogo.html"));
+        String certificados = Files.readString(frontend.resolve("aluno/certificado.html"));
+        String conclusao = Files.readString(frontend.resolve("aluno/conclusao_certificado.html"));
+        String alunoJs = Files.readString(frontend.resolve("aluno/aluno.js"));
+        String certificadoStyles = Files.readString(frontend.resolve("aluno/style/certificado.css"));
+
+        for (String html : List.of(catalogo, certificados, conclusao)) {
+            assertThat(html)
+                    .doesNotContain("<div class=\"avatar\">JD</div>", "<div class=\"avatar\">AL</div>")
+                    .contains(
+                            "avatar loading-skeleton loading-skeleton-avatar",
+                            "aria-label=\"Carregando perfil\"",
+                            "../dashboard-ui.js");
+        }
+
+        assertThat(certificados)
+                .doesNotContain(
+                        "id=\"totalCursos\">0</div>",
+                        "id=\"totalHoras\">-</div>",
+                        "id=\"mediaGeral\">-</div>")
+                .contains(
+                        "id=\"statsSection\" aria-busy=\"true\"",
+                        "id=\"totalCursos\" aria-hidden=\"true\"",
+                        "id=\"totalHoras\" aria-hidden=\"true\"",
+                        "id=\"mediaGeral\" aria-hidden=\"true\"",
+                        "O LinkedIn será aberto em uma nova aba");
+
+        assertThat(conclusao)
+                .doesNotContain("Nao informada pelo backend", "Não informada pelo backend")
+                .contains(
+                        "id=\"certificadoCargaHoraria\" class=\"loading-skeleton loading-skeleton-text\"",
+                        "id=\"certificadoData\" class=\"loading-skeleton loading-skeleton-text\"");
+
+        assertThat(alunoJs)
+                .contains(
+                        "element.textContent = value",
+                        "finishLoading(document.querySelector('#statsSection'))",
+                        "const getInitials = name =>",
+                        "if (!parts.length) return '?'",
+                        "getInitials(appState.session.nome)",
+                        "const rawCourseId = params.get('cursoId') ?? params.get('id')",
+                        "Number.isInteger(cursoId)",
+                        "Certificado não encontrado. Verifique o endereço",
+                        "const refreshCertificatesData = async () =>",
+                        "renderCertificateStats()",
+                        "matricula.dataConclusao || 'Data de conclusão não disponível'",
+                        "matricula?.dataEmissao",
+                        "|| matricula?.dataConclusao",
+                        "Carga horária não disponível para este curso.",
+                        "body.textContent = `O LinkedIn será aberto em uma nova aba")
+                .doesNotContain(
+                        "body.innerHTML = `Voce esta prestes a compartilhar",
+                        "if (!parts.length) return 'AL'",
+                        "addInfo('Concluído em:', matricula.dataMatricula",
+                        "dataEl.textContent = matricula?.dataMatricula",
+                        "Nao informada pelo backend");
+
+        assertThat(certificadoStyles)
+                .contains(
+                        ".certificados-grid > .empty-state",
+                        "grid-column: 1 / -1");
+    }
+
     private long countOccurrences(String content, String fragment) {
         return content.split(java.util.regex.Pattern.quote(fragment), -1).length - 1L;
     }
