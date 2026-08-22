@@ -48,7 +48,8 @@ function createHarness({
   courseResponse = response([{ id: 10, nome: 'Curso Real', status: 'APROVADO', professorId: 3 }]),
   enrollmentResponse = response([{ id: 20, alunoId: 7, cursoId: 10, status: 'ENCERRADA', dataMatricula: '2026-08-20' }]),
   detail = false,
-  studentName = 'Ana Real'
+  studentName = 'Ana Real',
+  locationSearch
 } = {}) {
   const listeners = {};
   const avatar = element('div');
@@ -68,6 +69,8 @@ function createHarness({
   const certificateCourse = element('div');
   const certificateHours = element('span');
   const certificateDate = element('span');
+  const certificatePreview = element('div');
+  certificatePreview.append(certificateName, certificateCourse, certificateHours, certificateDate);
   const modal = element('div');
   modal.style = {};
   const modalBody = element('div', 'Texto inicial');
@@ -83,6 +86,7 @@ function createHarness({
     '#certificadoCurso': detail ? certificateCourse : null,
     '#certificadoCargaHoraria': detail ? certificateHours : null,
     '#certificadoData': detail ? certificateDate : null,
+    '.certificado-preview': detail ? certificatePreview : null,
     '#modalCompartilhar': modal,
     '#modalCompartilharBody': modalBody
   };
@@ -106,7 +110,7 @@ function createHarness({
   };
   const window = {
     APP_CONFIG: { API_BASE_URL: 'https://api.test' },
-    location: { href: '', search: detail ? '?cursoId=10' : '' },
+    location: { href: '', search: detail ? (locationSearch ?? '?cursoId=10') : '' },
     jwtSession: {
       recoverSession: async () => ({ id: 7, perfil: 'aluno', nome: studentName }),
       requireSession: () => ({ id: 7, perfil: 'aluno', nome: studentName }),
@@ -129,6 +133,7 @@ function createHarness({
     certificateDate,
     certificateHours,
     certificateName,
+    certificatePreview,
     certificates,
     click: event => listeners.click[0](event),
     mediaGeral,
@@ -150,8 +155,8 @@ function treeText(node) {
 }
 
 test('mantém stats como skeleton até concluir a consulta e então exibe apenas dados reais', async () => {
-  const courses = deferred();
-  const harness = createHarness({ courseResponse: courses.promise });
+  const enrollments = deferred();
+  const harness = createHarness({ enrollmentResponse: enrollments.promise });
 
   const loading = harness.start();
   await new Promise(resolve => setImmediate(resolve));
@@ -160,7 +165,7 @@ test('mantém stats como skeleton até concluir a consulta e então exibe apenas
   assert.match(harness.totalCursos.className, /loading-skeleton/);
   assert.equal(harness.totalCursos.textContent, '');
 
-  courses.resolve(response([{ id: 10, nome: 'Curso Real', status: 'APROVADO', professorId: 3 }]));
+  enrollments.resolve(response([{ id: 20, alunoId: 7, cursoId: 10, status: 'ENCERRADA' }]));
   await loading;
 
   assert.equal(harness.avatar.textContent, 'AR');
@@ -177,7 +182,8 @@ test('gera iniciais com primeiro e último nome e preserva fallbacks', async () 
     ['João da Silva', 'JS'],
     ['Maria', 'MA'],
     ['  Maria   dos   Santos  ', 'MS'],
-    ['', 'AL']
+    ['', '?'],
+    [null, '?']
   ];
 
   for (const [studentName, expected] of cases) {
@@ -207,8 +213,8 @@ test('resposta vazia apresenta zero somente depois de encerrar o skeleton', asyn
   assert.equal(harness.statsSection.attributes.has('aria-busy'), false);
 });
 
-test('falha da API encerra skeleton sem apresentar zero como dado real', async () => {
-  const harness = createHarness({ courseResponse: response({ message: 'API indisponível' }, 500) });
+test('falha da API de matrículas encerra skeleton sem apresentar zero como dado real', async () => {
+  const harness = createHarness({ enrollmentResponse: response({ message: 'API indisponível' }, 500) });
 
   await harness.start();
 
@@ -217,6 +223,38 @@ test('falha da API encerra skeleton sem apresentar zero como dado real', async (
   assert.equal(harness.mediaGeral.textContent, 'Indisponível');
   assert.equal(harness.statsSection.attributes.has('aria-busy'), false);
   assert.equal(harness.certificates.children[0].textContent, 'API indisponível');
+});
+
+test('falha da API de cursos preserva o total calculado pelas matrículas', async () => {
+  const harness = createHarness({ courseResponse: response({ message: 'API indisponível' }, 500) });
+
+  await harness.start();
+
+  assert.equal(harness.totalCursos.textContent, '1');
+  assert.equal(harness.totalHoras.textContent, 'Não disponível');
+  assert.equal(harness.mediaGeral.textContent, 'Não disponível');
+  assert.match(treeText(harness.certificates), /Curso #10/);
+  assert.equal(harness.statsSection.attributes.has('aria-busy'), false);
+});
+
+test('falha de rede em cursos preserva matrículas e encerra o loading', async () => {
+  const harness = createHarness({ courseResponse: Promise.reject(new Error('Falha de rede')) });
+
+  await harness.start();
+
+  assert.equal(harness.totalCursos.textContent, '1');
+  assert.match(treeText(harness.certificates), /Curso #10/);
+  assert.equal(harness.statsSection.attributes.has('aria-busy'), false);
+});
+
+test('payload de cursos fora do contrato não apaga os certificados reais', async () => {
+  const harness = createHarness({ courseResponse: response({ id: 10, nome: 'Formato inválido' }) });
+
+  await harness.start();
+
+  assert.equal(harness.totalCursos.textContent, '1');
+  assert.match(treeText(harness.certificates), /Curso #10/);
+  assert.equal(harness.statsSection.attributes.has('aria-busy'), false);
 });
 
 test('detalhe usa mensagem amigável quando o backend não informa carga horária', async () => {
@@ -230,6 +268,19 @@ test('detalhe usa mensagem amigável quando o backend não informa carga horári
   assert.equal(harness.certificateHours.textContent, 'Carga horária não disponível para este curso.');
   assert.equal(harness.certificateDate.textContent, 'Data de emissão não disponível');
   assert.doesNotMatch(harness.certificateHours.className, /loading-skeleton/);
+});
+
+test('falha ao complementar dados do curso não invalida matrícula encerrada', async () => {
+  const harness = createHarness({
+    detail: true,
+    courseResponse: Promise.reject(new Error('Falha de rede'))
+  });
+
+  await harness.start();
+
+  assert.equal(harness.certificateName.textContent, 'Ana Real');
+  assert.equal(harness.certificateCourse.textContent, 'Dados do curso indisponíveis');
+  assert.doesNotMatch(treeText(harness.certificatePreview), /Certificado não encontrado/);
 });
 
 test('usa campos próprios de conclusão e emissão quando fornecidos pelo backend', async () => {
@@ -250,6 +301,30 @@ test('usa campos próprios de conclusão e emissão quando fornecidos pelo backe
   const detailHarness = createHarness({ detail: true, enrollmentResponse: response([enrollment]) });
   await detailHarness.start();
   assert.equal(detailHarness.certificateDate.textContent, '2026-08-20');
+});
+
+test('URL ausente ou inválida nunca seleciona outro certificado concluído', async () => {
+  const invalidSearches = ['', '?cursoId=', '?cursoId=0', '?cursoId=abc', '?cursoId=999'];
+
+  for (const locationSearch of invalidSearches) {
+    const harness = createHarness({ detail: true, locationSearch });
+    await harness.start();
+
+    assert.match(treeText(harness.certificatePreview), /Certificado não encontrado/);
+    assert.doesNotMatch(treeText(harness.certificatePreview), /Curso Real/);
+  }
+});
+
+test('curso sem matrícula encerrada não gera certificado', async () => {
+  const harness = createHarness({
+    detail: true,
+    enrollmentResponse: response([{ id: 20, alunoId: 7, cursoId: 10, status: 'ATIVA' }])
+  });
+
+  await harness.start();
+
+  assert.match(treeText(harness.certificatePreview), /Certificado não encontrado/);
+  assert.doesNotMatch(treeText(harness.certificatePreview), /Curso Real/);
 });
 
 test('modal descreve o fluxo real e trata nome do curso somente como texto', async () => {
