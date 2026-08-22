@@ -69,6 +69,27 @@ class FrontendContractTests {
     }
 
     @Test
+    void materiaisDoProfessorDevemEstarRemovidosDoProduto() throws IOException {
+        Path professor = frontend.resolve("professor");
+
+        assertThat(Files.exists(professor.resolve("materiais.html"))).isFalse();
+        assertThat(Files.exists(professor.resolve("style/materiais.css"))).isFalse();
+
+        try (Stream<Path> files = Files.walk(professor)) {
+            for (Path file : files.filter(Files::isRegularFile).toList()) {
+                assertThat(file.getFileName().toString().toLowerCase())
+                        .as("arquivo de materiais remanescente em %s", file)
+                        .doesNotContain("material");
+                if (isProjectTextFile(file)) {
+                    assertThat(Files.readString(file).toLowerCase())
+                            .as("referência de materiais remanescente em %s", file)
+                            .doesNotContain("materiais.html", "materiais.css", "rendermateriais", "materiais", "material");
+                }
+            }
+        }
+    }
+
+    @Test
     void frontendDeveCentralizarApiBaseUrlECarregarConfiguracaoAntesDosModulos() throws IOException {
         String localApiHardcode = "localhost:" + "8080";
         for (String relative : List.of(
