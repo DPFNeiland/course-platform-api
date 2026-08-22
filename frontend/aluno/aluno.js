@@ -33,7 +33,7 @@ const formatEnum = value => String(value || '')
 
 const getInitials = name => {
   const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
-  if (!parts.length) return 'AL';
+  if (!parts.length) return '?';
   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
   return `${parts[0][0]}${parts.at(-1)[0]}`.toUpperCase();
 };
@@ -474,14 +474,8 @@ const renderSalaAula = async () => {
   }
 };
 
-const renderCertificates = () => {
+const renderCertificateStats = () => {
   const finished = appState.matriculas.filter(m => m.status === 'ENCERRADA');
-  const certificateItems = finished.map((matricula, index) => ({
-    matricula,
-    curso: cursoPorId(matricula.cursoId),
-    gradient: `gradient-${(index % 6) + 1}`
-  }));
-
   const stats = [
     ['#totalCursos', String(finished.length)],
     ['#totalHoras', 'Não disponível'],
@@ -494,6 +488,17 @@ const renderCertificates = () => {
     finishLoading(element);
   });
   finishLoading(document.querySelector('#statsSection'));
+};
+
+const renderCertificates = () => {
+  const finished = appState.matriculas.filter(m => m.status === 'ENCERRADA');
+  const certificateItems = finished.map((matricula, index) => ({
+    matricula,
+    curso: cursoPorId(matricula.cursoId),
+    gradient: `gradient-${(index % 6) + 1}`
+  }));
+
+  renderCertificateStats();
 
   document.querySelectorAll('.certificates-grid, .certificados-grid').forEach(container => {
     const cards = certificateItems.map(({ matricula, curso, gradient }) => {
@@ -560,11 +565,32 @@ const renderCertificateDetail = () => {
   const cursoEl = document.querySelector('#certificadoCurso');
   if (!nome || !cursoEl) return;
   const params = new URLSearchParams(window.location.search);
-  const cursoId = Number(params.get('cursoId') || params.get('id'));
-  const matricula = appState.matriculas.find(m => m.status === 'ENCERRADA' && (!cursoId || Number(m.cursoId) === cursoId));
+  const rawCourseId = params.get('cursoId') ?? params.get('id');
+  const cursoId = Number(rawCourseId);
+  const hasValidCourseId = rawCourseId !== null
+    && rawCourseId.trim() !== ''
+    && Number.isInteger(cursoId)
+    && cursoId > 0;
+  const matricula = hasValidCourseId
+    ? appState.matriculas.find(m => m.status === 'ENCERRADA' && Number(m.cursoId) === cursoId)
+    : null;
+
+  if (!matricula) {
+    const preview = document.querySelector('.certificado-preview');
+    if (preview) {
+      preview.replaceChildren(createTextElement(
+        'p',
+        'empty-state',
+        'Certificado não encontrado. Verifique o endereço ou volte para seus certificados.'
+      ));
+      finishLoading(preview);
+    }
+    return;
+  }
+
   const curso = matricula ? cursoPorId(matricula.cursoId) : null;
   nome.textContent = appState.session.nome || 'Aluno';
-  cursoEl.textContent = curso?.nome || 'Curso não concluído';
+  cursoEl.textContent = curso?.nome || 'Dados do curso indisponíveis';
   const cargaHoraria = Number(curso?.cargaHoraria);
   const cargaHorariaEl = document.querySelector('#certificadoCargaHoraria');
   const dataEl = document.querySelector('#certificadoData');
@@ -626,12 +652,41 @@ const renderForum = () => {
 
 };
 
+const isCertificatesPage = () => Boolean(
+  document.querySelector('#statsSection') || document.querySelector('#certificadoNome')
+);
+
+const refreshCertificatesData = async () => {
+  const matriculas = await api('/matricula/me');
+  if (!Array.isArray(matriculas)) throw new Error('Resposta de matrículas inválida.');
+  appState.matriculas = matriculas.filter(m => Number(m.alunoId) === Number(appState.session.id));
+  renderCertificateStats();
+
+  try {
+    const cursos = await api('/curso');
+    if (!Array.isArray(cursos)) throw new Error('Resposta de cursos inválida.');
+    appState.cursos = cursos;
+    appState.cursosAprovados = cursos.filter(c => c.status === 'APROVADO');
+  } catch {
+    appState.cursos = [];
+    appState.cursosAprovados = [];
+  }
+
+  renderCertificates();
+  renderCertificateDetail();
+};
+
 const refreshData = async () => {
   if (isAchievementsPage()) {
     const matriculas = await api('/matricula/me');
     if (!Array.isArray(matriculas)) throw new Error('Resposta de matrículas inválida.');
     appState.matriculas = matriculas.filter(m => Number(m.alunoId) === Number(appState.session.id));
     renderAchievements();
+    return;
+  }
+
+  if (isCertificatesPage()) {
+    await refreshCertificatesData();
     return;
   }
 

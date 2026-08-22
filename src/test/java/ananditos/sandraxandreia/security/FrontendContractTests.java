@@ -499,7 +499,13 @@ class FrontendContractTests {
                         "element.textContent = value",
                         "finishLoading(document.querySelector('#statsSection'))",
                         "const getInitials = name =>",
+                        "if (!parts.length) return '?'",
                         "getInitials(appState.session.nome)",
+                        "const rawCourseId = params.get('cursoId') ?? params.get('id')",
+                        "Number.isInteger(cursoId)",
+                        "Certificado não encontrado. Verifique o endereço",
+                        "const refreshCertificatesData = async () =>",
+                        "renderCertificateStats()",
                         "matricula.dataConclusao || 'Data de conclusão não disponível'",
                         "matricula?.dataEmissao",
                         "|| matricula?.dataConclusao",
@@ -507,6 +513,7 @@ class FrontendContractTests {
                         "body.textContent = `O LinkedIn será aberto em uma nova aba")
                 .doesNotContain(
                         "body.innerHTML = `Voce esta prestes a compartilhar",
+                        "if (!parts.length) return 'AL'",
                         "addInfo('Concluído em:', matricula.dataMatricula",
                         "dataEl.textContent = matricula?.dataMatricula",
                         "Nao informada pelo backend");
