@@ -274,21 +274,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
   };
 
-  const renderMateriais = () => {
-    const materialGrid = document.querySelector('.materials-grid .grid, .cards-grid');
-    if (!materialGrid || document.querySelector('#courseForm')) return;
-    const cursos = ownCourses();
-    materialGrid.innerHTML = cursos.length
-      ? cursos.map(curso => `
-        <article class="card material-card">
-          <h3>${curso.nome}</h3>
-          <p>${formatEnum(curso.status)}</p>
-          <span>${formatEnum(curso.tipoCurso)} - ${formatEnum(curso.tipoAssinatura)}</span>
-        </article>
-      `).join('')
-      : '<p class="empty-state">Materiais e upload ainda nao possuem endpoint no backend.</p>';
-  };
-
   const renderDesempenho = () => {
     const kpis = document.querySelectorAll('.kpi-number');
     const cursos = ownCourses();
@@ -373,7 +358,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     state.alunos = alunos;
     renderDashboard();
     renderAvaliacoes();
-    renderMateriais();
     renderDesempenho();
     renderAulaAoVivo();
     renderForum();
