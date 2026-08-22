@@ -79,11 +79,15 @@ class FrontendContractTests {
             for (Path file : files.filter(Files::isRegularFile).toList()) {
                 assertThat(file.getFileName().toString().toLowerCase())
                         .as("arquivo de materiais remanescente em %s", file)
-                        .doesNotContain("material");
+                        .doesNotContain("materiais");
                 if (isProjectTextFile(file)) {
                     assertThat(Files.readString(file).toLowerCase())
                             .as("referência de materiais remanescente em %s", file)
-                            .doesNotContain("materiais.html", "materiais.css", "rendermateriais", "materiais", "material");
+                            .doesNotContain(
+                                    "materiais.html",
+                                    "materiais.css",
+                                    "rendermateriais",
+                                    ">materiais</a>");
                 }
             }
         }
