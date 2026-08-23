@@ -249,7 +249,7 @@ test('erro de rede encerra o loading e apresenta uma mensagem no catalogo', asyn
   await harness.start();
 
   assert.equal(harness.container.children.length, 1);
-  assert.equal(harness.container.children[0].textContent, 'Falha de rede');
+  assert.equal(harness.container.children[0].textContent, 'Servico temporariamente indisponivel. Tente novamente.');
   assert.equal(harness.attributes.has('aria-busy'), false);
 });
 

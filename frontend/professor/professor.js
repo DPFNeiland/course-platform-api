@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', async function() {
   const API_BASE_URL = window.APP_CONFIG.API_BASE_URL;
-  const state = { user: null, cursos: [], matriculas: [], alunos: [] };
+  const state = { user: null, cursos: [], matriculas: [] };
   let agendaMonth = new Date();
   agendaMonth = new Date(agendaMonth.getFullYear(), agendaMonth.getMonth(), 1);
 
@@ -8,15 +8,20 @@ document.addEventListener('DOMContentLoaded', async function() {
     const session = window.jwtSession.requireSession(['professor'], '../index.html');
     if (!session) throw new Error('Sessao expirada. Faca login novamente.');
     const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
-    const response = await window.jwtSession.authenticatedFetch(
-      API_BASE_URL, path, { ...options, headers }, '../index.html'
-    );
+    let response;
+    try {
+      response = await window.jwtSession.authenticatedFetch(
+        API_BASE_URL, path, { ...options, headers }, '../index.html'
+      );
+    } catch {
+      throw new Error('Servico temporariamente indisponivel. Tente novamente.');
+    }
     if (response.status === 401) {
       throw new Error('Sessao expirada. Faca login novamente.');
     }
     if (!response.ok) {
       const errorData = await response.json().catch(() => null);
-      throw new Error(errorData?.message || errorData?.error || 'Nao foi possivel concluir a operacao.');
+      throw new Error(errorData?.message || errorData?.error || errorData?.erro || 'Nao foi possivel concluir a operacao.');
     }
     return response.status === 204 ? null : response.json();
   };
@@ -28,7 +33,6 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   const ownCourses = () => state.cursos.filter(curso => Number(curso.professorId) === Number(state.user.id));
   const matriculasDoProfessor = () => state.matriculas.filter(matricula => ownCourses().some(curso => Number(curso.id) === Number(matricula.cursoId)));
-  const alunoPorId = id => state.alunos.find(aluno => Number(aluno.id) === Number(id));
   const cursoPorId = id => state.cursos.find(curso => Number(curso.id) === Number(id));
   const isAgendaPage = () => Boolean(document.querySelector('.calendar-grid'));
 
@@ -289,11 +293,10 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (tbody) {
       tbody.innerHTML = matriculas.length
         ? matriculas.map(matricula => {
-          const aluno = alunoPorId(matricula.alunoId);
           const curso = cursoPorId(matricula.cursoId);
           return `
             <tr>
-              <td>${aluno?.nome || `Aluno #${matricula.alunoId}`}</td>
+              <td>Aluno #${matricula.alunoId}</td>
               <td>${curso?.nome || `Curso #${matricula.cursoId}`}</td>
               <td>${formatEnum(matricula.status)}</td>
               <td>${matricula.dataMatricula || '-'}</td>
@@ -330,17 +333,16 @@ document.addEventListener('DOMContentLoaded', async function() {
       return;
     }
 
-    const [cursos, matriculas, alunos] = await Promise.all([
-      api('/curso'),
-      api('/matricula'),
-      api('/aluno').catch(() => [])
-    ]);
+    const cursos = await api(`/curso/professor/${state.user.id}`);
     if (!Array.isArray(cursos)) throw new Error('Resposta de cursos inválida.');
-    if (!Array.isArray(matriculas)) throw new Error('Resposta de matrículas inválida.');
-    if (!Array.isArray(alunos)) throw new Error('Resposta de alunos inválida.');
+    const matriculasPorCurso = await Promise.all(
+      cursos.map(curso => api(`/matricula/curso/${curso.id}`))
+    );
+    if (matriculasPorCurso.some(matriculas => !Array.isArray(matriculas))) {
+      throw new Error('Resposta de matrículas inválida.');
+    }
     state.cursos = cursos;
-    state.matriculas = matriculas;
-    state.alunos = alunos;
+    state.matriculas = matriculasPorCurso.flat();
     renderDashboard();
     renderAvaliacoes();
     renderDesempenho();
@@ -348,10 +350,15 @@ document.addEventListener('DOMContentLoaded', async function() {
   };
 
   const courseForm = document.getElementById('courseForm');
+  const courseSubmit = courseForm?.querySelector('.course-submit');
   if (courseForm) {
     courseForm.addEventListener('submit', async function(e) {
       e.preventDefault();
       const feedback = document.getElementById('course-feedback');
+      if (!state.user?.id) {
+        if (feedback) feedback.textContent = 'Aguarde o carregamento da sessão e tente novamente.';
+        return;
+      }
       const payload = {
         nome: document.getElementById('course-nome').value,
         tipoAssinatura: document.getElementById('course-tipoAssinatura').value,
@@ -359,13 +366,34 @@ document.addEventListener('DOMContentLoaded', async function() {
         professorId: state.user.id
       };
 
+      if (courseSubmit) {
+        courseSubmit.disabled = true;
+        courseSubmit.setAttribute('aria-disabled', 'true');
+        courseSubmit.textContent = 'Enviando...';
+      }
+
       try {
         await api('/curso', { method: 'POST', body: JSON.stringify(payload) });
-        courseForm.reset();
-        if (feedback) feedback.textContent = 'Curso enviado para avaliacao do curador.';
-        await refreshData();
       } catch (err) {
         if (feedback) feedback.textContent = err.message;
+        return;
+      } finally {
+        if (courseSubmit) {
+          courseSubmit.disabled = false;
+          courseSubmit.setAttribute('aria-disabled', 'false');
+          courseSubmit.textContent = 'Enviar para avaliacao';
+        }
+      }
+
+      courseForm.reset();
+      if (feedback) feedback.textContent = 'Curso enviado para avaliacao do curador.';
+
+      try {
+        await refreshData();
+      } catch {
+        if (feedback) {
+          feedback.textContent = 'Curso enviado para avaliacao. Nao foi possivel atualizar a lista; recarregue a pagina.';
+        }
       }
     });
   }
@@ -411,6 +439,11 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
     state.user.perfil = perfil;
     sessionStorage.setItem('session', JSON.stringify(state.user));
+    if (courseSubmit) {
+      courseSubmit.disabled = false;
+      courseSubmit.setAttribute('aria-disabled', 'false');
+      courseSubmit.textContent = 'Enviar para avaliacao';
+    }
     setAvatarAndName();
     await refreshData();
   } catch (err) {

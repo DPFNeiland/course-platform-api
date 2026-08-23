@@ -132,7 +132,8 @@ class SecurityIntegrationTests {
 
     @Test
     void devePermitirAlunoNoEndpointDeAluno() throws Exception {
-        mockMvc.perform(get("/aluno").header("Authorization", bearer("aluno@teste.com")))
+        Long alunoId = alunoAutenticado().getId();
+        mockMvc.perform(get("/aluno/{id}", alunoId).header("Authorization", bearer("aluno@teste.com")))
                 .andExpect(status().isOk());
     }
 
@@ -144,8 +145,39 @@ class SecurityIntegrationTests {
 
     @Test
     void devePermitirProfessorNoEndpointDeCurso() throws Exception {
-        mockMvc.perform(get("/curso").header("Authorization", bearer("professor@teste.com")))
+        Long professorId = professorAutenticado().getId();
+        mockMvc.perform(get("/curso/professor/{id}", professorId)
+                        .header("Authorization", bearer("professor@teste.com")))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void professorDeveCriarCursoProprioEMasNaoParaOutroProfessor() throws Exception {
+        Professor professor = professorAutenticado();
+        Professor outroProfessor = novoOutroProfessor();
+
+        mockMvc.perform(post("/curso")
+                        .header("Authorization", bearer("professor@teste.com"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(cursoPayload("Curso do professor autenticado", professor.getId())))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.professorId").value(professor.getId()));
+
+        mockMvc.perform(post("/curso")
+                        .header("Authorization", bearer("professor@teste.com"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(cursoPayload("Curso vinculado indevidamente", outroProfessor.getId())))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void curadorDeveListarCursosPendentesDeAprovacao() throws Exception {
+        Curso pendente = novoCursoEmAvaliacao("Curso aguardando aprovacao", professorAutenticado());
+
+        mockMvc.perform(get("/curso").header("Authorization", bearer("curador@teste.com")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[*].id", org.hamcrest.Matchers.hasItem(pendente.getId().intValue())))
+                .andExpect(jsonPath("$[*].status", org.hamcrest.Matchers.hasItem("EM_AVALIACAO")));
     }
 
     @Test
@@ -349,9 +381,11 @@ class SecurityIntegrationTests {
 
     @Test
     void cookieRetornadoNoLoginDeveAutorizarOsTresPerfis() throws Exception {
-        mockMvc.perform(get("/aluno").cookie(cookieObtidoNoLogin("aluno@teste.com")))
+        mockMvc.perform(get("/aluno/{id}", alunoAutenticado().getId())
+                        .cookie(cookieObtidoNoLogin("aluno@teste.com")))
                 .andExpect(status().isOk());
-        mockMvc.perform(get("/curso").cookie(cookieObtidoNoLogin("professor@teste.com")))
+        mockMvc.perform(get("/curso/professor/{id}", professorAutenticado().getId())
+                        .cookie(cookieObtidoNoLogin("professor@teste.com")))
                 .andExpect(status().isOk());
         mockMvc.perform(get("/curador").cookie(cookieObtidoNoLogin("curador@teste.com")))
                 .andExpect(status().isOk());
@@ -624,6 +658,39 @@ class SecurityIntegrationTests {
         ));
     }
 
+    private Professor professorAutenticado() {
+        return professorRepository.findAll().stream()
+                .filter(professor -> professor.getEmail().getValor().equals("professor@teste.com"))
+                .findFirst()
+                .orElseThrow();
+    }
+
+    private Professor novoOutroProfessor() {
+        return professorRepository.save(new Professor(
+                null,
+                "Outro Professor",
+                "outro.professor@teste.com",
+                passwordEncoder.encode("123456"),
+                "12345678909",
+                GeneroUsuario.NAO_INFORMADO,
+                "1/1/1984",
+                "Computacao",
+                90.0,
+                TipoEnsinoProfessor.AMBOS
+        ));
+    }
+
+    private String cursoPayload(String nome, Long professorId) {
+        return """
+                {
+                  "nome":"%s",
+                  "tipoAssinatura":"COMUM",
+                  "tipoCurso":"ASSINCRONO",
+                  "professorId":%d
+                }
+                """.formatted(nome, professorId);
+    }
+
     private String matriculaPayload(Long alunoId, Long cursoId, String status) {
         return """
                 {
@@ -638,6 +705,13 @@ class SecurityIntegrationTests {
         Curso curso = new Curso(null, nome, CursoAssinatura.COMUM, TipoCurso.ASSINCRONO);
         curso.setProfessor(professor);
         curso.setStatus(StatusCurso.APROVADO);
+        return cursoRepository.save(curso);
+    }
+
+    private Curso novoCursoEmAvaliacao(String nome, Professor professor) {
+        Curso curso = new Curso(null, nome, CursoAssinatura.COMUM, TipoCurso.ASSINCRONO);
+        curso.setProfessor(professor);
+        curso.setStatus(StatusCurso.EM_AVALIACAO);
         return cursoRepository.save(curso);
     }
 

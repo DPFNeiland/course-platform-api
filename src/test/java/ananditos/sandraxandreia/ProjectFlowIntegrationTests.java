@@ -276,6 +276,34 @@ class ProjectFlowIntegrationTests {
     }
 
     @Test
+    void deveRejeitarCpfJaUsadoPorOutroPerfilSemExporDetalhesDoBanco() throws Exception {
+        String payload = """
+                {
+                  "nome": "Professor Duplicado",
+                  "email": "professor.duplicado@teste.com",
+                  "cpf": "52998224725",
+                  "senha": "123456",
+                  "genero": "MASCULINO",
+                  "dataNascimento": "1/1/1990",
+                  "areaFormacao": "Tecnologia",
+                  "horaAula": 80,
+                  "tipoEnsino": "ASSINCRONO"
+                }
+                """;
+
+        mockMvc.perform(post("/professor")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.erro").value("CPF ja cadastrado"))
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString("constraint"))))
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString("insert into"))));
+    }
+
+    @Test
     void devePermitirAlunoMatriculadoListarEBaixarMateriais() throws Exception {
         Curso curso = new Curso(null, "Curso Matriculado", CursoAssinatura.COMUM, TipoCurso.ASSINCRONO);
         curso.setProfessor(professor);

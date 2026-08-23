@@ -9,7 +9,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import ananditos.sandraxandreia.domain.usuario.Usuario;
+import ananditos.sandraxandreia.domain.usuario.UsuarioCargo;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.util.List;
 
@@ -28,12 +32,13 @@ public class CursoController {
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('PROFESSOR')")
     @Operation(summary = "Cadastra um novo curso")
-    public CursoResponseDTO criar(@Valid @RequestBody CursoRequestDTO curso) {
-        return service.criar(curso);
+    public CursoResponseDTO criar(@Valid @RequestBody CursoRequestDTO curso,
+                                  @AuthenticationPrincipal Usuario usuario) {
+        return service.criar(curso, usuario.getId());
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('PROFESSOR')")
+    @PreAuthorize("hasAnyRole('CURADOR','ADMIN')")
     @Operation(summary = "Lista todos os cursos")
     public List<CursoResponseDTO> listarTodos() {
         return service.listarTodos();
@@ -49,7 +54,11 @@ public class CursoController {
     @GetMapping("/professor/{professorId}")
     @PreAuthorize("hasAnyRole('PROFESSOR','CURADOR','ADMIN')")
     @Operation(summary = "Lista todos os cursos de um professor")
-    public List<CursoResponseDTO> listarPorProfessor(@PathVariable Long professorId) {
+    public List<CursoResponseDTO> listarPorProfessor(@PathVariable Long professorId,
+                                                     @AuthenticationPrincipal Usuario usuario) {
+        if (usuario.getPerfil() == UsuarioCargo.PROFESSOR && !usuario.getId().equals(professorId)) {
+            throw new AccessDeniedException("Professor nao pode consultar cursos de outro professor");
+        }
         return service.listarPorProfessor(professorId);
     }
 
@@ -74,8 +83,9 @@ public class CursoController {
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('PROFESSOR')")
     @Operation(summary = "Atualiza um curso existente")
-    public CursoResponseDTO atualizar(@PathVariable Long id, @Valid @RequestBody CursoRequestDTO curso) {
-        return service.atualizar(id, curso);
+    public CursoResponseDTO atualizar(@PathVariable Long id, @Valid @RequestBody CursoRequestDTO curso,
+                                      @AuthenticationPrincipal Usuario usuario) {
+        return service.atualizar(id, curso, usuario.getId());
     }
 
     @PutMapping("/{id}/status")
@@ -89,7 +99,7 @@ public class CursoController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('PROFESSOR')")
     @Operation(summary = "Remove um curso pelo id")
-    public void deletar(@PathVariable Long id) {
-        service.deletar(id);
+    public void deletar(@PathVariable Long id, @AuthenticationPrincipal Usuario usuario) {
+        service.deletar(id, usuario.getId());
     }
 }

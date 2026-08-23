@@ -8,6 +8,8 @@ import ananditos.sandraxandreia.domain.usuario.vo.UsuarioEmail;
 import ananditos.sandraxandreia.domain.usuario.vo.UsuarioSenhaCriptografada;
 import ananditos.sandraxandreia.dto.request.UsuarioRequestDTO;
 import ananditos.sandraxandreia.dto.response.UsuarioResponseDTO;
+import ananditos.sandraxandreia.exception.RecursoNaoEncontradoException;
+import ananditos.sandraxandreia.exception.ConflitoDadosException;
 import ananditos.sandraxandreia.repository.UsuarioRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -52,11 +54,11 @@ public class UsuarioService {
         String cpf = normalizarCPF(request.getCpf());
 
         if (repository.existsByEmailValor(emailNormalizado)) {
-            throw new RuntimeException("E-mail ja cadastrado");
+            throw new ConflitoDadosException("E-mail ja cadastrado");
         }
 
         if (repository.existsByCpfValor(cpf)) {
-            throw new RuntimeException("CPF ja cadastrado");
+            throw new ConflitoDadosException("CPF ja cadastrado");
         }
         var usuario = new Usuario(
                 null,
@@ -80,19 +82,19 @@ public class UsuarioService {
 
     public UsuarioResponseDTO buscarPorId(Long id) {
         Usuario usuario = repository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Usuario nao encontrado para o id: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuario nao encontrado para o id: " + id));
         return toResponse(usuario);
     }
 
         public UsuarioResponseDTO atualizar(Long id, UsuarioRequestDTO request) {
             Usuario usuario = repository.findById(id)
-                    .orElseThrow(() -> new IllegalArgumentException("Usuario nao encontrado para o id: " + id));
+                    .orElseThrow(() -> new RecursoNaoEncontradoException("Usuario nao encontrado para o id: " + id));
             if (repository.existsByEmailValor(request.getEmail())) {
-                throw new RuntimeException("E-mail ja cadastrado");
+                throw new ConflitoDadosException("E-mail ja cadastrado");
             }
 
             if (repository.existsByCpfValor(request.getCpf())) {
-                throw new RuntimeException("CPF ja cadastrado");
+                throw new ConflitoDadosException("CPF ja cadastrado");
             }
 
             usuario.setNome(request.getNome());
@@ -108,7 +110,7 @@ public class UsuarioService {
 
     public void deletar(Long id) {
         Usuario usuario = repository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Usuario nao encontrado para o id: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuario nao encontrado para o id: " + id));
         repository.delete(usuario);
     }
 }

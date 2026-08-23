@@ -26,6 +26,7 @@
             <li><a href="agenda.html">Agenda</a></li>
         </ul>
         <div class="nav-right">
+        <button type="button" class="logout-btn" aria-label="Encerrar sessão">Sair</button>
         <div class="avatar loading-skeleton loading-skeleton-avatar" aria-label="Carregando perfil"></div>
         </div>
     </nav>
@@ -59,7 +60,7 @@
                         <option value="AMBOS">Ambos</option>
                     </select>
                 </label>
-                <button type="submit" class="btn course-submit">Enviar para avaliacao</button>
+                <button type="submit" class="btn course-submit" disabled aria-disabled="true">Carregando sessão...</button>
                 <p id="course-feedback" aria-live="polite"></p>
             </form>
         </div>

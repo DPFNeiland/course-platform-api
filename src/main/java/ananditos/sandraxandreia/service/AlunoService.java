@@ -10,7 +10,10 @@ import ananditos.sandraxandreia.domain.usuario.vo.UsuarioEmail;
 import ananditos.sandraxandreia.domain.usuario.vo.UsuarioSenhaCriptografada;
 import ananditos.sandraxandreia.dto.request.AlunoRequestDTO;
 import ananditos.sandraxandreia.dto.response.AlunoResponseDTO;
+import ananditos.sandraxandreia.exception.RecursoNaoEncontradoException;
+import ananditos.sandraxandreia.exception.ConflitoDadosException;
 import ananditos.sandraxandreia.repository.AlunoRepository;
+import ananditos.sandraxandreia.repository.UsuarioRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -23,11 +26,14 @@ import static ananditos.sandraxandreia.service.validation.emailNormalizado.norma
 public class AlunoService {
     // ferramenta para ler e gravar no banco de dados
     private final AlunoRepository alunoRepository;
+    private final UsuarioRepository usuarioRepository;
     // para criptografar as senhas
     private final PasswordEncoder passwordEncoder;
 
-    public AlunoService(AlunoRepository alunoRepository1, PasswordEncoder passwordEncoder) {
+    public AlunoService(AlunoRepository alunoRepository1, UsuarioRepository usuarioRepository,
+                        PasswordEncoder passwordEncoder) {
         this.alunoRepository = alunoRepository1;
+        this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -55,12 +61,12 @@ public class AlunoService {
         String cpf = normalizarCPF(request.getCpf());
 
         // verifica se já existe alguém com esse email
-        if (alunoRepository.existsByEmailValor(emailNormalizado)) {
-            throw new RuntimeException("E-mail ja cadastrado");
+        if (usuarioRepository.existsByEmailValor(emailNormalizado)) {
+            throw new ConflitoDadosException("E-mail ja cadastrado");
         }
 
-        if (alunoRepository.existsByCpfValor(cpf)) {
-            throw new RuntimeException("CPF ja cadastrado");
+        if (usuarioRepository.existsByCpfValor(cpf)) {
+            throw new ConflitoDadosException("CPF ja cadastrado");
         }
 
         // se não deu erro, extrai dados que foram escritos pelo usuário e
@@ -93,7 +99,7 @@ public class AlunoService {
 
     public AlunoResponseDTO buscarPorId(Long id) {
         Aluno aluno = alunoRepository.findById(id).
-                orElseThrow(() -> new IllegalArgumentException("`Professor` nao encontrado para o id: " + id));
+                orElseThrow(() -> new RecursoNaoEncontradoException("Aluno nao encontrado para o id: " + id));
         return toResponse(aluno);
 
     }
@@ -101,14 +107,18 @@ public class AlunoService {
     public AlunoResponseDTO atualizar(Long id, AlunoRequestDTO request) {
         //1° Busca aluno por ID (se nao achar dá erro)
         Aluno aluno = alunoRepository.findById(id).
-                orElseThrow(() -> new IllegalArgumentException("`Professor` nao encontrado para o id: " + id));
+                orElseThrow(() -> new RecursoNaoEncontradoException("Aluno nao encontrado para o id: " + id));
 
-        if (alunoRepository.existsByEmailValor(request.getEmail())) {
-            throw new RuntimeException("E-mail ja cadastrado");
+        String emailNormalizado = normalizarEMAIL(request.getEmail());
+        String cpfNormalizado = normalizarCPF(request.getCpf());
+        if (!aluno.getEmail().getValor().equals(emailNormalizado)
+                && usuarioRepository.existsByEmailValor(emailNormalizado)) {
+            throw new ConflitoDadosException("E-mail ja cadastrado");
         }
 
-        if (alunoRepository.existsByCpfValor(request.getCpf())) {
-            throw new RuntimeException("CPF ja cadastrado");
+        if (!aluno.getCpf().getValor().equals(cpfNormalizado)
+                && usuarioRepository.existsByCpfValor(cpfNormalizado)) {
+            throw new ConflitoDadosException("CPF ja cadastrado");
         }
 
 
@@ -132,7 +142,7 @@ public class AlunoService {
 
     public void deletar(Long id) {
         Aluno alunoExistente = alunoRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Professor nao encontrado para o id: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Aluno nao encontrado para o id: " + id));
 
         alunoRepository.delete(alunoExistente);
     }

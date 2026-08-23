@@ -7,6 +7,8 @@ import ananditos.sandraxandreia.domain.usuario.vo.UsuarioEmail;
 import ananditos.sandraxandreia.domain.usuario.vo.UsuarioSenhaCriptografada;
 import ananditos.sandraxandreia.dto.request.CuradorRequestDTO;
 import ananditos.sandraxandreia.dto.response.CuradorResponseDTO;
+import ananditos.sandraxandreia.exception.RecursoNaoEncontradoException;
+import ananditos.sandraxandreia.exception.ConflitoDadosException;
 import ananditos.sandraxandreia.repository.CuradorRepository;
 import ananditos.sandraxandreia.repository.UsuarioRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -76,7 +78,7 @@ public class CuradorService {
 
     private Curador buscarCurador(Long id) {
         return curadorRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Curador nao encontrado para o id: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Curador nao encontrado para o id: " + id));
     }
 
     private CuradorResponseDTO toResponse(Curador curador) {
@@ -97,13 +99,13 @@ public class CuradorService {
 
         if (curadorAtual == null || !curadorAtual.getEmail().getValor().equals(emailNormalizado)) {
             if (usuarioRepository.existsByEmailValor(emailNormalizado)) {
-                throw new RuntimeException("E-mail ja cadastrado");
+                throw new ConflitoDadosException("E-mail ja cadastrado");
             }
         }
 
         if (curadorAtual == null || !curadorAtual.getCpf().getValor().equals(cpfNormalizado)) {
             if (usuarioRepository.existsByCpfValor(cpfNormalizado)) {
-                throw new RuntimeException("CPF ja cadastrado");
+                throw new ConflitoDadosException("CPF ja cadastrado");
             }
         }
     }

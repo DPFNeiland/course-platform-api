@@ -1,5 +1,8 @@
 package ananditos.sandraxandreia.controller;
 
+import ananditos.sandraxandreia.exception.RecursoNaoEncontradoException;
+import ananditos.sandraxandreia.exception.ConflitoDadosException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -17,6 +20,33 @@ import java.util.Map;
 // Em vez de cada controller tratar erro manualmente, centralizamos aqui.
 @RestControllerAdvice
 public class ApiExceptionHandler {
+
+    @ExceptionHandler(ConflitoDadosException.class)
+    public ResponseEntity<Map<String, Object>> handleConflict(ConflitoDadosException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.CONFLICT.value());
+        body.put("erro", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleDataIntegrity() {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.CONFLICT.value());
+        body.put("erro", "Os dados informados ja estao cadastrados");
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+    }
+
+    @ExceptionHandler(RecursoNaoEncontradoException.class)
+    public ResponseEntity<Map<String, Object>> handleNotFound(RecursoNaoEncontradoException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.NOT_FOUND.value());
+        body.put("erro", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+    }
 
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<Map<String, Object>> handleResponseStatus(ResponseStatusException ex) {

@@ -14,15 +14,20 @@ document.addEventListener('DOMContentLoaded', async function() {
     const session = window.jwtSession.requireSession(['curador', 'admin'], '../index.html');
     if (!session) throw new Error('Sessao expirada. Faca login novamente.');
     const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
-    const response = await window.jwtSession.authenticatedFetch(
-      API_BASE_URL, path, { ...options, headers }, '../index.html'
-    );
+    let response;
+    try {
+      response = await window.jwtSession.authenticatedFetch(
+        API_BASE_URL, path, { ...options, headers }, '../index.html'
+      );
+    } catch {
+      throw new Error('Servico temporariamente indisponivel. Tente novamente.');
+    }
     if (response.status === 401) {
       throw new Error('Sessao expirada. Faca login novamente.');
     }
     if (!response.ok) {
       const error = await response.json().catch(() => null);
-      throw new Error(error?.message || error?.error || 'Nao foi possivel concluir a operacao.');
+      throw new Error(error?.message || error?.error || error?.erro || 'Nao foi possivel concluir a operacao.');
     }
     return response.status === 204 ? null : response.json();
   };
