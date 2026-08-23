@@ -82,6 +82,25 @@ body {
   border-color: var(--primary-blue);
 }
 
+.filter-pill:disabled,
+.filter-pill:disabled:hover {
+  background: var(--bg-card);
+  border-color: var(--border-light);
+  color: var(--text-muted);
+  cursor: not-allowed;
+  opacity: 0.65;
+  transform: none;
+  box-shadow: none;
+}
+
+.filters-status {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
 /* Courses Grid */
 .courses-grid {
   max-width: 1200px;

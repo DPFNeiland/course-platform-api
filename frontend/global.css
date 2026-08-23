@@ -19,6 +19,13 @@ a{
     text-decoration: none;
 }
 
+.unavailable-hint {
+    margin: 0;
+    color: var(--text-secondary, #6b7280);
+    font-size: 0.85rem;
+    text-align: center;
+}
+
 .navbar {
     background: var(--primary-blue-dark);
     color: white;
