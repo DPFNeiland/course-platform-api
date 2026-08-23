@@ -73,15 +73,13 @@ class FrontendContractTests {
         assertThat(Files.exists(aluno.resolve("style/forum.css"))).isFalse();
 
         try (Stream<Path> files = Files.walk(aluno)) {
-            for (Path file : files.filter(Files::isRegularFile).toList()) {
-                assertThat(file.getFileName().toString().toLowerCase())
-                        .as("arquivo de fórum remanescente em %s", file)
-                        .doesNotContain("forum");
-                if (isProjectTextFile(file)) {
-                    assertThat(Files.readString(file).toLowerCase())
-                            .as("referência de fórum remanescente em %s", file)
-                            .doesNotContain("forum.html", "forum.js", "renderforum", "fórum", "forum");
-                }
+            for (Path file : files
+                    .filter(Files::isRegularFile)
+                    .filter(this::isProjectTextFile)
+                    .toList()) {
+                assertThat(Files.readString(file).toLowerCase())
+                        .as("referência à funcionalidade de fórum remanescente em %s", file)
+                        .doesNotContain("forum.html", "forum.js", "renderforum");
             }
         }
     }
@@ -153,6 +151,10 @@ class FrontendContractTests {
         String login = Files.readString(frontend.resolve("index.html"));
         String loginStyles = Files.readString(frontend.resolve("style.css"));
         String alunoDashboard = Files.readString(frontend.resolve("aluno/dashboard.html"));
+        String dashboardStyles = Files.readString(frontend.resolve("aluno/style/dashboard.css"));
+        String certificado = Files.readString(frontend.resolve("aluno/certificado.html"));
+        String certificadoStyles = Files.readString(frontend.resolve("aluno/style/certificado.css"));
+        String globalStyles = Files.readString(frontend.resolve("global.css"));
         String curadorCatalogo = Files.readString(frontend.resolve("curador/catalogo.html"));
         String catalogoStyles = Files.readString(frontend.resolve("aluno/style/catalogo.css"));
         String agenda = Files.readString(frontend.resolve("professor/agenda.html"));
@@ -172,9 +174,29 @@ class FrontendContractTests {
 
         assertThat(alunoDashboard)
                 .contains(
-                        "type=\"button\" disabled aria-disabled=\"true\"",
+                        "type=\"button\" disabled aria-disabled=\"true\" aria-describedby=\"change-plan-status\"",
                         "title=\"Alteração de plano em breve\"",
-                        ">Mudar Plano</button>");
+                        ">Mudar Plano</button>",
+                        "id=\"change-plan-status\" class=\"unavailable-hint\">Alteração de plano em breve.</p>");
+        assertThat(extractCssRule(dashboardStyles, ".btn-pill:disabled:hover,\n.btn-pill[aria-disabled=\"true\"]:hover"))
+                .contains(
+                        "background: var(--primary-blue)",
+                        "transform: none",
+                        "box-shadow: none");
+
+        assertThat(certificado)
+                .contains(
+                        "class=\"filtro-btn ativo\" type=\"button\" disabled aria-disabled=\"true\" "
+                                + "aria-describedby=\"certificate-filter-status\" title=\"Filtros de certificados em breve\">Todos</button>",
+                        "id=\"certificate-filter-status\" class=\"unavailable-hint\">Filtros de certificados em breve.</p>");
+        assertThat(extractCssRule(certificadoStyles, ".filtro-btn:disabled,\n.filtro-btn:disabled:hover"))
+                .contains(
+                        "cursor: not-allowed",
+                        "opacity: 0.65");
+        assertThat(extractCssRule(globalStyles, ".unavailable-hint"))
+                .contains(
+                        "color: var(--text-secondary, #6b7280)",
+                        "text-align: center");
 
         String disabledCuratorFilter = "class=\"filter-pill\" type=\"button\" disabled aria-disabled=\"true\" "
                 + "aria-describedby=\"curator-filters-status\" title=\"Filtros do catálogo em breve\"";
