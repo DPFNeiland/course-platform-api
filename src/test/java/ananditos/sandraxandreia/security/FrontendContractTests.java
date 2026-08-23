@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -60,12 +62,26 @@ class FrontendContractTests {
                 .contains("endpoint = '/curador'")
                 .doesNotContain("fetch(`${API_BASE_URL}/login`")
                 .doesNotContain("fetch(`${API_BASE_URL}${endpoint}`");
+    }
 
-        String forum = Files.readString(frontend.resolve("aluno/forum.html"));
-        assertThat(forum)
-                .contains("<script src=\"../session.js\"></script>")
-                .contains("<script src=\"aluno.js\"></script>")
-                .doesNotContain("forum.js");
+    @Test
+    void forumDoAlunoDeveEstarRemovidoDoProduto() throws IOException {
+        Path aluno = frontend.resolve("aluno");
+
+        assertThat(Files.exists(aluno.resolve("forum.html"))).isFalse();
+        assertThat(Files.exists(aluno.resolve("forum.js"))).isFalse();
+        assertThat(Files.exists(aluno.resolve("style/forum.css"))).isFalse();
+
+        try (Stream<Path> files = Files.walk(aluno)) {
+            for (Path file : files
+                    .filter(Files::isRegularFile)
+                    .filter(this::isProjectTextFile)
+                    .toList()) {
+                assertThat(Files.readString(file).toLowerCase())
+                        .as("referência à funcionalidade de fórum remanescente em %s", file)
+                        .doesNotContain("forum.html", "forum.js", "renderforum");
+            }
+        }
     }
 
     @Test
@@ -128,6 +144,80 @@ class FrontendContractTests {
                 }
             }
         }
+    }
+
+    @Test
+    void botoesSemHandlerDevemEstarDesabilitadosEIdentificados() throws IOException {
+        String login = Files.readString(frontend.resolve("index.html"));
+        String loginStyles = Files.readString(frontend.resolve("style.css"));
+        String alunoDashboard = Files.readString(frontend.resolve("aluno/dashboard.html"));
+        String dashboardStyles = Files.readString(frontend.resolve("aluno/style/dashboard.css"));
+        String certificado = Files.readString(frontend.resolve("aluno/certificado.html"));
+        String certificadoStyles = Files.readString(frontend.resolve("aluno/style/certificado.css"));
+        String globalStyles = Files.readString(frontend.resolve("global.css"));
+        String curadorCatalogo = Files.readString(frontend.resolve("curador/catalogo.html"));
+        String catalogoStyles = Files.readString(frontend.resolve("aluno/style/catalogo.css"));
+        String agenda = Files.readString(frontend.resolve("professor/agenda.html"));
+        String professorScript = Files.readString(frontend.resolve("professor/professor.js"));
+
+        assertThat(login)
+                .contains(
+                        "disabled aria-disabled=\"true\" aria-describedby=\"social-login-status\" title=\"Login com Google em breve\">Google</button>",
+                        "disabled aria-disabled=\"true\" aria-describedby=\"social-login-status\" title=\"Login com Microsoft em breve\">Microsoft</button>",
+                        "id=\"social-login-status\" class=\"unavailable-hint\">Login com Google e Microsoft em breve.</p>");
+        assertThat(extractCssRule(loginStyles, ".btn-social:disabled"))
+                .contains(
+                        "cursor: not-allowed",
+                        "opacity: 0.6");
+        assertThat(extractCssRule(loginStyles, ".btn-social:disabled:hover"))
+                .contains("background: var(--gray-100)");
+
+        assertThat(alunoDashboard)
+                .contains(
+                        "type=\"button\" disabled aria-disabled=\"true\" aria-describedby=\"change-plan-status\"",
+                        "title=\"Alteração de plano em breve\"",
+                        ">Mudar Plano</button>",
+                        "id=\"change-plan-status\" class=\"unavailable-hint\">Alteração de plano em breve.</p>");
+        assertThat(extractCssRule(dashboardStyles, ".btn-pill:disabled:hover,\n.btn-pill[aria-disabled=\"true\"]:hover"))
+                .contains(
+                        "background: var(--primary-blue)",
+                        "transform: none",
+                        "box-shadow: none");
+
+        assertThat(certificado)
+                .contains(
+                        "class=\"filtro-btn ativo\" type=\"button\" disabled aria-disabled=\"true\" "
+                                + "aria-describedby=\"certificate-filter-status\" title=\"Filtros de certificados em breve\">Todos</button>",
+                        "id=\"certificate-filter-status\" class=\"unavailable-hint\">Filtros de certificados em breve.</p>");
+        assertThat(extractCssRule(certificadoStyles, ".filtro-btn:disabled,\n.filtro-btn:disabled:hover"))
+                .contains(
+                        "cursor: not-allowed",
+                        "opacity: 0.65");
+        assertThat(extractCssRule(globalStyles, ".unavailable-hint"))
+                .contains(
+                        "color: var(--text-secondary, #6b7280)",
+                        "text-align: center");
+
+        String disabledCuratorFilter = "class=\"filter-pill\" type=\"button\" disabled aria-disabled=\"true\" "
+                + "aria-describedby=\"curator-filters-status\" title=\"Filtros do catálogo em breve\"";
+        assertThat(countOccurrences(curadorCatalogo, disabledCuratorFilter)).isEqualTo(6);
+        assertThat(curadorCatalogo)
+                .contains("id=\"curator-filters-status\" class=\"filters-status\">Filtros do catálogo em breve.</p>");
+        assertThat(extractCssRule(catalogoStyles, ".filter-pill:disabled,\n.filter-pill:disabled:hover"))
+                .contains(
+                        "cursor: not-allowed",
+                        "transform: none",
+                        "box-shadow: none");
+
+        assertThat(agenda)
+                .contains(
+                        "data-month-direction=\"-1\"",
+                        "data-month-direction=\"1\"");
+        assertThat(professorScript)
+                .contains(
+                        "button.disabled = false",
+                        "const monthButton = e.target.closest('[data-month-direction]')",
+                        "agendaMonth = new Date(agendaMonth.getFullYear(), agendaMonth.getMonth() + direction, 1)");
     }
 
     @Test
@@ -588,6 +678,12 @@ class FrontendContractTests {
 
     private long countOccurrences(String content, String fragment) {
         return content.split(java.util.regex.Pattern.quote(fragment), -1).length - 1L;
+    }
+
+    private String extractCssRule(String css, String selector) {
+        Matcher matcher = Pattern.compile(Pattern.quote(selector) + "\\s*\\{([^}]*)}", Pattern.DOTALL).matcher(css);
+        assertThat(matcher.find()).as("regra CSS %s", selector).isTrue();
+        return matcher.group(1);
     }
 
     private boolean isProjectTextFile(Path path) {

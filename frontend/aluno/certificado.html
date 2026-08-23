@@ -21,7 +21,6 @@
             </div>
             <ul class="menu">
                 <li><a href="conquistas.html">Conquistas</a></li>
-                <li><a href="forum.html">Forum</a></li>
             </ul>
             <div class="nav-right">
                 <div class="avatar loading-skeleton loading-skeleton-avatar" aria-label="Carregando perfil"></div>
@@ -49,8 +48,9 @@
             </div>
         </div>
 
-        <div class="filtros-section">
-            <button class="filtro-btn ativo" type="button">Todos</button>
+        <div class="filtros-section" aria-labelledby="certificate-filter-status">
+            <button class="filtro-btn ativo" type="button" disabled aria-disabled="true" aria-describedby="certificate-filter-status" title="Filtros de certificados em breve">Todos</button>
+            <p id="certificate-filter-status" class="unavailable-hint">Filtros de certificados em breve.</p>
         </div>
 
         <div id="certificadosContainer" class="certificados-grid">
