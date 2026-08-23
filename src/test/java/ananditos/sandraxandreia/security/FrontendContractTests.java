@@ -94,6 +94,43 @@ class FrontendContractTests {
     }
 
     @Test
+    void aulaAoVivoDoProfessorDeveEstarRemovidaDoProduto() throws IOException {
+        Path professor = frontend.resolve("professor");
+
+        assertThat(Files.exists(professor.resolve("aula-ao-vivo.html"))).isFalse();
+        assertThat(Files.exists(professor.resolve("style/aula-ao-vivo.css"))).isFalse();
+
+        try (Stream<Path> files = Files.walk(frontend)) {
+            for (Path file : files
+                    .filter(Files::isRegularFile)
+                    .filter(this::isProjectTextFile)
+                    .toList()) {
+                assertThat(Files.readString(file).toLowerCase())
+                        .as("link para aula ao vivo remanescente em %s", file)
+                        .doesNotContain("aula-ao-vivo.html");
+            }
+        }
+
+        try (Stream<Path> files = Files.walk(professor)) {
+            for (Path file : files.filter(Files::isRegularFile).toList()) {
+                assertThat(file.getFileName().toString().toLowerCase())
+                        .as("arquivo de aula ao vivo remanescente em %s", file)
+                        .doesNotContain("aula-ao-vivo");
+                if (isProjectTextFile(file)) {
+                    assertThat(Files.readString(file).toLowerCase())
+                            .as("referência de aula ao vivo remanescente em %s", file)
+                            .doesNotContain(
+                                    "aula-ao-vivo.css",
+                                    "renderaulaaovivo",
+                                    "window.sendmessage",
+                                    ".chat-input button",
+                                    ">aula ao vivo</a>");
+                }
+            }
+        }
+    }
+
+    @Test
     void frontendDeveCentralizarApiBaseUrlECarregarConfiguracaoAntesDosModulos() throws IOException {
         String localApiHardcode = "localhost:" + "8080";
         for (String relative : List.of(

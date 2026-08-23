@@ -313,21 +313,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
   };
 
-  const renderAulaAoVivo = () => {
-    const participantes = document.querySelector('.participants ul, .participants-list');
-    if (participantes) {
-      const matriculas = matriculasDoProfessor();
-      participantes.innerHTML = matriculas.length
-        ? matriculas.map(m => `<div class="participant"><div class="avatar">${(alunoPorId(m.alunoId)?.nome || 'AL').slice(0, 2).toUpperCase()}</div><span>${alunoPorId(m.alunoId)?.nome || `Aluno #${m.alunoId}`}</span></div>`).join('')
-        : '<p class="empty-state">Nenhum aluno matriculado nos seus cursos.</p>';
-    }
-    const messages = document.querySelector('#chat-messages, .chat-messages');
-    if (messages && !messages.dataset.ready) {
-      messages.dataset.ready = 'true';
-      messages.innerHTML = '<p class="empty-state">Chat ao vivo nao possui endpoint no backend. Mensagens enviadas ficam apenas nesta tela.</p>';
-    }
-  };
-
   const renderForum = () => {
     const discussions = document.querySelector('.forum-grid, .topics-grid, .topics-list, .discussions-list');
     if (discussions) {
@@ -359,7 +344,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     renderDashboard();
     renderAvaliacoes();
     renderDesempenho();
-    renderAulaAoVivo();
     renderForum();
   };
 
@@ -387,17 +371,6 @@ document.addEventListener('DOMContentLoaded', async function() {
   }
 
   window.logout = logout;
-  window.sendMessage = function() {
-    const input = document.querySelector('#chat-input, .chat-input input');
-    const messages = document.querySelector('#chat-messages, .chat-messages');
-    const value = input?.value.trim();
-    if (!value || !messages) return;
-    const msg = document.createElement('div');
-    msg.className = 'message sent';
-    msg.innerHTML = `<strong>${state.user.nome}:</strong> ${value}<small>${new Date().toLocaleTimeString('pt-BR')}</small>`;
-    messages.appendChild(msg);
-    input.value = '';
-  };
 
   function logout() {
     window.jwtSession.logout(API_BASE_URL, '../index.html');
@@ -418,7 +391,6 @@ document.addEventListener('DOMContentLoaded', async function() {
       document.querySelector(`.tab-panel[data-panel="${tabBtn.dataset.tab}"]`)?.classList.add('active');
     }
     if (e.target.matches('#logout-btn, .logout-btn')) logout();
-    if (e.target.matches('.chat-input button')) sendMessage();
     if (e.target.matches('[data-action]')) {
       alert('Esta funcionalidade ainda nao possui endpoint no backend.');
     }
