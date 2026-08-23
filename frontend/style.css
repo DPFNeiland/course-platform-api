@@ -188,6 +188,17 @@ p.subtitle {
     background: var(--gray-100);
 }
 
+.btn-social:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+    background: var(--gray-100);
+    color: var(--gray-600);
+}
+
+.btn-social:disabled:hover {
+    background: var(--gray-100);
+}
+
 .toggle-text {
     margin-top: 30px;
     text-align: center;

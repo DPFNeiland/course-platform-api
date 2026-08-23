@@ -131,6 +131,41 @@ class FrontendContractTests {
     }
 
     @Test
+    void botoesSemHandlerDevemEstarDesabilitadosEIdentificados() throws IOException {
+        String login = Files.readString(frontend.resolve("index.html"));
+        String loginStyles = Files.readString(frontend.resolve("style.css"));
+        String alunoDashboard = Files.readString(frontend.resolve("aluno/dashboard.html"));
+        String agenda = Files.readString(frontend.resolve("professor/agenda.html"));
+        String professorScript = Files.readString(frontend.resolve("professor/professor.js"));
+
+        assertThat(login)
+                .contains(
+                        "class=\"btn-social\" type=\"button\" disabled aria-disabled=\"true\" title=\"Login com Google em breve\">Google</button>",
+                        "class=\"btn-social\" type=\"button\" disabled aria-disabled=\"true\" title=\"Login com Microsoft em breve\">Microsoft</button>");
+        assertThat(loginStyles)
+                .contains(
+                        ".btn-social:disabled",
+                        "cursor: not-allowed",
+                        ".btn-social:disabled:hover");
+
+        assertThat(alunoDashboard)
+                .contains(
+                        "type=\"button\" disabled aria-disabled=\"true\"",
+                        "title=\"Alteração de plano em breve\"",
+                        ">Mudar Plano</button>");
+
+        assertThat(agenda)
+                .contains(
+                        "data-month-direction=\"-1\"",
+                        "data-month-direction=\"1\"");
+        assertThat(professorScript)
+                .contains(
+                        "button.disabled = false",
+                        "const monthButton = e.target.closest('[data-month-direction]')",
+                        "agendaMonth = new Date(agendaMonth.getFullYear(), agendaMonth.getMonth() + direction, 1)");
+    }
+
+    @Test
     void frontendDeveCentralizarApiBaseUrlECarregarConfiguracaoAntesDosModulos() throws IOException {
         String localApiHardcode = "localhost:" + "8080";
         for (String relative : List.of(
