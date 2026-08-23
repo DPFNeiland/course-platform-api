@@ -7,6 +7,7 @@ import ananditos.sandraxandreia.domain.usuario.Usuario;
 import ananditos.sandraxandreia.domain.usuario.UsuarioCargo;
 import ananditos.sandraxandreia.dto.request.CursoMaterialLinkRequestDTO;
 import ananditos.sandraxandreia.dto.response.CursoMaterialResponseDTO;
+import ananditos.sandraxandreia.exception.RecursoNaoEncontradoException;
 import ananditos.sandraxandreia.repository.CursoRepository;
 import ananditos.sandraxandreia.repository.MaterialCursoRepository;
 import ananditos.sandraxandreia.repository.MatriculaRepository;
@@ -75,7 +76,7 @@ public class MaterialCursoService {
     public MaterialCurso buscarArquivo(Long cursoId, Long materialId, Usuario usuarioAutenticado) {
         validarAcessoDeLeitura(cursoId, usuarioAutenticado);
         MaterialCurso material = materialCursoRepository.findByIdAndCurso_Id(materialId, cursoId)
-                .orElseThrow(() -> new IllegalArgumentException("Material nao encontrado para o curso informado"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Material nao encontrado para o curso informado"));
 
         if (material.getTipo() != TipoMaterialCurso.ARQUIVO) {
             throw new IllegalArgumentException("Material informado nao eh um arquivo");
@@ -93,7 +94,7 @@ public class MaterialCursoService {
 
     private Curso buscarCurso(Long cursoId) {
         return cursoRepository.findById(cursoId)
-                .orElseThrow(() -> new IllegalArgumentException("Curso nao encontrado para o id: " + cursoId));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Curso nao encontrado para o id: " + cursoId));
     }
 
     private void validarProfessorResponsavel(Curso curso, String emailProfessorAutenticado) {

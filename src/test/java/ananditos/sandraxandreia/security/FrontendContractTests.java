@@ -60,6 +60,8 @@ class FrontendContractTests {
         assertThat(auth)
                 .contains("jwtSession.csrfFetch")
                 .contains("endpoint = '/curador'")
+                .contains("submitButton.disabled = true")
+                .contains("submitButton.textContent = 'Criando conta...'")
                 .doesNotContain("fetch(`${API_BASE_URL}/login`")
                 .doesNotContain("fetch(`${API_BASE_URL}${endpoint}`");
     }

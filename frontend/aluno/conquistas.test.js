@@ -208,8 +208,8 @@ test('erro de rede encerra o loading sem exibir dados ficticios', async () => {
   const harness = createHarness(Promise.reject(new Error('Falha de rede')));
   await harness.start();
 
-  assert.match(treeText(harness.grid), /Falha de rede/);
-  assert.match(treeText(harness.ranking), /Falha de rede/);
+  assert.match(treeText(harness.grid), /Servico temporariamente indisponivel/);
+  assert.match(treeText(harness.ranking), /Servico temporariamente indisponivel/);
   assert.equal(harness.grid.attributes.has('aria-busy'), false);
   assert.equal(harness.rankingSection.attributes.has('aria-busy'), false);
   assert.equal(harness.grid.children.length, 1);

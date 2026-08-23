@@ -1,6 +1,7 @@
 FROM nginx:alpine
 
 COPY . /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY config.template.js /opt/sandra-x-andreia/config.template.js
 COPY docker-entrypoint.d/40-generate-config.sh /docker-entrypoint.d/40-generate-config.sh
 

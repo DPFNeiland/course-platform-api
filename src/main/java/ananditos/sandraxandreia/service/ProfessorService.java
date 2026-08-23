@@ -8,7 +8,10 @@ import ananditos.sandraxandreia.domain.usuario.vo.UsuarioEmail;
 import ananditos.sandraxandreia.domain.usuario.vo.UsuarioSenhaCriptografada;
 import ananditos.sandraxandreia.dto.request.ProfessorRequestDTO;
 import ananditos.sandraxandreia.dto.response.ProfessorResponseDTO;
+import ananditos.sandraxandreia.exception.RecursoNaoEncontradoException;
+import ananditos.sandraxandreia.exception.ConflitoDadosException;
 import ananditos.sandraxandreia.repository.ProfessorRepository;
+import ananditos.sandraxandreia.repository.UsuarioRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -20,11 +23,14 @@ import static ananditos.sandraxandreia.service.validation.emailNormalizado.norma
 @Service
 public class ProfessorService {
     private final ProfessorRepository professorRepository;
+    private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public ProfessorService(ProfessorRepository professorRepository, PasswordEncoder passwordEncoder) {
+    public ProfessorService(ProfessorRepository professorRepository, UsuarioRepository usuarioRepository,
+                            PasswordEncoder passwordEncoder) {
         this.passwordEncoder = passwordEncoder;
         this.professorRepository = professorRepository;
+        this.usuarioRepository = usuarioRepository;
     }
     private ProfessorResponseDTO toResponse(Professor professor) {
         return new ProfessorResponseDTO(
@@ -47,12 +53,12 @@ public class ProfessorService {
         String cpf = normalizarCPF(request.getCpf());
 
 
-        if (professorRepository.existsByEmailValor(emailNormalizado)) {
-            throw new RuntimeException("E-mail ja cadastrado");
+        if (usuarioRepository.existsByEmailValor(emailNormalizado)) {
+            throw new ConflitoDadosException("E-mail ja cadastrado");
         }
 
-        if (professorRepository.existsByCpfValor(cpf)) {
-            throw new RuntimeException("CPF ja cadastrado");
+        if (usuarioRepository.existsByCpfValor(cpf)) {
+            throw new ConflitoDadosException("CPF ja cadastrado");
         }
         var professor = new Professor(
                 null,
@@ -78,7 +84,7 @@ public class ProfessorService {
 
     public ProfessorResponseDTO buscarPorId(Long id) {
         Professor professor = professorRepository.findById(id).
-                orElseThrow(() -> new IllegalArgumentException("`Professor` nao encontrado para o id: " + id));
+                orElseThrow(() -> new RecursoNaoEncontradoException("Professor nao encontrado para o id: " + id));
         return toResponse(professor);
 
     }
@@ -86,13 +92,17 @@ public class ProfessorService {
 
     public ProfessorResponseDTO atualizar(Long id, ProfessorRequestDTO request) {
         Professor professor = professorRepository.findById(id).
-                orElseThrow(() -> new IllegalArgumentException("`Professor` nao encontrado para o id: " + id));
-        if (professorRepository.existsByEmailValor(request.getEmail())) {
-            throw new RuntimeException("E-mail ja cadastrado");
+                orElseThrow(() -> new RecursoNaoEncontradoException("Professor nao encontrado para o id: " + id));
+        String emailNormalizado = normalizarEMAIL(request.getEmail());
+        String cpfNormalizado = normalizarCPF(request.getCpf());
+        if (!professor.getEmail().getValor().equals(emailNormalizado)
+                && usuarioRepository.existsByEmailValor(emailNormalizado)) {
+            throw new ConflitoDadosException("E-mail ja cadastrado");
         }
 
-        if (professorRepository.existsByCpfValor(request.getCpf())) {
-            throw new RuntimeException("CPF ja cadastrado");
+        if (!professor.getCpf().getValor().equals(cpfNormalizado)
+                && usuarioRepository.existsByCpfValor(cpfNormalizado)) {
+            throw new ConflitoDadosException("CPF ja cadastrado");
         }
         professor.setNome(request.getNome());
         professor.setEmail(new UsuarioEmail(request.getEmail()));
@@ -113,7 +123,7 @@ public class ProfessorService {
 
     public void deletar(Long id) {
         Professor professorExistente = professorRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Professor nao encontrado para o id: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Professor nao encontrado para o id: " + id));
 
         professorRepository.delete(professorExistente);
     }

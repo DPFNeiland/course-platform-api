@@ -19,6 +19,24 @@ a{
     text-decoration: none;
 }
 
+.logout-btn {
+    border: 1px solid rgba(255, 255, 255, 0.65);
+    border-radius: 999px;
+    background: transparent;
+    color: white;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+}
+
+.logout-btn:hover,
+.logout-btn:focus-visible {
+    background: rgba(255, 255, 255, 0.16);
+    outline: 2px solid white;
+    outline-offset: 2px;
+}
+
 .unavailable-hint {
     margin: 0;
     color: var(--text-secondary, #6b7280);

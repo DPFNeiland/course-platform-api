@@ -4,6 +4,7 @@ import ananditos.sandraxandreia.domain.assinatura.Assinatura;
 import ananditos.sandraxandreia.domain.assinatura.PlanoAssinatura;
 import ananditos.sandraxandreia.dto.request.AssinaturaRequestDTO;
 import ananditos.sandraxandreia.dto.response.AssinaturaResponseDTO;
+import ananditos.sandraxandreia.exception.RecursoNaoEncontradoException;
 import ananditos.sandraxandreia.repository.AssinaturaRepository;
 import org.springframework.stereotype.Service;
 
@@ -72,7 +73,7 @@ public class AssinaturaService {
 
     private Assinatura buscarAssinatura(Long id) {
         return assinaturaRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Assinatura nao encontrada para o id: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Assinatura nao encontrada para o id: " + id));
     }
 
     private AssinaturaResponseDTO toResponse(Assinatura assinatura) {
