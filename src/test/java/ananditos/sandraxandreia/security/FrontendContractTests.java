@@ -100,6 +100,17 @@ class FrontendContractTests {
         assertThat(Files.exists(professor.resolve("aula-ao-vivo.html"))).isFalse();
         assertThat(Files.exists(professor.resolve("style/aula-ao-vivo.css"))).isFalse();
 
+        try (Stream<Path> files = Files.walk(frontend)) {
+            for (Path file : files
+                    .filter(Files::isRegularFile)
+                    .filter(this::isProjectTextFile)
+                    .toList()) {
+                assertThat(Files.readString(file).toLowerCase())
+                        .as("link para aula ao vivo remanescente em %s", file)
+                        .doesNotContain("aula-ao-vivo.html");
+            }
+        }
+
         try (Stream<Path> files = Files.walk(professor)) {
             for (Path file : files.filter(Files::isRegularFile).toList()) {
                 assertThat(file.getFileName().toString().toLowerCase())
@@ -109,7 +120,6 @@ class FrontendContractTests {
                     assertThat(Files.readString(file).toLowerCase())
                             .as("referência de aula ao vivo remanescente em %s", file)
                             .doesNotContain(
-                                    "aula-ao-vivo.html",
                                     "aula-ao-vivo.css",
                                     "renderaulaaovivo",
                                     "window.sendmessage",
