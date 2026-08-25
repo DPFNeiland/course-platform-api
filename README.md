@@ -13,7 +13,7 @@ Este repositório abriga a implementação em Java/Spring Boot da **camada de do
 
 - Betina Volpi
 - Icaro Dias
-- Kayla Abreu
+- Gustavo Abreu
 - Rodrigo Neiland
 --- 
 ## 📋 Sobre o Projeto
