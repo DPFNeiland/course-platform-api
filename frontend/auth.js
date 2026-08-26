@@ -170,8 +170,10 @@ document.addEventListener('DOMContentLoaded', function() {
     perfilSelect?.addEventListener('input', updateRegisterFields);
     updateRegisterFields();
 
-    registerForm.addEventListener('submit', function(e) {
+    registerForm.addEventListener('submit', async function(e) {
         e.preventDefault();
+        const submitButton = registerForm.querySelector('button[type="submit"]');
+        if (submitButton?.disabled) return;
 
         const perfil = getSelectedPerfil();
         const usuarioDTO = {
@@ -209,14 +211,19 @@ document.addEventListener('DOMContentLoaded', function() {
             endpoint = '/curador';
         }
 
-        window.jwtSession.csrfFetch(API_BASE_URL, endpoint, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        })
-        .then(async (resposta) => {
+        if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.textContent = 'Criando conta...';
+        }
+
+        try {
+            const resposta = await window.jwtSession.csrfFetch(API_BASE_URL, endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
             if (resposta.status === 201) {
                 const sessao = await autenticar(usuarioDTO.email, usuarioDTO.senha, perfil);
                 redirectByPerfil(sessao.perfil);
@@ -224,11 +231,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 const erroData = await resposta.json().catch(() => null);
                 showError(extrairMensagemErro(erroData, resposta.status));
             }
-        })
-        .catch(erro => {
+        } catch (erro) {
             console.error('Erro no cadastro:', erro);
             showError(erro?.message || 'Servidor indisponivel. O Backend esta rodando?');
-        });
+        } finally {
+            if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Criar Conta';
+            }
+        }
     });
 
     const loginForm = document.getElementById('loginForm');

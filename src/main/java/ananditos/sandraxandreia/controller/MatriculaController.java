@@ -59,7 +59,11 @@ public class MatriculaController {
     @GetMapping("/curso/{cursoId}")
     @PreAuthorize("hasAnyRole('PROFESSOR','CURADOR','ADMIN')")
     @Operation(summary = "Lista as matriculas de um curso")
-    public List<MatriculaResponseDTO> listarPorCurso(@PathVariable Long cursoId) {
+    public List<MatriculaResponseDTO> listarPorCurso(@PathVariable Long cursoId,
+                                                     @AuthenticationPrincipal Usuario usuario) {
+        if (usuario.getPerfil() == UsuarioCargo.PROFESSOR) {
+            return service.listarPorCursoDoProfessor(cursoId, usuario.getId());
+        }
         return service.listarPorCurso(cursoId);
     }
 

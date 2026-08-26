@@ -116,7 +116,7 @@ function createHarness({
       requireSession: () => ({ id: 7, perfil: 'aluno', nome: studentName }),
       authenticatedFetch: async (_base, requestPath) => {
         calls.push(requestPath);
-        return requestPath === '/curso' ? courseResponse : enrollmentResponse;
+        return requestPath === '/curso/disponiveis' ? courseResponse : enrollmentResponse;
       },
       logout() {}
     },

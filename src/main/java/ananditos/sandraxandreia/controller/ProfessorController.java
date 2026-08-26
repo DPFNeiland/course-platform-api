@@ -8,7 +8,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import ananditos.sandraxandreia.domain.usuario.Usuario;
+import ananditos.sandraxandreia.domain.usuario.UsuarioCargo;
 
 import java.util.List;
 
@@ -31,23 +35,26 @@ public class ProfessorController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('PROFESSOR')")
+    @PreAuthorize("hasAnyRole('CURADOR','ADMIN')")
     @Operation(summary = "Lista todos os professor")
     public List<ProfessorResponseDTO> listarTodos() {
         return service.listarTodos();
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('PROFESSOR')")
+    @PreAuthorize("hasAnyRole('PROFESSOR','CURADOR','ADMIN')")
     @Operation(summary = "Busca um professor pelo id")
-    public ProfessorResponseDTO buscarPorId(@PathVariable Long id) {
+    public ProfessorResponseDTO buscarPorId(@PathVariable Long id, @AuthenticationPrincipal Usuario usuario) {
+        validarAcessoProprio(id, usuario);
         return service.buscarPorId(id);
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('PROFESSOR')")
     @Operation(summary = "Atualiza um professor existente")
-    public ProfessorResponseDTO atualizar(@PathVariable Long id, @Valid @RequestBody ProfessorRequestDTO professor) {
+    public ProfessorResponseDTO atualizar(@PathVariable Long id, @Valid @RequestBody ProfessorRequestDTO professor,
+                                          @AuthenticationPrincipal Usuario usuario) {
+        validarAcessoProprio(id, usuario);
         return service.atualizar(id, professor);
     }
 
@@ -55,7 +62,14 @@ public class ProfessorController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('PROFESSOR')")
     @Operation(summary = "Remove um professor pelo id")
-    public void deletar(@PathVariable Long id) {
+    public void deletar(@PathVariable Long id, @AuthenticationPrincipal Usuario usuario) {
+        validarAcessoProprio(id, usuario);
         service.deletar(id);
+    }
+
+    private void validarAcessoProprio(Long id, Usuario usuario) {
+        if (usuario.getPerfil() == UsuarioCargo.PROFESSOR && !usuario.getId().equals(id)) {
+            throw new AccessDeniedException("Professor nao pode acessar dados de outro professor");
+        }
     }
 }

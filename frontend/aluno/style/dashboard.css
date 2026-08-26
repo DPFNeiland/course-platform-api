@@ -49,6 +49,13 @@ body {
     font-weight: 700;
 }
 
+.plan-action {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.35rem;
+}
+
 .top-cards {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
@@ -269,6 +276,13 @@ h4 {
 .btn-primary:hover {
     background: var(--primary-blue-dark);
     box-shadow: 0 15px 35px rgba(59,130,246,0.4);
+}
+
+.btn-pill:disabled:hover,
+.btn-pill[aria-disabled="true"]:hover {
+    background: var(--primary-blue);
+    transform: none;
+    box-shadow: none;
 }
 
 .btn-continue {

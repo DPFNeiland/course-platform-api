@@ -13,9 +13,14 @@ const api = async (path, options = {}) => {
   const session = getSession();
   if (!session) throw new Error('Sessao expirada. Faca login novamente.');
   const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
-  const response = await window.jwtSession.authenticatedFetch(
-    API_BASE_URL, path, { ...options, headers }, '../index.html'
-  );
+  let response;
+  try {
+    response = await window.jwtSession.authenticatedFetch(
+      API_BASE_URL, path, { ...options, headers }, '../index.html'
+    );
+  } catch {
+    throw new Error('Servico temporariamente indisponivel. Tente novamente.');
+  }
   if (response.status === 401) {
     throw new Error('Sessao expirada. Faca login novamente.');
   }
@@ -657,7 +662,7 @@ const refreshCertificatesData = async () => {
   renderCertificateStats();
 
   try {
-    const cursos = await api('/curso');
+    const cursos = await api('/curso/disponiveis');
     if (!Array.isArray(cursos)) throw new Error('Resposta de cursos inválida.');
     appState.cursos = cursos;
     appState.cursosAprovados = cursos.filter(c => c.status === 'APROVADO');
@@ -685,7 +690,7 @@ const refreshData = async () => {
   }
 
   const [cursos, matriculas] = await Promise.all([
-    api('/curso'),
+    api('/curso/disponiveis'),
     api('/matricula/me')
   ]);
   if (!Array.isArray(cursos)) throw new Error('Resposta de cursos inválida.');

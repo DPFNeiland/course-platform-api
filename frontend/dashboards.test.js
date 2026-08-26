@@ -17,6 +17,7 @@ function deferred() {
 }
 
 function element(tagName, textContent = '') {
+  const listeners = {};
   const node = {
     tagName: tagName.toUpperCase(),
     className: '',
@@ -29,7 +30,13 @@ function element(tagName, textContent = '') {
     replaceChildren(...children) { this.textContent = ''; this.children = children; },
     removeAttribute(name) { this.attributes.delete(name); },
     setAttribute(name, value) { this.attributes.set(name, String(value)); },
-    addEventListener() {},
+    addEventListener(type, listener) {
+      listeners[type] = listeners[type] || [];
+      listeners[type].push(listener);
+    },
+    async dispatch(type, event = {}) {
+      for (const listener of listeners[type] || []) await listener(event);
+    },
     matches() { return false; },
     closest() { return null; },
     querySelector() { return null; }
@@ -133,7 +140,7 @@ function createStudentDashboardHarness({
       requireSession: () => ({ id: 7, perfil: 'aluno' }),
       authenticatedFetch: async (_base, requestPath) => {
         calls.push(requestPath);
-        return requestPath === '/curso' ? courseResponse : enrollmentResponse;
+        return requestPath === '/curso/disponiveis' ? courseResponse : enrollmentResponse;
       },
       logout() {}
     },
@@ -328,14 +335,10 @@ test('dashboard do curador cobre loading, listas vazias e falhas', async () => {
 
 function createProfessorDashboardHarness({
   responses = {
-    '/curso': response([
-      { id: 1, professorId: 7, nome: 'Curso Próprio', status: 'APROVADO' },
-      { id: 2, professorId: 99, nome: 'Curso de Outro Professor', status: 'APROVADO' }
+    '/curso/professor/7': response([
+      { id: 1, professorId: 7, nome: 'Curso Próprio', status: 'APROVADO' }
     ]),
-    '/matricula': response([
-      { id: 1, cursoId: 1 },
-      { id: 2, cursoId: 2 }
-    ])
+    '/matricula/curso/1': response([{ id: 1, cursoId: 1 }])
   },
   recoverSession = async () => ({ id: 7, perfil: 'professor', nome: 'Professora Real' })
 } = {}) {
@@ -352,7 +355,16 @@ function createProfessorDashboardHarness({
   const name = element('span');
   const avatar = element('div');
   const courseForm = element('form');
+  const courseSubmit = element('button', 'Carregando sessão...');
+  courseSubmit.disabled = true;
+  courseForm.querySelector = selector => selector === '.course-submit' ? courseSubmit : null;
+  const courseName = element('input');
+  const courseSubscription = element('select');
+  const courseType = element('select');
+  const courseFeedback = element('p');
+  courseForm.reset = () => {};
   const calls = [];
+  const requests = [];
 
   const document = {
     querySelector(selector) {
@@ -372,7 +384,15 @@ function createProfessorDashboardHarness({
         '.cards-grid, .horizontal-grid': []
       }[selector] || [];
     },
-    getElementById(id) { return id === 'courseForm' ? courseForm : null; },
+    getElementById(id) {
+      return {
+        courseForm,
+        'course-nome': courseName,
+        'course-tipoAssinatura': courseSubscription,
+        'course-tipoCurso': courseType,
+        'course-feedback': courseFeedback
+      }[id] || null;
+    },
     createElement: tagName => element(tagName)
   };
   const window = {
@@ -381,9 +401,14 @@ function createProfessorDashboardHarness({
     jwtSession: {
       recoverSession,
       requireSession: () => ({ id: 7, perfil: 'professor' }),
-      authenticatedFetch: async (_base, requestPath) => {
+      authenticatedFetch: async (_base, requestPath, options = {}) => {
         calls.push(requestPath);
-        return responses[requestPath] || response([]);
+        requests.push({ path: requestPath, options });
+        if (requestPath === '/curso' && options.method === 'POST') {
+          return response({ id: 99, professorId: 7, status: 'EM_AVALIACAO' }, 201);
+        }
+        const configured = responses[requestPath];
+        return typeof configured === 'function' ? configured(options) : configured || response([]);
       },
       logout() {}
     }
@@ -394,7 +419,14 @@ function createProfessorDashboardHarness({
     avatar,
     calls,
     charts,
+    courseFeedback,
+    courseForm,
+    courseName,
+    courseSubmit,
+    courseSubscription,
+    courseType,
     name,
+    requests,
     start: execute('professor/professor.js', document, window),
     values
   };
@@ -416,8 +448,7 @@ test('dashboard do professor apresenta KPIs e cursos reais do proprio professor'
 test('dashboard do professor cobre loading, listas vazias e falhas', async () => {
   const pendingCourses = deferred();
   const pending = createProfessorDashboardHarness({ responses: {
-    '/curso': pendingCourses.promise,
-    '/matricula': response([])
+    '/curso/professor/7': pendingCourses.promise
   } });
   const loading = pending.start();
   await new Promise(resolve => setImmediate(resolve));
@@ -428,8 +459,7 @@ test('dashboard do professor cobre loading, listas vazias e falhas', async () =>
   assert.match(treeText(pending.activities), /Nenhum curso cadastrado/);
 
   const invalidPayload = createProfessorDashboardHarness({ responses: {
-    '/curso': response({ id: 1 }),
-    '/matricula': response([])
+    '/curso/professor/7': response({ id: 1 })
   } });
   await invalidPayload.start();
   assert.deepEqual(invalidPayload.values.map(value => value.textContent), ['--', '--', '--', '--']);
@@ -447,10 +477,68 @@ test('dashboard do professor cobre loading, listas vazias e falhas', async () =>
 test('dashboard do professor renderiza nome malicioso de curso como texto', async () => {
   const maliciousName = '<img src=x onerror=alert(1)>';
   const harness = createProfessorDashboardHarness({ responses: {
-    '/curso': response([{ id: 1, professorId: 7, nome: maliciousName, status: 'APROVADO' }]),
-    '/matricula': response([])
+    '/curso/professor/7': response([{ id: 1, professorId: 7, nome: maliciousName, status: 'APROVADO' }]),
+    '/matricula/curso/1': response([])
   } });
   await harness.start();
   assert.match(treeText(harness.activities), /<img src=x onerror=alert\(1\)>/);
   assert.equal(treeTags(harness.activities).includes('IMG'), false);
+});
+
+test('cadastro de curso aguarda a sessao e envia o professor autenticado', async () => {
+  const session = deferred();
+  const harness = createProfessorDashboardHarness({ recoverSession: () => session.promise });
+  const loading = harness.start();
+
+  await harness.courseForm.dispatch('submit', { preventDefault() {} });
+  assert.equal(harness.courseSubmit.disabled, true);
+  assert.match(harness.courseFeedback.textContent, /Aguarde o carregamento/);
+  assert.equal(harness.requests.some(request => request.options.method === 'POST'), false);
+
+  session.resolve({ id: 7, perfil: 'professor', nome: 'Professora Real' });
+  await loading;
+  assert.equal(harness.courseSubmit.disabled, false);
+  assert.equal(harness.courseSubmit.textContent, 'Enviar para avaliacao');
+
+  harness.courseName.value = 'Curso de Integração';
+  harness.courseSubscription.value = 'PREMIUM';
+  harness.courseType.value = 'ASSINCRONO';
+  await harness.courseForm.dispatch('submit', { preventDefault() {} });
+
+  const post = harness.requests.find(request => request.path === '/curso' && request.options.method === 'POST');
+  assert.ok(post);
+  assert.deepEqual(JSON.parse(post.options.body), {
+    nome: 'Curso de Integração',
+    tipoAssinatura: 'PREMIUM',
+    tipoCurso: 'ASSINCRONO',
+    professorId: 7
+  });
+  assert.match(harness.courseFeedback.textContent, /enviado para avaliacao/);
+});
+
+test('curso salvo nao e apresentado como falha quando a atualizacao do dashboard falha', async () => {
+  let courseQueries = 0;
+  const harness = createProfessorDashboardHarness({ responses: {
+    '/curso/professor/7': () => {
+      courseQueries += 1;
+      return courseQueries === 1
+        ? response([{ id: 1, professorId: 7, nome: 'Curso existente', status: 'APROVADO' }])
+        : response({ erro: 'Falha ao atualizar dashboard' }, 500);
+    },
+    '/matricula/curso/1': response([])
+  } });
+  await harness.start();
+
+  harness.courseName.value = 'Curso salvo';
+  harness.courseSubscription.value = 'COMUM';
+  harness.courseType.value = 'SINCRONO';
+  harness.requests.length = 0;
+  harness.courseFeedback.textContent = '';
+
+  await harness.courseForm.dispatch('submit', { preventDefault() {} });
+
+  assert.equal(harness.requests.filter(request => request.options.method === 'POST').length, 1);
+  assert.equal(harness.courseSubmit.disabled, false);
+  assert.match(harness.courseFeedback.textContent, /Curso enviado para avaliacao/);
+  assert.match(harness.courseFeedback.textContent, /recarregue a pagina/);
 });

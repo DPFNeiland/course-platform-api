@@ -26,6 +26,7 @@
                 <li><a href="conquistas.html">Conquistas</a></li>
             </ul>
             <div class="nav-right">
+                <button type="button" class="logout-btn" aria-label="Encerrar sessão">Sair</button>
                 <div class="avatar loading-skeleton loading-skeleton-avatar" aria-label="Carregando perfil"></div>
             </div>
         </nav>
@@ -34,7 +35,10 @@
     <main>
         <section class="greeting">
             <h1>Olá, <span data-field="nomeAluno" class="loading-skeleton loading-skeleton-text" aria-label="Carregando nome"></span>!</h1>
-            <button class="btn-pill btn-primary" type="button" disabled aria-disabled="true" title="Alteração de plano em breve">Mudar Plano</button>
+            <div class="plan-action">
+                <button class="btn-pill btn-primary" type="button" disabled aria-disabled="true" aria-describedby="change-plan-status" title="Alteração de plano em breve">Mudar Plano</button>
+                <p id="change-plan-status" class="unavailable-hint">Alteração de plano em breve.</p>
+            </div>
         </section>
 
         <section class="top-cards">
