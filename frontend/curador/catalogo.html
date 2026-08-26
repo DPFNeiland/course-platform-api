@@ -24,7 +24,7 @@
                 <li><a href="catalogo.html">Catálogo de Cursos</a></li>
             </ul>
             <div class="nav-right">
-            
+            <button type="button" class="logout-btn" aria-label="Encerrar sessão">Sair</button>
             <a href="#"><div class="avatar">JD</div></a>
             </div>
         </nav>  
@@ -36,13 +36,14 @@
     </header>
 
     <!-- Filters -->
-    <div class="filters">
-        <button class="filter-pill active">Todos</button>
-        <button class="filter-pill">Recomendados</button>
-        <button class="filter-pill">Front-end</button>
-        <button class="filter-pill">Back-end</button>
-        <button class="filter-pill">Data Science</button>
-        <button class="filter-pill">Soft Skills</button>
+    <div class="filters" aria-labelledby="curator-filters-status">
+        <button class="filter-pill" type="button" disabled aria-disabled="true" aria-describedby="curator-filters-status" title="Filtros do catálogo em breve">Todos</button>
+        <button class="filter-pill" type="button" disabled aria-disabled="true" aria-describedby="curator-filters-status" title="Filtros do catálogo em breve">Recomendados</button>
+        <button class="filter-pill" type="button" disabled aria-disabled="true" aria-describedby="curator-filters-status" title="Filtros do catálogo em breve">Front-end</button>
+        <button class="filter-pill" type="button" disabled aria-disabled="true" aria-describedby="curator-filters-status" title="Filtros do catálogo em breve">Back-end</button>
+        <button class="filter-pill" type="button" disabled aria-disabled="true" aria-describedby="curator-filters-status" title="Filtros do catálogo em breve">Data Science</button>
+        <button class="filter-pill" type="button" disabled aria-disabled="true" aria-describedby="curator-filters-status" title="Filtros do catálogo em breve">Soft Skills</button>
+        <p id="curator-filters-status" class="filters-status">Filtros do catálogo em breve.</p>
     </div>
 
     <!-- Courses Grid -->

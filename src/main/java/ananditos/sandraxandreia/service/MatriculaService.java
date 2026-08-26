@@ -7,6 +7,7 @@ import ananditos.sandraxandreia.domain.matricula.Matricula;
 import ananditos.sandraxandreia.domain.matricula.StatusMatricula;
 import ananditos.sandraxandreia.dto.request.MatriculaRequestDTO;
 import ananditos.sandraxandreia.dto.response.MatriculaResponseDTO;
+import ananditos.sandraxandreia.exception.RecursoNaoEncontradoException;
 import ananditos.sandraxandreia.repository.AlunoRepository;
 import ananditos.sandraxandreia.repository.CursoRepository;
 import ananditos.sandraxandreia.repository.MatriculaRepository;
@@ -79,6 +80,16 @@ public class MatriculaService {
                 .toList();
     }
 
+    public List<MatriculaResponseDTO> listarPorCursoDoProfessor(Long cursoId, Long professorAutenticadoId) {
+        Curso curso = buscarCurso(cursoId);
+        if (!Objects.equals(curso.getProfessor().getId(), professorAutenticadoId)) {
+            throw new AccessDeniedException("Professor nao pode consultar matriculas de curso de outro professor");
+        }
+        return matriculaRepository.findByCurso_Id(cursoId).stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
     public MatriculaResponseDTO buscarPorId(Long id) {
         return toResponse(buscarMatricula(id));
     }
@@ -121,17 +132,17 @@ public class MatriculaService {
 
     private Matricula buscarMatricula(Long id) {
         return matriculaRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Matricula nao encontrada para o id: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Matricula nao encontrada para o id: " + id));
     }
 
     private Aluno buscarAluno(Long id) {
         return alunoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Aluno nao encontrado"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Aluno nao encontrado para o id: " + id));
     }
 
     private Curso buscarCurso(Long id) {
         return cursoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Curso nao encontrado"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Curso nao encontrado para o id: " + id));
     }
 
     private void validarAlunoSolicitado(Long alunoSolicitadoId, Long alunoAutenticadoId) {

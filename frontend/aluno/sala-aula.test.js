@@ -154,7 +154,7 @@ function createHarness({
     }
   };
   const responses = {
-    '/curso': courses,
+    '/curso/disponiveis': courses,
     '/matricula/me': enrollments,
     '/curso/10/materiais': materials,
     '/curso/10/materiais/2/arquivo': download
@@ -239,7 +239,7 @@ test('carrega curso e materiais reais mantendo o skeleton durante a requisicao',
   ]));
   await loading;
 
-  assert.deepEqual(harness.calls.map(call => call.path), ['/curso', '/matricula/me', '/curso/10/materiais']);
+  assert.deepEqual(harness.calls.map(call => call.path), ['/curso/disponiveis', '/matricula/me', '/curso/10/materiais']);
   assert.equal(harness.materialGrid.children.length, 2);
   assert.match(treeText(harness.materialGrid), /<img src=x>/);
   assert.equal(treeTags(harness.materialGrid).includes('IMG'), false);
@@ -267,7 +267,7 @@ test('aluno sem matricula nao consulta nem apresenta materiais de curso', async 
   const harness = createHarness({ courses: response([course]), enrollments: response([]) });
   await harness.start();
 
-  assert.deepEqual(harness.calls.map(call => call.path), ['/curso', '/matricula/me']);
+  assert.deepEqual(harness.calls.map(call => call.path), ['/curso/disponiveis', '/matricula/me']);
   assert.equal(harness.courseHeader.textContent, 'Nenhum curso selecionado');
   assert.equal(harness.completeButton.textContent, 'Matrícula necessária');
   assert.match(treeText(harness.materialGrid), /Matricule-se em um curso/);
@@ -305,7 +305,7 @@ test('falha de rede em materiais encerra o loading sem restaurar mocks', async (
   });
   await harness.start();
 
-  assert.match(treeText(harness.materialGrid), /Falha de rede/);
+  assert.match(treeText(harness.materialGrid), /Servico temporariamente indisponivel/);
   assert.equal(harness.materialGrid.attributes.has('aria-busy'), false);
 });
 
