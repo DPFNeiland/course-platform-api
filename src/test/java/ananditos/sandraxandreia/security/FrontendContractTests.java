@@ -75,16 +75,18 @@ class FrontendContractTests {
         assertThat(Files.exists(aluno.resolve("style/forum.css"))).isFalse();
 
         try (Stream<Path> files = Files.walk(aluno)) {
-            for (Path file : files
-                    .filter(Files::isRegularFile)
-                    .filter(this::isProjectTextFile)
-                    .toList()) {
-                assertThat(Files.readString(file).toLowerCase())
-                        .as("referência à funcionalidade de fórum remanescente em %s", file)
-                        .doesNotContain("forum.html", "forum.js", "renderforum");
+            for (Path file : files.filter(Files::isRegularFile).toList()) {
+                assertThat(file.getFileName().toString().toLowerCase())
+                        .as("arquivo de fórum remanescente em %s", file)
+                        .doesNotContain("forum");
+                if (isProjectTextFile(file)) {
+                    assertThat(Files.readString(file).toLowerCase())
+                            .as("referência de fórum remanescente em %s", file)
+                            .doesNotContain("forum.html", "forum.js", "renderforum", "fórum", "forum");
+                }
             }
         }
-    }
+
 
     @Test
     void materiaisDoProfessorDevemEstarRemovidosDoProduto() throws IOException {
