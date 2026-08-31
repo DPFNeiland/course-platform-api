@@ -86,7 +86,7 @@ class FrontendContractTests {
                 }
             }
         }
-
+    }
 
     @Test
     void materiaisDoProfessorDevemEstarRemovidosDoProduto() throws IOException {
