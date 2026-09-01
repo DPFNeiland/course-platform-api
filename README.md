@@ -89,7 +89,7 @@ src/
 | Curso | `/curso` | `POST`, `GET`, `GET /{id}`, `PUT /{id}`, `DELETE /{id}` |
 
 ---
-## Referencias
+## Referências
 
 - Spring Data JPA Documentation
 - springdoc OpenAPI
